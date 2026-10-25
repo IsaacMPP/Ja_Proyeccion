@@ -181,6 +181,27 @@
 - **Estado exacto de esta fase (handoff 25-oct-2026):** la implementación funcional se publicó en commit `3021c51f33` (`fix(scripture): reliable verse navigation and live accessible Bible styling`), con `jaVerseNavigation.ts`, cambios a `Scripture.svelte`, `ScriptureInfo.svelte`, `scripture.ts` y nueva prueba `scripts/ja/scripture-live-controls.test.mjs`. El run `40228820831` **falló en `ja:test`**: una prueba antigua `spanish-bible.test.mjs` esperaba `_moveSelection` llamado directamente desde el teclado; el nuevo flujo usa `navigateVerse` y espera la operación en cola. Se corrigió únicamente esa aserción en commit `d77387ff7d`. **La CI `40229385282` terminó EXITOSA** sobre `d77387ff7d`, confirmó pruebas, build e instalador Windows. Sigue pendiente la prueba real del usuario de avance y estilos inmediatos. No afirmar que la corrección de navegación y estilos esté validada hasta completar CI y ensayo físico. **La copia del archivo auxiliar que se redactó durante este chat no se publicó por separado: la versión canónica ya existe en GitHub y no debe duplicarse.**
 - **Pruebas de aceptación pendientes:** avanzar al menos 10 versos con flechas y botones (incluidos versos largos y cambios de capítulo), retroceder, navegar rápidamente, cambiar fuente, tamaño, alineación, color e imagen sin seleccionar otro versículo, probar segundo monitor y reiniciar para verificar persistencia. No declararlo probado en pantalla real solo porque CI compile.
 
+
+### 3.10 Importación personal de Biblias JSON (en desarrollo, rama separada)
+
+- El usuario confirmó que la navegación bíblica corregida **funciona bien en Windows** (25-oct-2026); registrar aceptación positiva de navegación. **No se ha confirmado por separado la actualización de estilos en vivo**.
+- Petición nueva: preparar importación **local** desde `josevladimir/bible-json` y `mrk214/bible-data-es-spa` para uso personal, sin empaquetar traducciones modernas en la distribución pública.
+- Rama de propuesta: `feature/importacion-biblias-locales-json` (NO fusionada a `main`).
+- Nuevo conversor Python sin dependencias `scripts/ja/import_local_bible.py`: lee arrays JavaScript por libro sin ejecutarlos, o JSON de estructuras compatibles, y genera archivos `.fsb` para el importador local existente. Rechaza libros incompletos de manera predeterminada.
+- Guía: `docs/JA_IMPORTACION_BIBLIAS_PERSONALES.md`. **No se descargaron ni añadieron textos de traducciones a GitHub**.
+
+- **Actualización en esta rama:** se añadió `src/frontend/converters/jaLocalBible.ts` y un control «Seleccionar archivos de Biblia» en `ImportScripture.svelte` (pestaña Importar > Local). Acepta un JSON completo o selección múltiple de 66 archivos `.js`; convierte en memoria y llama `importFSB` existente. No ejecuta código de terceros. La interfaz es preliminar hasta validar datos reales y CI.
+- **Acción de CI:** workflow de Windows habilitado temporalmente para la rama; ejecución `40232191359` iniciada. Registrar resultado real antes de fusionar; no afirmar éxito antes del final.
+- **Validación pendiente:** probar conversión de archivos reales de ambos repositorios, especialmente esquema de mrk214, importar el `.fsb` en JA Proyección, verificar 66 libros, conteo, referencias y persistencia. No declarar compatibilidad total antes de estas pruebas.
+- La licencia MIT de repositorios de código no implica autorización de distribución de traducciones bíblicas modernas; separar estrictamente conversor y contenido local.
+
+### Confirmación de uso — importación local de Biblias (25-oct-2026)
+
+- El usuario confirmó explícitamente que **los archivos bíblicos se importan correctamente en JA Proyección en su PC**. Registrar esta prueba real de importación como validada.
+- La navegación bíblica también había sido validada previamente por el usuario.
+- La compatibilidad de cada variante, la persistencia tras reinicio y la totalidad de libros no quedan automáticamente certificadas con esta confirmación; conservar estos ensayos como cobertura futura.
+- Se pospone RVR1995/API por decisión del usuario. Próximo frente aprobado: analizar el organizador de cultos (Fase 4).
+
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
 > Esta tabla **reemplaza las fases antiguas** descritas en `JA_RUTA_DESARROLLO.md`, que es un documento histórico y aún contiene el orden inicial ya superado.
