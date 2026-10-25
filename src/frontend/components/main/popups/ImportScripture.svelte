@@ -1,6 +1,8 @@
 <script lang="ts">
     import type { CustomBibleListContent } from "json-bible/lib/api/ApiBible"
     import { uid } from "uid"
+    import { convertLocalBibleFiles } from "../../../converters/jaLocalBible"
+    import { importFSB } from "../../../converters/bible"
     import { Main } from "../../../../types/IPC/Main"
     import { requestMain, sendMain } from "../../../IPC/main"
     import { scriptures } from "../../../stores"
@@ -92,6 +94,26 @@
         searchedRecommendedBibles = clone(recommended).filter((a) => value.split(" ").find((value) => a.name.toLowerCase().includes(value)))
     }
 
+    let privateBibleInput: HTMLInputElement
+    let importingPrivateBible = false
+    let privateBibleError = ""
+    async function importPersonalBible(event: Event) {
+        const files = Array.from((event.currentTarget as HTMLInputElement).files || [])
+        if (!files.length) return
+        importingPrivateBible = true
+        privateBibleError = ""
+        try {
+            const bible = await convertLocalBibleFiles(files)
+            importFSB([{name:bible.name,content:JSON.stringify([uid(),bible])}])
+            importType = ""
+        } catch (error) {
+            privateBibleError = error instanceof Error ? error.message : "No se pudo importar la Biblia."
+        } finally {
+            importingPrivateBible = false
+            if (privateBibleInput) privateBibleInput.value = ""
+        }
+    }
+
     let importType = ""
     const importTypes = [
         { id: "api", name: "API", icon: "web" }, // translate | scripture_alt
@@ -167,6 +189,17 @@
         <HRule />
     {/if}
 
+    <div class="private-bible-import">
+        <h3>Importar Biblia personal (JSON / JS)</h3>
+        <p>Selecciona un JSON completo de bible-data-es-spa o los 66 archivos .js de la carpeta procesados de bible-json. La conversión es local; no se suben los textos a GitHub.</p>
+        <input class="private-bible-input" type="file" accept=".json,.js" multiple bind:this={privateBibleInput} on:change={importPersonalBible} />
+        <MaterialButton variant="outlined" icon="import" disabled={importingPrivateBible} on:click={() => privateBibleInput.click()}>
+            {importingPrivateBible ? "Importando Biblia..." : "Seleccionar archivos de Biblia"}
+        </MaterialButton>
+        {#if privateBibleError}<p class="private-bible-error">{privateBibleError}</p>{/if}
+        <p class="private-bible-note">Las traducciones modernas pueden estar protegidas. Importa únicamente archivos cuyo uso tengas autorizado.</p>
+    </div>
+
     <p style="font-size: 1.1em;"><T id="scripture.supported_formats" /></p>
     <ul style="list-style: inside;">
         <li>
@@ -189,6 +222,13 @@
 {/if}
 
 <style>
+    .private-bible-import { padding: 14px; background: var(--primary-darker); border-radius: 10px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+    .private-bible-import h3 { margin: 0; font-size: 1.05em; }
+    .private-bible-import p { margin: 0; line-height: 1.4; }
+    .private-bible-input { display: none; }
+    .private-bible-error { color: #ff9999; }
+    .private-bible-note { opacity: .7; font-size: .82em; }
+
     .list {
         display: flex;
         flex-direction: column;
