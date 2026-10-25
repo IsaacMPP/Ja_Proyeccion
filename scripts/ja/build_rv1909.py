@@ -15,7 +15,7 @@ import zipfile
 from pathlib import Path
 
 URL = "https://ebible.org/Scriptures/spaRV1909_vpl.zip"
-SHA256 = "5681755d2844b7524c18f75081f0da6bb844d6d932384a9350ad1c7c2dca3c30"
+SHA256 = "c901a31a89421eafa54e82a0a2ad94962c6889e3c5556c2a0834529789c4ac76"
 ROOT = Path(__file__).resolve().parents[2]
 TARGET = ROOT / "public" / "ja-bibles" / "rv1909.fsb"
 BOOKS = [
