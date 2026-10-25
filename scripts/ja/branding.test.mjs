@@ -9,7 +9,7 @@ test("La identidad JA se muestra en la cabecera, inicio y créditos", async () =
         readFile("src/frontend/components/main/popups/About.svelte", "utf8")
     ])
     for (const view of [top, splash, about]) {
-        assert.match(view, /ja-logo\.svg/)
+        assert.match(view, /ja-logo\.webp/)
         assert.match(view, /Proyección/)
     }
     assert.doesNotMatch(top, /<h1[^>]*>FreeShow<\/h1>/)
@@ -34,7 +34,7 @@ test("La ventana de carga y el título del navegador usan JA Proyección", async
         readFile("public/index.html", "utf8")
     ])
     assert.match(loading, /JA Proyección/)
-    assert.match(loading, /ja-logo\.svg/)
+    assert.match(loading, /ja-logo\.webp/)
     assert.match(index, /<title>JA Proyección<\/title>/)
 })
 
