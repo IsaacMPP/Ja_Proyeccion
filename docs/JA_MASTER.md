@@ -213,6 +213,15 @@
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
 
+### Fase 4.2 — caché persistente global de miniaturas (25-oct-2026)
+
+- Usuario pidió miniaturas persistentes para **todos los videos**, no únicamente himnos, y autorizó implementarlas después de verificar el trabajo en curso.
+- Las ejecuciones previas `40244753443`, `40244765544`, `40244790313` estaban en curso al comenzar esta mejora; el último ya se encontraba creando EXE. Para evitar cruces, se creó `feature/fase4-2-cache-persistente-global` basada en `feature/fase4-2-himnario` sin modificar ni fusionar `main`.
+- El caché existente de FreeShow ya reutilizaba imágenes según la fecha de modificación y guardaba archivos en `AppData/media-cache`. No se sustituye el motor; se cambia la ubicación preferida a `<directorio de datos JA>/Cache/Miniaturas`, con persistencia entre cierres. Se recuperan archivos de la carpeta anterior bajo demanda, para no recapturar todos los videos tras una actualización.
+- Se conserva fallback a caché persistente en AppData si la ubicación del usuario no es escribible. Continúa el límite de dos capturas simultáneas del cambio anterior. La carga visual de tarjetas sigue reutilizando el sistema de miniaturas de FreeShow.
+- Prueba automatizada: `scripts/ja/persistent-thumbnail-cache.test.mjs`; falta compilación Windows, verificar uso real con cientos de videos, reincidencia de caché al reiniciar y que una actualización de MP4 regenere solo su miniatura.
+- El trabajo no es un proxy de video: son imágenes PNG de previsualización (no reproducción). Futuras mejoras de JPG compacto / prioridad de elementos visibles requieren medición antes de alterar el motor.
+
 ### Causa raíz adicional del bloqueo de miniaturas (25-oct-2026)
 
 - Usuario confirmó que el scroll mejora algo, pero el Himnario de 613 videos todavía muestra tarjetas vacías y se congela en Ryzen 9.
