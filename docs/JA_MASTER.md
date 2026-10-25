@@ -195,6 +195,13 @@
 - **Validación pendiente:** probar conversión de archivos reales de ambos repositorios, especialmente esquema de mrk214, importar el `.fsb` en JA Proyección, verificar 66 libros, conteo, referencias y persistencia. No declarar compatibilidad total antes de estas pruebas.
 - La licencia MIT de repositorios de código no implica autorización de distribución de traducciones bíblicas modernas; separar estrictamente conversor y contenido local.
 
+### Confirmación de uso — importación local de Biblias (25-oct-2026)
+
+- El usuario confirmó explícitamente que **los archivos bíblicos se importan correctamente en JA Proyección en su PC**. Registrar esta prueba real de importación como validada.
+- La navegación bíblica también había sido validada previamente por el usuario.
+- La compatibilidad de cada variante, la persistencia tras reinicio y la totalidad de libros no quedan automáticamente certificadas con esta confirmación; conservar estos ensayos como cobertura futura.
+- Se pospone RVR1995/API por decisión del usuario. Próximo frente aprobado: analizar el organizador de cultos (Fase 4).
+
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
 > Esta tabla **reemplaza las fases antiguas** descritas en `JA_RUTA_DESARROLLO.md`, que es un documento histórico y aún contiene el orden inicial ya superado.
