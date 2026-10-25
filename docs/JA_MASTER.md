@@ -181,6 +181,18 @@
 - **Estado exacto de esta fase (handoff 25-oct-2026):** la implementación funcional se publicó en commit `3021c51f33` (`fix(scripture): reliable verse navigation and live accessible Bible styling`), con `jaVerseNavigation.ts`, cambios a `Scripture.svelte`, `ScriptureInfo.svelte`, `scripture.ts` y nueva prueba `scripts/ja/scripture-live-controls.test.mjs`. El run `40228820831` **falló en `ja:test`**: una prueba antigua `spanish-bible.test.mjs` esperaba `_moveSelection` llamado directamente desde el teclado; el nuevo flujo usa `navigateVerse` y espera la operación en cola. Se corrigió únicamente esa aserción en commit `d77387ff7d`. **La CI `40229385282` terminó EXITOSA** sobre `d77387ff7d`, confirmó pruebas, build e instalador Windows. Sigue pendiente la prueba real del usuario de avance y estilos inmediatos. No afirmar que la corrección de navegación y estilos esté validada hasta completar CI y ensayo físico. **La copia del archivo auxiliar que se redactó durante este chat no se publicó por separado: la versión canónica ya existe en GitHub y no debe duplicarse.**
 - **Pruebas de aceptación pendientes:** avanzar al menos 10 versos con flechas y botones (incluidos versos largos y cambios de capítulo), retroceder, navegar rápidamente, cambiar fuente, tamaño, alineación, color e imagen sin seleccionar otro versículo, probar segundo monitor y reiniciar para verificar persistencia. No declararlo probado en pantalla real solo porque CI compile.
 
+### 3.10 Fase 4 — Organizador de cultos (primer entregable de prueba)
+
+- **Autorización:** usuario pidió continuar los pendientes y posteriormente «procede» para Fase 4.
+- **Rama:** `feature/fase4-organizador-cultos`, basada en `main`. No fusionar sin verificar CI y uso real.
+- Se auditó `src/frontend/components/show/{Projects.svelte,ProjectContentList.svelte,project.ts}` y `src/types/Projects.ts`; FreeShow ya ofrece proyectos, secciones, archivos multimedia, presentaciones y orden editable. No duplicar su sistema.
+- Se añadió `jaCultoProject.ts`, que prepara un proyecto estándar con ocho secciones editables: bienvenida, canto de apertura, oración inicial, lectura bíblica, participaciones, tema, canto final y oración final. No crea vídeos ni versículos ficticios y no reemplaza proyectos previos.
+- En el menú de nuevo proyecto de `Projects.svelte` se añadió «Culto JA — orden sugerido», conservando los accesos anteriores y reutilizando `history` + `openProject`. El usuario puede agregar posteriormente sus vídeos y lecturas a la lista.
+- Pruebas estáticas de integración: `scripts/ja/culto-project.test.mjs`. CI Windows habilitada para esta rama a fin de compilar Electron/NSIS.
+- **Sin validar todavía en Windows:** crear proyecto, editar nombre/secciones, agregar vídeo/lectura, reiniciar, avanzar en proyección y conservar datos. Registrar prueba real antes de declarar la fase terminada.
+- La importación JSON personal fue validada por el usuario previamente, pero sus cambios siguen en PR #1 y rama separada; no se mezclan ni redistribuyen traducciones protegidas en este trabajo.
+- RVR1995 y API bíblica quedaron pospuestas a petición del usuario.
+
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
 > Esta tabla **reemplaza las fases antiguas** descritas en `JA_RUTA_DESARROLLO.md`, que es un documento histórico y aún contiene el orden inicial ya superado.

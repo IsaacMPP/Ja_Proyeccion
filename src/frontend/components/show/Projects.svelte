@@ -26,6 +26,7 @@
     import { getRecentlyUsedProjects, isProjectLinked, openProject } from "./project"
     import ProjectContentList from "./ProjectContentList.svelte"
     import ProjectList from "./ProjectList.svelte"
+    import { createJACultoProject } from "./jaCultoProject"
 
     let tree: Tree[] = []
 
@@ -99,6 +100,17 @@
         let parent = interactedFolder || ($folders[currentProject?.parent || ""] ? currentProject?.parent || "/" : "/")
         if (profile[parent] === "none" || tree.find((a) => a.id === parent)?.readOnly) parent = "/"
         history({ id: "UPDATE", newData: { replace: { parent } }, location: { page: "show", id: `project${folder ? "_folder" : ""}` } })
+    }
+
+    function createCultoJA() {
+        let parent = interactedFolder || ($folders[currentProject?.parent || ""] ? currentProject?.parent || "/" : "/")
+        if (profile[parent] === "none" || tree.find((a) => a.id === parent)?.readOnly) parent = "/"
+        if (readOnly || profile[parent] === "read") return
+        const id = uid()
+        const project = { ...createJACultoProject(), parent }
+        history({ id: "UPDATE", newData: { data: project }, oldData: { id }, location: { page: "show", id: "project" } })
+        openProject(id, false)
+        addMenuOpen = false
     }
 
     function createProjectTemplate() {
@@ -544,6 +556,9 @@
 
             {#if addMenuOpen}
                 <div class="addMenu" transition:fade={{ duration: 80 }} role="none" on:click={() => (addMenuOpen = false)}>
+                    <MaterialButton variant="outlined" icon="project" title="Crear un orden de culto editable" on:click={createCultoJA}>
+                        Culto JA — orden sugerido
+                    </MaterialButton>
                     <MaterialButton variant="outlined" icon="project" title="<b>new.project</b><br>tooltip.project" on:click={() => createProject()}>
                         <T id="formats.project" />
                     </MaterialButton>
