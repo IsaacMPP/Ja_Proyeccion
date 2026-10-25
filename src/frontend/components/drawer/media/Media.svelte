@@ -367,6 +367,7 @@
 
     // Búsqueda local/global con letras, acentos y números de himno.
     let searchedFiles: FileFolder[] = []
+    $: mediaShiftRange = mediaFilesOnly.map((a) => ({ ...a, type: getMediaType(getExtension(a.name)), name: removeExtension(a.name) }))
     async function filterSearch() {
         if (jaSearchBusy) {
             jaSearchDirty = true
@@ -638,7 +639,6 @@
             </div>
         {:else if searchedFiles.length}
             <div class="context #media" style="display: contents;">
-                {#key searchedFiles}
                     {#if $mediaOptions.mode === "grid"}
                         <MediaGrid items={searchedFiles} columns={$mediaOptions.columns} let:item>
                             {#if item.isFolder}
@@ -654,7 +654,7 @@
                                     on:open={(e) => (path = e.detail)}
                                 />
                             {:else}
-                                <Media credits={item.credits || {}} name={item.name || ""} path={item.path} thumbnailPath={item.previewUrl || item.thumbnailPath} collectionName={jaSearchEverywhere && searchValue.trim() ? getJAVideoLibraryName(item.path, $mediaFolders) : ""} loadFullImage={$mediaOptions.columns < 3} type={getMediaType(item.extension || getExtension(item.name))} shiftRange={mediaFilesOnly.map((a) => ({ ...a, type: getMediaType(getExtension(a.name)), name: removeExtension(a.name) }))} {active} />
+                                <Media credits={item.credits || {}} name={item.name || ""} path={item.path} thumbnailPath={item.previewUrl || item.thumbnailPath} collectionName={jaSearchEverywhere && searchValue.trim() ? getJAVideoLibraryName(item.path, $mediaFolders) : ""} loadFullImage={$mediaOptions.columns < 3} type={getMediaType(item.extension || getExtension(item.name))} shiftRange={mediaShiftRange} {active} />
                             {/if}
                         </MediaGrid>
                     {:else}
@@ -662,11 +662,10 @@
                             {#if file.isFolder}
                                 <Folder name={file.name} path={file.path} mode={$mediaOptions.mode} on:open={(e) => (path = e.detail)} />
                             {:else}
-                                <Media credits={file.credits || {}} thumbnail={$mediaOptions.mode !== "list"} name={file.name || ""} path={file.path} collectionName={jaSearchEverywhere && searchValue.trim() ? getJAVideoLibraryName(file.path, $mediaFolders) : ""} loadFullImage={$mediaOptions.columns < 3} type={getMediaType(file.extension || getExtension(file.name))} shiftRange={mediaFilesOnly.map((a) => ({ ...a, type: getMediaType(getExtension(a.name)), name: removeExtension(a.name) }))} {active} />
+                                <Media credits={file.credits || {}} thumbnail={$mediaOptions.mode !== "list"} name={file.name || ""} path={file.path} collectionName={jaSearchEverywhere && searchValue.trim() ? getJAVideoLibraryName(file.path, $mediaFolders) : ""} loadFullImage={$mediaOptions.columns < 3} type={getMediaType(file.extension || getExtension(file.name))} shiftRange={mediaShiftRange} {active} />
                             {/if}
                         </VirtualList>
                     {/if}
-                {/key}
             </div>
         {:else}
             <div class={specialTabs.includes(active || "") ? "" : "context #media"} style="display: contents;">
