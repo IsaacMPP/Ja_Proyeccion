@@ -193,6 +193,15 @@
 - La importación JSON personal fue validada por el usuario previamente, pero sus cambios siguen en PR #1 y rama separada; no se mezclan ni redistribuyen traducciones protegidas en este trabajo.
 - RVR1995 y API bíblica quedaron pospuestas a petición del usuario.
 
+### Fase 4.1 — Biblioteca central vinculada (25-oct-2026)
+
+- **Autorización:** usuario aprobó el orden Fase 4.1–4.5 y pidió «procede».
+- Rama `feature/fase4-1-biblioteca-central` (basada en rama de Fase 4, no fusionada a `main`).
+- Primera entrega: categorías exclusivas de carpetas vinculadas para Himnario Adventista, Cantos juveniles, Fondos personalizados y Especiales/videos, desde el panel Medios. Los archivos se mantienen en su ubicación original; se reutilizan los registros persistentes `mediaFolders`, importación existente, navegación y motor de medios de FreeShow. Se conservan las carpetas generales sin categorizar.
+- Nuevos archivos: `src/frontend/components/drawer/media/jaLibraryRoles.ts`. UI: `src/frontend/components/drawer/navigation/MediaTabs.svelte`.
+- Alcance deliberado: no se crea copia de medios, no se instala material con derechos, no se altera `Archivos de programa`; aún no crea carpetas físicas, no incorpora biblias a esta estructura ni clasifica automáticamente videos por contenido. El himnario especializado con búsqueda por número/título y miniaturas se hará en Fase 4.2. El organizador y los espacios aislados corresponden a 4.3 y 4.4.
+- **Aceptación pendiente:** CI Windows de rama, vincular carpetas separadas, comprobar persistencia tras reiniciar y proyección de video externo. No marcar terminado sin prueba real.
+
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
 > Esta tabla **reemplaza las fases antiguas** descritas en `JA_RUTA_DESARROLLO.md`, que es un documento histórico y aún contiene el orden inicial ya superado.
