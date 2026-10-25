@@ -1,0 +1,103 @@
+name: Inicializar JA Proyeccion y compilar Windows
+
+on:
+  push:
+    paths:
+      - ".bootstrap/ja-overlay.zip"
+      - ".github/workflows/inicializar-ja.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  importar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Descargar repositorio JA
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Importar base GPL-3.0 y cambios JA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .bootstrap/ja-overlay.zip
+          BASE="$RUNNER_TEMP/freeshow-ja-base"
+          git init -q "$BASE"
+          git -C "$BASE" remote add origin https://github.com/ChurchApps/FreeShow.git
+          git -C "$BASE" fetch --depth 1 origin 436d4b634878ba723da1d1373637384ec700ce16
+          git -C "$BASE" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$BASE" rev-parse HEAD)" = "436d4b634878ba723da1d1373637384ec700ce16"
+          tar -C "$BASE" --exclude='./.git' --exclude='./.github' -cf - . | tar -xf -
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          root=Path.cwd().resolve()
+          with ZipFile(".bootstrap/ja-overlay.zip") as archive:
+              for item in archive.infolist():
+                  target=(root/item.filename).resolve()
+                  if target != root and root not in target.parents:
+                      raise RuntimeError("Ruta insegura en overlay")
+              archive.extractall(root)
+          PY
+          rm -f public/fonts/CMGSans-Bold.woff2 public/fonts/CMGSans-BoldItalic.woff2 public/fonts/CMGSans-Medium.woff2 public/fonts/CMGSans-MediumItalic.woff2
+          rm -rf .bootstrap
+          test -f package-lock.json
+          test -f scripts/ja/verify-base.mjs
+          test -f .github/workflows/compilar-windows.yml
+          git config user.name "JA Proyeccion CI"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Importar FreeShow 1.6.7 y base JA Proyeccion (GPL-3.0)"
+          git push origin HEAD:main
+
+  compilar:
+    needs: importar
+    runs-on: windows-2022
+    timeout-minutes: 90
+    env:
+      CI: "true"
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    permissions:
+      contents: read
+    steps:
+      - name: Obtener codigo importado
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.16.0
+          cache: npm
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Preparar Git HTTPS y Python
+        shell: pwsh
+        run: |
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+          git config --global --add url."https://github.com/".insteadOf "git@github.com:"
+          "npm_config_python=$((Get-Command python).Source)" >> $env:GITHUB_ENV
+      - name: Comprobar estructura
+        run: node scripts/ja/verify-base.mjs
+      - name: Instalar dependencias
+        run: npm ci --no-audit --no-fund
+      - name: Pruebas de base
+        run: npm run ja:test
+      - name: Compilar codigo
+        run: npm run build
+      - name: Empaquetar instalador EXE
+        run: npx electron-builder --config config/building/electron-builder.yaml --win nsis --x64 --publish never
+      - name: Publicar artefacto de pruebas
+        uses: actions/upload-artifact@v4
+        with:
+          name: JA-Proyeccion-Windows-pruebas
+          path: dist/*.exe
+          if-no-files-found: error
+          retention-days: 14
