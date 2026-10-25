@@ -35,7 +35,7 @@ function parseVerses(raw: any) {
 function parseChapters(raw: any) {
     const data=raw?.chapters ?? raw?.capitulos ?? raw
     if (!data || typeof data !== "object") return []
-    return Object.entries(data).map(([k,v],i)=>({number:Number((v as any)?.number ?? (v as any)?.chapter ?? (v as any)?.human ?? (Array.isArray(data)?i+1:k)),verses:parseVerses(v)})).filter(c=>Number.isInteger(c.number)&&c.number>0&&c.verses.length).sort((a,b)=>a.number-b.number)
+    return Object.entries(data).map(([k,v],i)=>({number:Number((v as any)?.number ?? (v as any)?.chapter ?? (/^\\d+$/.test(String((v as any)?.human ?? "")) ? (v as any).human : undefined) ?? (Array.isArray(data)?i+1:k)),verses:parseVerses(v)})).filter(c=>Number.isInteger(c.number)&&c.number>0&&c.verses.length).sort((a,b)=>a.number-b.number)
 }
 function parseBookIndex(book: any, fallback: string): number | undefined {
     for (const candidate of [book?.usfm,book?.abbreviation,book?.abbr,book?.code,book?.name,book?.human,book?.book,book?.title,fallback]) {
