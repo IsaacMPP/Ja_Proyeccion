@@ -353,8 +353,8 @@
         }
 
         filteredFiles = clone(localFilteredFiles)
-        if (searchValue.length < 2) searchedFiles = clone(filteredFiles)
-        else filterSearch()
+        if (!searchValue.trim()) searchedFiles = clone(filteredFiles)
+        else void filterSearch()
 
         // scroll to top
         scrollElem?.scrollTo(0, 0)
