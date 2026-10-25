@@ -6,6 +6,7 @@ test("grid renders a bounded visible window without animated loading backlog", (
   const grid = fs.readFileSync("src/frontend/components/drawer/media/MediaGrid.svelte", "utf8")
   const media = fs.readFileSync("src/frontend/components/drawer/media/Media.svelte", "utf8")
   assert.match(grid, /OVERSCAN_ROWS/)
+  assert.match(grid, /\{\/each\}\s*<\/div>\s*<style>/)
   assert.match(grid, /i >= firstItemIndex && i < lastItemIndex/)
   assert.doesNotMatch(grid, /lazyLoader|slowlyChange|debouncedScroll/)
   assert.doesNotMatch(media, /\{#key searchedFiles\}/)
