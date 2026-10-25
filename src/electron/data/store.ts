@@ -19,6 +19,7 @@ import { dataFolderNames, deleteFile, doesPathExist, getDataFolderPath, getDataF
 import { clone, wait } from "../utils/helpers"
 import "./contentProviders"
 import { defaultConfig, defaultSettings, defaultSyncedSettings } from "./defaults"
+import { ensureJALibraryDirectories } from "./jaLibraryDirectories"
 
 // NOTE: defaults will always replace the keys with any in the default when they are removed
 
@@ -62,6 +63,7 @@ export async function setupStores() {
     checkStores(getDataFolderPath("userData"))
 
     specialCaseFixer()
+    ensureJALibraryDirectories()
 }
 
 // Check that files are parsed properly!
