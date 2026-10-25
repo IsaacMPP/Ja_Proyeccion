@@ -71,3 +71,12 @@ Referencia visual facilitada por el usuario el 2026-10-25, 1672×941.
 - Opción de identificar pantallas con números, actualizar tras HDMI, instrucciones Win+P y desplegable de opciones avanzadas originales.
 - No tocamos NDI ni el resto de integraciones; quedan para una fase posterior.
 - Pendiente verificar CI y probar físicamente con 1, 2 y 3 pantallas. Más detalles en `docs/JA_PANTALLAS_FACILES.md`.
+
+## Corrección de salida negra sobre laptop (2026-10-25)
+- Reporte real: al pulsar «Proyectar», aparece una ventana negra a pantalla completa en la laptop, no en el monitor secundario, pese a que Windows usa «Extender».
+- Causa verificada: `OutputVisibility.resolveOutputBounds` conservaba antiguas coordenadas dentro de cualquier display antes de respetar `output.screen`; el valor inicial 0,0 corresponde al monitor del operador.
+- Se extrajo `displayRouting.ts` (funciones puras y pruebas) y se prioriza el monitor elegido por su ID. Con dos monitores, el modo automático selecciona el ajeno a la ventana del operador, sin asumir orden ni que esté a la derecha.
+- La ventana ahora se mueve a su destino antes de mostrarse; bloquea apertura automática sobre la laptop y salidas no asignadas que la taparían.
+- Mantiene posiciones manuales bloqueadas y separa el caso de 3+ pantallas, donde la elección debe ser explícita.
+- Se deja intacta la reproducción, las pistas multimedia, la vista previa y las herramientas NDI.
+- Próximo paso: revisar GitHub Actions y probar con monitor secundario físico; confirmar que «Primario» está asignado a pantalla externa desde el asistente **Pantallas**.

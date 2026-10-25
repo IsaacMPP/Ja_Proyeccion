@@ -6,6 +6,7 @@ import type { Output } from "../../../types/Output"
 import { OutputHelper } from "../OutputHelper"
 import { setOutputAlwaysOnTop } from "./OutputAlwaysOnTop"
 import { OutputBounds } from "./OutputBounds"
+import { resolvePhysicalDisplayBounds } from "./displayRouting"
 
 export class OutputVisibility {
     static toggleOutputs(data: { outputs: (Output & { id: string })[]; state: boolean; autoStartup?: boolean; autoPosition?: boolean }) {
@@ -45,10 +46,15 @@ export class OutputVisibility {
 
         const bounds: Rectangle = this.resolveOutputBounds(output, autoPosition)
 
-        const windowCoveringMain = this.amountCovered(bounds, mainWindow!.getBounds()) > 0.5
-        const invalidWindowPosition = windowCoveringMain && autoPosition && window.isAlwaysOnTop() === true
+        const windowCoveringMain = !!mainWindow && this.amountCovered(bounds, mainWindow.getBounds()) > 0.5
+        // Al proyectar automáticamente, no cubrir jamás los controles del operador.
+        // Quien desee usar el monitor principal intencionalmente puede hacerlo en modo manual.
+        const unassignedOutputOnOperator = !output.screen && !output.boundsLocked && windowCoveringMain
+        const invalidWindowPosition = (!!autoPosition && (displays.length <= 1 || windowCoveringMain)) || unassignedOutputOnOperator
 
         if (state === true && !invalidWindowPosition) {
+            // Posicionar ANTES de mostrar: evita un destello negro sobre la laptop.
+            window.setBounds(bounds)
             this.showWindow(window, output.alwaysOnTop !== false)
 
             OutputHelper.Bounds.updateBounds({ id: output.id, bounds })
@@ -65,38 +71,16 @@ export class OutputVisibility {
 
     static resolveOutputBounds(output: Partial<Output> & { bounds: Rectangle; boundsLocked?: boolean; screen?: string | null }, autoPosition = false): Rectangle {
         const displays = screen.getAllDisplays()
-        const primaryBounds = displays.length ? displays[0].bounds : { x: 0, y: 0, width: 1920, height: 1080 }
-        const hasValidBounds = !!(output.bounds?.width && output.bounds?.height)
-        const outputBounds = hasValidBounds ? output.bounds : primaryBounds
-
-        // never auto position locked bounds
-        if (output.boundsLocked) return outputBounds
-
-        // 1. Primary: Preserve valid coordinates if already within an active physical display
-        if (displays.length > 0 && hasValidBounds && output.bounds) {
-            const isCenterOnDisplay = displays.some((d) => {
-                const centerX = output.bounds.x + output.bounds.width / 2
-                const centerY = output.bounds.y + output.bounds.height / 2
-                return centerX >= d.bounds.x && centerX < d.bounds.x + d.bounds.width && centerY >= d.bounds.y && centerY < d.bounds.y + d.bounds.height
-            })
-
-            if (isCenterOnDisplay) return output.bounds
-        }
-
-        // 2. Secondary fallback: Look up by target display ID if coordinates are off-screen (e.g. topology changed)
-        if (displays.length > 0 && output.screen) {
-            const isCoveringMain = this.amountCovered(outputBounds, mainWindow!.getBounds()) > 0.5
-            const targetDisplay = isCoveringMain ? null : displays.find((d) => d.id.toString() === output.screen)
-            if (targetDisplay) return { ...targetDisplay.bounds }
-        }
-
-        // fallback to second display auto positioning if not locked and autoPosition requested or bounds are undefined
-        // (not on macOS due to window detection quirks)
-        if ((autoPosition || !hasValidBounds) && displays.length > 1 && !isMac) {
-            return this.getSecondDisplay(outputBounds)
-        }
-
-        return outputBounds
+        const controllerScreenId = mainWindow && !mainWindow.isDestroyed() ? screen.getDisplayMatching(mainWindow.getBounds()).id : null
+        return resolvePhysicalDisplayBounds({
+            displays,
+            bounds: output.bounds,
+            targetScreenId: output.screen,
+            controllerScreenId,
+            autoPosition,
+            boundsLocked: output.boundsLocked,
+            isMac
+        })
     }
 
     static getSecondDisplay(bounds: Rectangle) {
