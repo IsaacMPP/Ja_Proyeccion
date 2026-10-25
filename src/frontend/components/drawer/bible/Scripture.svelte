@@ -22,6 +22,7 @@
     import TextInput from "../../inputs/TextInput.svelte"
     import Loader from "../../main/Loader.svelte"
     import Center from "../../system/Center.svelte"
+    import { selectedBaseVerseNumbers } from "./jaVerseNavigation"
     import { createScriptureShow, formatBibleText, getShortBibleName, getVerseIdParts, getVersePartLetter, joinRange, loadJsonBible, moveSelection, outputIsScripture, playScripture, sanitizeVerseText, scriptureRangeSelect, sortScriptureSelection, splitText, swapPreviewBible } from "./scripture"
 
     export let active: string | null
@@ -391,7 +392,7 @@
         if (chapterNumbers && !verseNumbers) activeReference.verses = []
         activeReference.chapters = targetChapterNumbers
 
-        openVerse(verseNumbers)
+        await openVerse(verseNumbers)
         return true
     }
 
@@ -405,7 +406,11 @@
 
         // load new data
         try {
-            data[previewBibleId].verseData = currentData.getVerses(verseNumbers.map(Number))
+            // "3_2" es un subverso visual, no un número JS; Number(["3_2"])
+            // devuelve NaN y bloquea las siguientes proyecciones.
+            const baseNumbers = selectedBaseVerseNumbers(verseNumbers)
+            if (!baseNumbers.length) return
+            data[previewBibleId].verseData = currentData.getVerses(baseNumbers)
         } catch {
             // failed to load
             return
@@ -912,7 +917,7 @@
             ))
         ) {
             e.preventDefault()
-            void _moveSelection(e.key === "ArrowLeft")
+            navigateVerse(e.key === "ArrowLeft")
             return
         }
 
@@ -949,14 +954,35 @@
 
         // go to next/previous verse
         let left = e.key.includes("Left")
-        _moveSelection(left)
+        navigateVerse(left)
     }
 
     /// MOVE SELECTION ///
 
     let chapterLengths: { [key: number]: number } = {}
-    $: if ($activeTriggerFunction === "scripture_next") _moveSelection(false)
-    $: if ($activeTriggerFunction === "scripture_previous") _moveSelection(true)
+    $: if ($activeTriggerFunction === "scripture_next") navigateVerse(false)
+    $: if ($activeTriggerFunction === "scripture_previous") navigateVerse(true)
+    // Serializa pulsaciones rápidas: cada cambio termina antes de proyectar el siguiente.
+    // Evita que una lectura asíncrona vieja sobrescriba el versículo más reciente.
+    let navigatingVerse = false
+    let queuedVerses: boolean[] = []
+    function navigateVerse(moveLeft: boolean) {
+        if (queuedVerses.length < 24) queuedVerses.push(moveLeft)
+        if (!navigatingVerse) void flushVerseNavigation()
+    }
+    async function flushVerseNavigation() {
+        if (navigatingVerse) return
+        navigatingVerse = true
+        try {
+            while (queuedVerses.length) {
+                const direction = queuedVerses.shift()
+                if (direction === undefined) break
+                await _moveSelection(direction)
+            }
+        } finally {
+            navigatingVerse = false
+        }
+    }
     async function _moveSelection(moveLeft: boolean) {
         if (!activeReference.book) return
 
@@ -968,7 +994,10 @@
         const currentVerseId = currentVerses[0]?.toString()
         const selectionCount = currentVerses.length
         if (currentVerseId && splittedVerses.length) {
-            const currentIndex = splittedVerses.findIndex((v) => v.id === currentVerseId || getVerseIdParts(v.id).id === Number(currentVerseId))
+            const currentBase = getVerseIdParts(currentVerseId).id
+            const currentIndex = splittedVerses.findIndex((v) =>
+                v.id === currentVerseId || (!String(currentVerseId).includes("_") && getVerseIdParts(v.id).id === currentBase)
+            )
             if (currentIndex !== -1) {
                 // Navigate within split verses, maintaining selection count
                 const newIndex = moveLeft ? currentIndex - selectionCount : currentIndex + selectionCount
@@ -980,9 +1009,8 @@
                         newSelection.push(splittedVerses[newIndex + i].id)
                     }
 
-                    await wait(1) // this fixes API next not changing selection
-                    openVerse([newSelection])
-                    if (isActiveInOutput) setTimeout(playScripture)
+                    await openVerse([newSelection])
+                    if (isActiveInOutput) await playScripture()
                     return
                 } else if (newIndex < 0 || newIndex + selectionCount - 1 >= splittedVerses.length) {
                     // Need to move to next/previous chapter or book
@@ -1021,9 +1049,14 @@
 
         const newSelection = moveSelection(lengths, selection, moveLeft)
 
-        openBook(newSelection.book, newSelection.chapters, [newSelection.verses])
+        // Misma sección: evita recargar todos los datos de libro/capítulo.
+        const sameBook = newSelection.book === Number(activeReference.book)
+        const sameChapter = sameBook && newSelection.chapters[0] === Number(activeReference.chapters[0])
+        const ready = sameChapter
+            ? (await openVerse([newSelection.verses]), true)
+            : await openBook(newSelection.book, newSelection.chapters, [newSelection.verses])
 
-        if (isActiveInOutput) setTimeout(playScripture)
+        if (ready && isActiveInOutput) await playScripture()
     }
 
     $: reference = getReference({ data, activeReference })
@@ -1286,10 +1319,10 @@
 {:else if $scriptureMode !== "grid" || $resized.rightPanelDrawer > 5}
     <FloatingInputs>
         {#if isActiveInOutput}
-            <MaterialButton disabled={activeReference.book?.toString() === "1" && !!activeReference.chapters?.find((a) => a.toString() === "1") && !!activeReference.verses[0]?.find((a) => a.toString() === "1")} title="{translateText('preview._previous_slide')} [Ctrl+Arrow Left]" on:click={() => _moveSelection(true)}>
+            <MaterialButton disabled={activeReference.book?.toString() === "1" && !!activeReference.chapters?.find((a) => a.toString() === "1") && !!activeReference.verses[0]?.find((a) => a.toString() === "1")} title="{translateText('preview._previous_slide')} [Ctrl+Arrow Left]" on:click={() => navigateVerse(true)}>
                 <Icon size={1.3} id="previous" />
             </MaterialButton>
-            <MaterialButton disabled={activeReference.book?.toString() === books?.length.toString() && activeReference.chapters?.includes(chapters ? chapters.length : 1) && activeReference.verses[0]?.includes(verses ? verses.length : 1)} title="{translateText('preview._next_slide')} [Ctrl+Arrow Right]" on:click={() => _moveSelection(false)}>
+            <MaterialButton disabled={activeReference.book?.toString() === books?.length.toString() && activeReference.chapters?.includes(chapters ? chapters.length : 1) && activeReference.verses[0]?.includes(verses ? verses.length : 1)} title="{translateText('preview._next_slide')} [Ctrl+Arrow Right]" on:click={() => navigateVerse(false)}>
                 <Icon size={1.3} id="next" />
             </MaterialButton>
         {/if}

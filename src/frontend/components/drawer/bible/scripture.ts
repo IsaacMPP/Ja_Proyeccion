@@ -279,6 +279,33 @@ export function sortScriptureSelection(selection: (string | number)[]) {
 
 // OUTPUT
 
+// Refresca el pasaje en vivo después de un cambio de estilo. Los ajustes rápidos
+// se agrupan sin perder el último valor del usuario.
+let scriptureRefreshTimer: ReturnType<typeof setTimeout> | undefined
+let scriptureRefreshRunning = false
+let scriptureRefreshRequested = false
+let lastScriptureBackground = ""
+export function refreshLiveJAScripture() {
+    if (!outputIsScripture()) return
+    scriptureRefreshRequested = true
+    if (scriptureRefreshTimer) clearTimeout(scriptureRefreshTimer)
+    scriptureRefreshTimer = setTimeout(() => { void flushLiveJAScriptureRefresh() }, 90)
+}
+async function flushLiveJAScriptureRefresh() {
+    if (scriptureRefreshRunning) return
+    scriptureRefreshRunning = true
+    try {
+        while (scriptureRefreshRequested && outputIsScripture()) {
+            scriptureRefreshRequested = false
+            try { await playScripture() } catch (error) {
+                console.error("JA: no se pudo actualizar la proyección bíblica", error)
+            }
+        }
+    } finally {
+        scriptureRefreshRunning = false
+    }
+}
+
 export async function playScripture() {
     if (get(outLocked)) return
 
@@ -355,15 +382,21 @@ export async function playScripture() {
 
     const templateBackground = _template.getSetting("backgroundPath")
 
-    // play template background
-    if (!templateBackground) return
-
-    // get style (for media "fit")
+    // El fondo debe sincronizarse también al elegir un color o quitar imagen.
+    // Solo se borra una imagen si era el fondo bíblico previo; otras capas
+    // elegidas intencionalmente por el operador permanecen intactas.
     const currentOutput = getFirstActiveOutput()
-    const currentStyle = get(styles)[currentOutput?.style || ""] || {}
-
-    const mediaStyle = getMediaStyle(get(media)[templateBackground], currentStyle)
-    setOutput("background", { path: templateBackground, loop: true, muted: true, ...mediaStyle })
+    if (!templateBackground) {
+        if (lastScriptureBackground && currentOutput?.out?.background?.path === lastScriptureBackground) {
+            setOutput("background", null)
+        }
+        lastScriptureBackground = ""
+    } else {
+        const currentStyle = get(styles)[currentOutput?.style || ""] || {}
+        const mediaStyle = getMediaStyle(get(media)[templateBackground], currentStyle)
+        setOutput("background", { path: templateBackground, loop: true, muted: true, ...mediaStyle })
+        lastScriptureBackground = templateBackground
+    }
 
     ///
 

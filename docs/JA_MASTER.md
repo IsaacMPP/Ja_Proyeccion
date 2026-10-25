@@ -3,7 +3,7 @@
 > **DOCUMENTO CANÓNICO / FUENTE ÚNICA DE VERDAD.**
 > Antes de continuar el desarrollo, abrir este archivo **directamente desde `main` en GitHub**, consultar el último commit y revisar las ejecuciones de GitHub Actions. No confiar en respuestas anteriores del chat ni en una copia antigua de este documento.
 >
-> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.9. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
+> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 2.0. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
 
 **Enlace directo:** https://github.com/IsaacMPP/Ja_Proyeccion/blob/main/docs/JA_MASTER.md
 
@@ -158,6 +158,24 @@
 - **Tercera incidencia:** run `40222693944` ejecutó el verificador al inicio, revelando con precisión las abreviaturas no reconocidas: `EZE`, `JOH`, `MAR`, `JAM`, `1JO`, `PHI`, `JOE`, `NAH`, `3JO`, `2JO`. Se corrigió la tabla de nombres con correspondencias verificadas por el diagnóstico (no hay cambios en el texto bíblico).
 - **Estado:** pendiente de siguiente CI, prueba de integridad de todos los libros/capítulos y EXE; después prueba física del usuario.
 
+### 3.8 Corrección de navegación y diseño bíblico en vivo (25-oct-2026)
+
+**Reporte real del usuario:** tras avanzar los primeros 2 versículos, la proyección quedaba fija; los cambios de fondo, color o letra solo se veían después de seleccionar otro versículo. Además, el panel era demasiado pequeño y la vista previa desplazaba los controles.
+
+**Diagnóstico en código:**
+- `Scripture.svelte` entregaba a `getVerses` `verseNumbers.map(Number)`. Un identificador de fragmento como `"3_2"` se convertía en `NaN`, interrumpiendo la actualización de la selección. Las flechas también usaban `setTimeout(playScripture)` sin esperar a que libro, capítulo y versículo terminaran de cargar.
+- `ScriptureInfo.svelte` guardaba una plantilla pero nunca refrescaba por sí mismo la salida temporal `temp`; además, la vista previa estaba encima de los controles y los cambios de tamaño/color se aplicaban al soltar el deslizador o selector.
+- `scripture.ts` dejaba la imagen de fondo anterior activa cuando se quitaba para seleccionar un color.
+
+**Solución implementada (pendiente CI y prueba en Windows):**
+- `jaVerseNavigation.ts` interpreta los IDs de subversos y pasa números base válidos al motor, preservando la selección visual completa.
+- Flechas y botones usan una cola secuencial; se espera a terminar la carga antes de proyectar, sin `setTimeout` de carreras. En el mismo capítulo no se recarga todo el libro innecesariamente.
+- Los cambios de estilo se ven en la proyección activa con `refreshLiveJAScripture`, agrupando movimientos continuos del control. Solo se interviene la salida bíblica, no otras presentaciones; se respeta la plantilla original.
+- Al elegir color de fondo, se elimina la asociación con la imagen de fondo anterior, y solo se limpia el fondo de salida si era el previamente instalado por el módulo bíblico.
+- Controles grandes y de una sola columna, primero el diseño, colores y fondo, después vista previa desplegable y opciones avanzadas; adaptación a panel estrecho. Si la salida tiene una plantilla especial, se dirige a una copia JA sin modificar la plantilla original.
+- `scripts/ja/scripture-live-controls.test.mjs` añade pruebas de subversos, orden de navegación, controles inmediatos y sustitución segura del fondo.
+- **Pruebas de aceptación pendientes:** avanzar al menos 10 versos con flechas y botones (incluidos versos largos y cambios de capítulo), retroceder, navegar rápidamente, cambiar fuente, tamaño, alineación, color e imagen sin seleccionar otro versículo, probar segundo monitor y reiniciar para verificar persistencia. No declararlo probado en pantalla real solo porque CI compile.
+
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
 > Esta tabla **reemplaza las fases antiguas** descritas en `JA_RUTA_DESARROLLO.md`, que es un documento histórico y aún contiene el orden inicial ya superado.
@@ -259,6 +277,7 @@
 | 2026-10-25 | Audio general validado por usuario («ya funciona»), CI exitosa; audífonos por separado pendientes de ensayo | `a03635c`, Actions `40213108136` |
 | 2026-10-25 | Biblia española: catálogo, estilo JA, navegación con flechas implementados; pendiente CI/licencias | `docs/JA_BIBLIA_ESPANOL.md` |
 | 2026-10-25 | Falló CI Biblia `40216920921` en Svelte (TS aserción dentro de markup); corregido en `7d66e1e`. Nueva CI `40218691694` **exitosa**, instalador Windows publicado; prueba real de Biblia pendiente | `ScriptureInfo.svelte`, `scripts/ja/scripture-svelte-compile.test.mjs` |
+| 2026-10-25 | Corrección de avance de subversos, cola de navegación, estilos en vivo y panel bíblico accesible; pendiente CI y validación real | `jaVerseNavigation.ts`, `Scripture.svelte`, `ScriptureInfo.svelte`, `scripture.ts` |
 | 2026-10-25 | Integración RV1909 de dominio público; compilación TS corregida al declarar tupla validada [ID, Bible] y registro al abrir Biblia; pendiente CI y prueba física | `scripts/ja/build_rv1909.py`, `docs/JA_BIBLIA_RV1909_INTEGRADA.md` |
 
 ## 9. Texto para comenzar una conversación nueva
