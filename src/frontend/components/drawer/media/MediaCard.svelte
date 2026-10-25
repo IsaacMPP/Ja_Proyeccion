@@ -2,6 +2,10 @@
     import { derived } from "svelte/store"
     import type { ContentFile, ContentProviderId } from "../../../../electron/contentProviders/base/types"
     import type { MediaStyle } from "../../../../types/Main"
+    import { Main } from "../../../../types/IPC/Main"
+    import { requestMain } from "../../../IPC/main"
+    import { newToast } from "../../../utils/common"
+    import { save } from "../../../utils/save"
     import type { ShowType } from "../../../../types/Show"
     import { addProjectItem } from "../../../converters/project"
     import { activeShow, customMessageCredits, media, mediaOptions, mediaTags, outLocked, outputs, photoApiCredits, styles } from "../../../stores"
@@ -29,8 +33,62 @@
     export let contentProvider: ContentProviderId | false = false
     export let contentFileData: ContentFile | null = null
 
+    $: customCoverPath = !contentProvider && type === "video" ? $media[path]?.jaCoverPath || "" : ""
+    $: previewCoverPath = customCoverPath || thumbnailPath
+    let changingCover = false
+
+    async function chooseCover(event: MouseEvent) {
+        event.stopPropagation()
+        if (changingCover || !path || contentProvider || type !== "video") return
+        iconClicked = setTimeout(() => (iconClicked = null), 100)
+        changingCover = true
+        try {
+            const chosen = await requestMain(Main.JA_PICK_VIDEO_COVER, { videoPath: path, previousPath: customCoverPath })
+            if (chosen?.status === "ok") {
+                media.update((entries) => ({
+                    ...entries,
+                    [path]: { ...(entries[path] || {}), jaCoverPath: chosen.path }
+                }))
+                save()
+                newToast("Portada personalizada guardada")
+            } else if (chosen?.status === "error") {
+                newToast(chosen.message)
+            }
+        } catch (error) {
+            console.error("JA: No se pudo cambiar la portada", error)
+            newToast("No fue posible cambiar la portada")
+        } finally {
+            changingCover = false
+        }
+    }
+
+    async function resetCover(event: MouseEvent) {
+        event.stopPropagation()
+        if (changingCover || !customCoverPath) return
+        iconClicked = setTimeout(() => (iconClicked = null), 100)
+        changingCover = true
+        try {
+            // La asociación se elimina aunque ya no exista el archivo de la portada.
+            await requestMain(Main.JA_REMOVE_VIDEO_COVER, { videoPath: path, coverPath: customCoverPath })
+            media.update((entries) => {
+                const next = { ...entries, [path]: { ...(entries[path] || {}) } }
+                delete next[path].jaCoverPath
+                return next
+            })
+            failed = false
+            thumbnailPath = ""
+            save()
+            newToast("Miniatura automática restaurada")
+        } catch (error) {
+            console.error("JA: No se pudo restaurar la portada", error)
+            newToast("No fue posible restaurar la portada")
+        } finally {
+            changingCover = false
+        }
+    }
+
     let failed = false
-    $: if (thumbnail && !thumbnailPath && !loadFullImage) getThumbnail()
+    $: if (thumbnail && !thumbnailPath && !loadFullImage && !customCoverPath) getThumbnail()
     async function getThumbnail() {
         failed = false
         thumbnailPath = await loadThumbnail(path)
@@ -209,7 +267,7 @@
 <SelectElem id="media" class="context #media_card" data={{ name, path, type, contentProvider }} {shiftRange} draggable fill>
     <Card
         resolution={{ width: 16, height: 9 }}
-        loaded={(loaded && ($mediaOptions.mode === "grid" ? thumbnailPath !== "" || loadFullImage : true)) || failed}
+        loaded={(loaded && ($mediaOptions.mode === "grid" ? !!previewCoverPath || loadFullImage : true)) || (failed && !customCoverPath)}
         style={thumbnail ? `width: ${$mediaOptions.mode === "grid" ? 100 : 100 / $mediaOptions.columns}%;` : ""}
         mode={$mediaOptions.mode}
         width={100}
@@ -231,6 +289,22 @@
     >
         <!-- icons -->
         <div class="icons">
+            {#if !contentProvider && type === "video" && path}
+                <div class="ja-cover-controls">
+                    <div class="button">
+                        <Button style="padding: 3px;" title="Elegir portada JPG o PNG" on:click={chooseCover} disabled={changingCover}>
+                            <Icon id="image" size={0.9} white />
+                        </Button>
+                    </div>
+                    {#if customCoverPath}
+                        <div class="button">
+                            <Button style="padding: 3px;" title="Restaurar miniatura automática" on:click={resetCover} disabled={changingCover}>
+                                <Icon id="refresh" size={0.9} white />
+                            </Button>
+                        </div>
+                    {/if}
+                </div>
+            {/if}
             {#if isFavourite && active !== "favourites"}
                 <div style="max-width: 100%;">
                     <div class="button">
@@ -272,13 +346,13 @@
             {/if}
         </div>
 
-        {#if failed}
+        {#if failed && !customCoverPath}
             <div class="icon">
                 <Icon size={2.5} id="close" style="color: var(--disconnected);" white />
             </div>
         {:else if thumbnail}
-            {#if thumbnailPath || loadFullImage}
-                <MediaLoader bind:loaded bind:hover bind:duration bind:videoElem {resolution} {type} {path} {thumbnailPath} {name} {mediaStyle} {loadFullImage} />
+            {#if previewCoverPath || loadFullImage}
+                <MediaLoader bind:loaded bind:hover bind:duration bind:videoElem {resolution} {type} {path} thumbnailPath={previewCoverPath} {name} {mediaStyle} {loadFullImage} />
             {/if}
         {:else}
             <div class="icon">
@@ -300,6 +374,17 @@
     .icon :global(svg) {
         height: 100%;
     }
+
+    .ja-cover-controls {
+        display: flex;
+        gap: 3px;
+        background: rgba(6, 27, 48, 0.9);
+        border: 1px solid rgba(246, 191, 25, 0.55);
+        border-radius: 6px;
+        overflow: hidden;
+        pointer-events: all;
+    }
+    .ja-cover-controls :global(button:hover) { color: #f6bf19; }
 
     /* icons */
 

@@ -3,7 +3,7 @@
 > **DOCUMENTO CANÓNICO / FUENTE ÚNICA DE VERDAD.**
 > Antes de continuar el desarrollo, abrir este archivo **directamente desde `main` en GitHub**, consultar el último commit y revisar las ejecuciones de GitHub Actions. No confiar en respuestas anteriores del chat ni en una copia antigua de este documento.
 >
-> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.0. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
+> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.1. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
 
 **Enlace directo:** https://github.com/IsaacMPP/Ja_Proyeccion/blob/main/docs/JA_MASTER.md
 
@@ -111,6 +111,17 @@
 - `npm run ja:test` corre en GitHub Actions; **no sustituye pruebas reales en Windows**.
 - `.github/workflows/compilar-windows.yml` es el workflow activo único; usa Node **24.16.0**, Python **3.12**, runner **windows-2022**, `npm ci`, `npm run build`, NSIS x64.
 
+### 3.5 Portadas personalizadas de videos — implementación nueva
+
+- **Autorización:** usuario pidió continuar con siguiente fase el 25-oct-2026.
+- Tarjetas de videos locales ofrecen **Elegir portada** (JPG/PNG) y **Restaurar miniatura automática**.
+- El video original **no se toca**; se copia solo la imagen de portada a `Config/JA-Video-Covers` en los datos de JA Proyección y se guarda el vínculo de ruta en el `MEDIA` persistente (`jaCoverPath`).
+- Conserva vista previa y proyección reales del video, sin sustituir su flujo de reproducción.
+- Implementación: `src/electron/data/jaVideoCovers.ts`, `src/frontend/components/drawer/media/MediaCard.svelte`, `src/types/{Main,IPC/Main}.ts`, IPC `responsesMain.ts`.
+- Nueva documentación: [JA_PORTADAS_PERSONALIZADAS.md](JA_PORTADAS_PERSONALIZADAS.md); pruebas: `scripts/ja/video-covers.test.mjs`.
+- **Estado al escribir:** código pendiente de validar con compilación/instalación y ensayos reales. Confirmar último HEAD y CI antes de afirmar éxito.
+- **Limitación:** asociación por ruta de video; mover o renombrar el archivo requiere reasignar portada. No se implementó editor de recorte ni sincronización entre dispositivos.
+
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
 > Esta tabla **reemplaza las fases antiguas** descritas en `JA_RUTA_DESARROLLO.md`, que es un documento histórico y aún contiene el orden inicial ya superado.
@@ -118,19 +129,19 @@
 | Prioridad | Trabajo | Estado real | Criterio mínimo para cerrar |
 | --- | --- | --- | --- |
 | 0 | Base, videoteca, marca y pantalla secundaria | **Integradas; validadas parcialmente en Windows** | Mantener como línea base; corregir regresiones, no rehacer módulos estables. |
-| **1 — SIGUIENTE** | **Miniaturas/portadas personalizadas por video** | **Pendiente de implementar** | Escoger JPG/PNG, asociarla a cada archivo sin tocar original, conservarla al reiniciar, restaurar miniatura automática, mostrarla en biblioteca/búsqueda. |
-| 2 | Audio/pistas musicales | **Por ampliar** | Carpetas MP3/WAV, búsqueda, escucha previa, controles de volumen, pausa y avance; probar aislamiento de audio antes de declarar monitoreo privado. |
+| **1 — EN DESARROLLO** | **Miniaturas/portadas personalizadas por video** | **Código integrado en este cambio; esperando CI y prueba de usuario** | Escoger JPG/PNG, asociarla a cada archivo sin tocar original, conservarla al reiniciar, restaurar miniatura automática, mostrarla en biblioteca/búsqueda. |
+| **2 — SIGUIENTE DESPUÉS DE VALIDAR PORTADAS** | Audio/pistas musicales | **Por ampliar** | Carpetas MP3/WAV, búsqueda, escucha previa, controles de volumen, pausa y avance; probar aislamiento de audio antes de declarar monitoreo privado. |
 | 3 | Biblia en español | **Por implementar / validar licencia** | Importar traducción autorizada, buscar libro/capítulo/versículo, navegar con flechas, controlar cantidad de versículos y fondos. |
 | 4 | Organización de un culto | **Propuesta aprobada como ruta, no implementada** | Preparar orden de videos, especiales, versículos y anuncios reutilizando proyectos de FreeShow. |
 | 5 | Temporizadores y mejoras de operación | **Hay componentes heredados; falta adaptar/probar** | Cronómetro/reloj, cuentas regresivas, avisos y controles rápidos comprobados en salida real. |
 | 6 | Auditoría de funciones avanzadas heredadas | **Dejar para el final (instrucción del usuario)** | NDI, control por celular, StageShow, OBS, OMT, cámaras y demás: inventario, configuración y pruebas independientes. |
 | 7 | Estabilización/versión de distribución | **Pendiente** | Pruebas con distintos Windows/monitores/códecs, rendimiento, respaldos de datos y documentación GPL. |
 
-**Próxima acción planificada:** plantear/implementar las **miniaturas personalizadas por video**, pero **esperar la autorización del usuario** si solo está preguntando por el estado o definiendo prioridades. Al retomarlo, primero auditar modelo de medios, persistencia y caché existentes.
+**Próxima acción planificada:** validar la nueva función de **portadas personalizadas por video** mediante CI y prueba real en Windows. Luego, según autorización del usuario, pasar a biblioteca de audio/pistas musicales.
 
 ### Aspectos que NO deben contarse como terminados
 
-- Portadas personalizadas (solo están las automáticas).
+- Portadas personalizadas **integradas en código** en el nuevo cambio; CI/pruebas reales pendientes, no declararlas terminadas todavía.
 - Biblioteca de audio específicamente adaptada a pistas musicales y monitoreo separado.
 - Traducción bíblica en español empaquetada o importada con permiso.
 - Control remoto por celular y NDI funcionando; existen bases heredadas pero faltan ensayos reales.
@@ -166,7 +177,7 @@
 | --- | --- |
 | Inicio y marca | `src/frontend/components/main/{Top,Splash}.svelte`, `public/loading.html`, `public/ja-logo.png`, `public/icon.png` |
 | Tema | `src/frontend/components/settings/tabs/defaultThemes.ts`, `public/global.css` |
-| Videoteca | `src/frontend/components/drawer/media/Media.svelte`, `MediaCard.svelte`, `jaVideoLibrary.ts` |
+| Videoteca y portadas | `src/frontend/components/drawer/media/{Media.svelte,MediaCard.svelte,jaVideoLibrary.ts}`, `src/electron/data/jaVideoCovers.ts`, `docs/JA_PORTADAS_PERSONALIZADAS.md` |
 | Previsualización/salidas | `src/frontend/components/output/preview/`, `src/frontend/components/helpers/output.ts` |
 | Selector de pantalla | `src/frontend/components/settings/{Screens.svelte,displayGuide.ts}` |
 | Salida Windows/Electron | `src/electron/output/helpers/{OutputVisibility.ts,displayRouting.ts}` |
@@ -201,6 +212,7 @@
 | 2026-10-25 | Asistente de pantallas y protección del monitor operador | `d909f78c` |
 | 2026-10-25 | Corrección final de ruta de salida; usuario confirma proyector secundario | `74709e0`; CI `40167451587` **exitosa** |
 | 2026-10-25 | Creación del documento maestro y establecimiento de protocolo de continuidad | **Este documento** |
+| 2026-10-25 | Implementación de portadas personalizadas, selector JPG/PNG y restauración; validación Windows pendiente | `src/electron/data/jaVideoCovers.ts`, `docs/JA_PORTADAS_PERSONALIZADAS.md`; revisar CI nueva |
 
 ## 9. Texto para comenzar una conversación nueva
 

@@ -188,6 +188,8 @@ export interface Media {
     [key: string]: MediaStyle
 }
 export interface MediaStyle {
+    /** JA: portada JPG/PNG propia; el video original no se modifica. */
+    jaCoverPath?: string
     creationTime?: number // used for checking valid media thumbnail cache
     filter?: string
     flipped?: boolean

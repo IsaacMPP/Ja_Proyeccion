@@ -23,6 +23,7 @@ import { deleteBackup, getBackups, restoreFiles } from "../data/backup"
 import { getLocalIPs } from "../data/bonjour"
 import { checkIfMediaDownloaded, downloadLessonsMedia, downloadMedia } from "../data/downloadMedia"
 import { importShow } from "../data/import"
+import { pickJAVideoCover, removeJAVideoCover } from "../data/jaVideoCovers"
 import { save } from "../data/save"
 import { _store, appDataPath, config, createStores, getStore, getStoreValue, setStoreValue } from "../data/store"
 import { captureSlide, doesMediaExist, getThumbnail, getThumbnailFolderPath, pdfToImage, saveImage } from "../data/thumbnails"
@@ -127,6 +128,8 @@ export const mainResponses: MainResponses = {
     // MEDIA
     [Main.DOES_MEDIA_EXIST]: (data) => doesMediaExist(data),
     [Main.GET_THUMBNAIL]: async (data) => await getThumbnail(data),
+    [Main.JA_PICK_VIDEO_COVER]: (data) => pickJAVideoCover(data),
+    [Main.JA_REMOVE_VIDEO_COVER]: (data) => removeJAVideoCover(data),
     [Main.SAVE_IMAGE]: (data) => saveImage(data),
     [Main.PDF_TO_IMAGE]: (data) => pdfToImage(data),
     [Main.READ_EXIF]: (data) => readExifData(data),

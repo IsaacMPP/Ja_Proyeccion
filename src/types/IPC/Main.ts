@@ -93,6 +93,8 @@ export enum Main {
     OUTPUT = "OUTPUT",
     DOES_MEDIA_EXIST = "DOES_MEDIA_EXIST",
     GET_THUMBNAIL = "GET_THUMBNAIL",
+    JA_PICK_VIDEO_COVER = "JA_PICK_VIDEO_COVER",
+    JA_REMOVE_VIDEO_COVER = "JA_REMOVE_VIDEO_COVER",
     SAVE_IMAGE = "SAVE_IMAGE",
     PDF_TO_IMAGE = "PDF_TO_IMAGE",
     READ_EXIF = "READ_EXIF",
@@ -220,6 +222,8 @@ export interface MainSendPayloads {
     [Main.OUTPUT]: "true" | "false"
     [Main.DOES_MEDIA_EXIST]: { path: string; creationTime?: number; noCache?: boolean }
     [Main.GET_THUMBNAIL]: { input: string; size: number }
+    [Main.JA_PICK_VIDEO_COVER]: { videoPath: string; previousPath?: string }
+    [Main.JA_REMOVE_VIDEO_COVER]: { videoPath: string; coverPath: string }
     [Main.SAVE_IMAGE]: { id?: string; path?: string; base64?: string; buffer?: ArrayBuffer; filePath?: string[]; format?: "png" | "jpg"; openFolder?: boolean }
     [Main.PDF_TO_IMAGE]: { filePath: string }
     [Main.READ_EXIF]: { id: string }
@@ -356,6 +360,8 @@ export interface MainReturnPayloads {
     [Main.GET_WINDOWS]: Promise<{ name: string; id: string }[]>
     [Main.DOES_MEDIA_EXIST]: Promise<{ path: string; exists: boolean; creationTime?: number }>
     [Main.GET_THUMBNAIL]: Promise<{ output: string; input: string; size: number }>
+    [Main.JA_PICK_VIDEO_COVER]: Promise<{ status: "ok"; path: string } | { status: "cancelled" } | { status: "error"; message: string }>
+    [Main.JA_REMOVE_VIDEO_COVER]: Promise<{ success: boolean }>
     // [Main.PDF_TO_IMAGE]: Promise<string[]>
     [Main.READ_EXIF]: Promise<{ id: string; exif: ExifData | undefined }>
     [Main.MEDIA_CODEC]: Promise<MediaCodecInfo>
