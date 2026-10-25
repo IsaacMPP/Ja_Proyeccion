@@ -208,6 +208,16 @@
 - Alcance deliberado: no se crea copia de medios, no se instala material con derechos, no se altera `Archivos de programa`; aún no crea carpetas físicas, no incorpora biblias a esta estructura ni clasifica automáticamente videos por contenido. El himnario especializado con búsqueda por número/título y miniaturas se hará en Fase 4.2. El organizador y los espacios aislados corresponden a 4.3 y 4.4.
 - **Aceptación pendiente:** CI Windows de rama, vincular carpetas separadas, comprobar persistencia tras reiniciar y proyección de video externo. No marcar terminado sin prueba real.
 
+### Fase 4.2 — Himnario Adventista, primera integración (25-oct-2026)
+
+- El usuario confirmó la creación física de las carpetas de biblioteca en Windows («ya está») y autorizó continuar.
+- Rama: `feature/fase4-2-himnario`, derivada de la Fase 4.1. `main` no se modifica.
+- `src/frontend/components/drawer/media/jaHymnal.ts` reconoce archivos numerados como `385 Hablando con Jesus.mp4`, extrae número/título, busca número exacto y nombre sin acentos y ordena numéricamente.
+- Al seleccionar una carpeta vinculada con `jaLibraryRole: "hymnal"`, `Media.svelte` activa búsqueda exclusiva, no permite buscar otras carpetas desde esa vista y presenta únicamente videos MP4 con número y título válido; reutiliza las tarjetas, miniaturas, vista previa, proyección y añadir a proyecto de FreeShow.
+- La carpeta física `Documentos/JA Proyección/Himnario Adventista` debe vincularse una vez desde Medios → Vincular biblioteca JA → Himnario Adventista; en esta entrega no existe registro automático al iniciarse. Evitar afirmar lo contrario.
+- Prueba estática: `scripts/ja/hymnal-library.test.mjs`. Falta CI y comprobación real en Windows con videos del usuario; miniaturas se heredan del motor existente, verificar generación/caché real y navegación.
+- Pendientes de esta fase: vinculación automática (sin duplicados), controles de lista dedicados si el usuario los prefiere, duplicados/ausentes, manejo de nombre sin título y rendimiento con muchos MP4. No declarar la fase completa antes de cerrar esos puntos.
+
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
 > Esta tabla **reemplaza las fases antiguas** descritas en `JA_RUTA_DESARROLLO.md`, que es un documento histórico y aún contiene el orden inicial ya superado.
