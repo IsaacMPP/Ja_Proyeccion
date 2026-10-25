@@ -213,6 +213,14 @@
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
 
+### Causa raíz adicional del bloqueo de miniaturas (25-oct-2026)
+
+- Usuario confirmó que el scroll mejora algo, pero el Himnario de 613 videos todavía muestra tarjetas vacías y se congela en Ryzen 9.
+- Auditoría de `src/electron/data/thumbnails.ts`: el sistema original tenía su guardia `working` desactivada, por lo que `addToGenerateQueue` lanzaba capturas simultáneas sin límite práctico; también tenía un tope de 20 capturas en Canvas. Esto puede saturar CPU/GPU y renderizador.
+- Se introdujo cola con **máximo dos capturas activas**, prevención de entradas repetidas y liberación de cupos por identificador al finalizar. Se eliminó `currentlyGenerating.clear()` global cuando terminaba una captura, para no liberar solicitudes todavía activas.
+- Prueba automatizada `scripts/ja/thumbnail-queue.test.mjs`. Pendiente CI Windows y prueba real en biblioteca de 613 himnos; especialmente primera generación, scroll rápido, vuelta atrás, caché tras reiniciar y que la proyección no se bloquee.
+- Si todavía hay atasco: revisar tiempos de espera de solicitudes/IPC y generación inicial gradual priorizada. No declarar resuelto sin prueba del usuario.
+
 ### Incidente rendimiento Himnario (25-oct-2026)
 - Usuario observó con 613 MP4 que las miniaturas tardan en aparecer y la interfaz se congela al hacer scroll; se ve panel vacío. No cerrar Fase 4.2 sin ensayo real.
 - Investigación en `MediaGrid.svelte`: la animación `lazyLoader` por cada tarjeta dependía de frames y podía quedar atrás al desplazar rápidamente; reemplazada por ventana directa de tarjetas visibles + margen. `Media.svelte` recalculaba `mediaFilesOnly.map(...)` para cada tarjeta y remontaba toda la cuadrícula con `{#key searchedFiles}`; ahora memoriza la lista derivada y mantiene instancias. Test estático `media-grid-performance.test.mjs`.
