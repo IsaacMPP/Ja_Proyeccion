@@ -189,6 +189,9 @@
 - Rama de propuesta: `feature/importacion-biblias-locales-json` (NO fusionada a `main`).
 - Nuevo conversor Python sin dependencias `scripts/ja/import_local_bible.py`: lee arrays JavaScript por libro sin ejecutarlos, o JSON de estructuras compatibles, y genera archivos `.fsb` para el importador local existente. Rechaza libros incompletos de manera predeterminada.
 - Guía: `docs/JA_IMPORTACION_BIBLIAS_PERSONALES.md`. **No se descargaron ni añadieron textos de traducciones a GitHub**.
+
+- **Actualización en esta rama:** se añadió `src/frontend/converters/jaLocalBible.ts` y un control «Seleccionar archivos de Biblia» en `ImportScripture.svelte` (pestaña Importar > Local). Acepta un JSON completo o selección múltiple de 66 archivos `.js`; convierte en memoria y llama `importFSB` existente. No ejecuta código de terceros. La interfaz es preliminar hasta validar datos reales y CI.
+- **Acción de CI:** workflow de Windows habilitado temporalmente para la rama; ejecución `40232191359` iniciada. Registrar resultado real antes de fusionar; no afirmar éxito antes del final.
 - **Validación pendiente:** probar conversión de archivos reales de ambos repositorios, especialmente esquema de mrk214, importar el `.fsb` en JA Proyección, verificar 66 libros, conteo, referencias y persistencia. No declarar compatibilidad total antes de estas pruebas.
 - La licencia MIT de repositorios de código no implica autorización de distribución de traducciones bíblicas modernas; separar estrictamente conversor y contenido local.
 
