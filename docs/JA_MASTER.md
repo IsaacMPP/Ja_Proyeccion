@@ -174,6 +174,7 @@
 - Al elegir color de fondo, se elimina la asociación con la imagen de fondo anterior, y solo se limpia el fondo de salida si era el previamente instalado por el módulo bíblico.
 - Controles grandes y de una sola columna, primero el diseño, colores y fondo, después vista previa desplegable y opciones avanzadas; adaptación a panel estrecho. Si la salida tiene una plantilla especial, se dirige a una copia JA sin modificar la plantilla original.
 - `scripts/ja/scripture-live-controls.test.mjs` añade pruebas de subversos, orden de navegación, controles inmediatos y sustitución segura del fondo.
+- **CI de esta fase:** el primer run `40228820831` generó RV1909 correctamente, pero `ja:test` se detuvo porque una prueba anterior seguía esperando la llamada antigua `_moveSelection` desde el teclado. La implementación nueva llama a `navigateVerse` para serializar y después invoca `_moveSelection`. Se actualizó `scripts/ja/spanish-bible.test.mjs` para verificar el contrato nuevo. **Pendiente resultado de nueva CI.**
 - **Pruebas de aceptación pendientes:** avanzar al menos 10 versos con flechas y botones (incluidos versos largos y cambios de capítulo), retroceder, navegar rápidamente, cambiar fuente, tamaño, alineación, color e imagen sin seleccionar otro versículo, probar segundo monitor y reiniciar para verificar persistencia. No declararlo probado en pantalla real solo porque CI compile.
 
 ## 4. Próximas fases y prioridades ACTUALIZADAS
