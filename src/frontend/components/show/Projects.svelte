@@ -609,6 +609,7 @@
         flex-direction: column;
         flex: 1;
         overflow-y: auto;
+        background: linear-gradient(180deg, #0b2846 0%, #081b32 100%);
     }
 
     .tabs {

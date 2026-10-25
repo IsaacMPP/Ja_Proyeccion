@@ -783,15 +783,16 @@
         gap: 6px;
         flex-wrap: wrap;
         padding: 5px 9px;
-        background: var(--primary-darkest);
+        background: #092740;
+        border-bottom: 1px solid #205477;
         font-size: 0.78em;
     }
     .jaVideoToolbar button {
         cursor: pointer;
         padding: 4px 8px;
         border: 1px solid var(--primary-lighter);
-        border-radius: 5px;
-        background: transparent;
+        border-radius: 14px;
+        background: #092e4e;
         color: var(--text);
         font: inherit;
     }

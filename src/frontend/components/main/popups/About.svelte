@@ -24,7 +24,7 @@
 
 <div style="text-align: center;">
     <div class="logo">
-        <img style="height: 35px;" src="./ja-logo.svg" alt="Emblema JA" draggable={false} />
+        <img style="height: 35px;" src="./ja-logo.webp" alt="Emblema JA" draggable={false} />
         <h1 style="color: var(--text);font-size: 1.7em;">JA <span style="color: var(--secondary);">Proyección</span></h1>
     </div>
 

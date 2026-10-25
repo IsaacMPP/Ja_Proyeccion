@@ -85,7 +85,8 @@
     .tabs {
         display: flex;
         flex-wrap: wrap;
-        background-color: var(--primary-darker);
+        background: linear-gradient(90deg, #0b2a48, #071e36);
+        border-bottom: 1px solid #27516f;
         z-index: 1;
         box-shadow: inset 0 -1px 0 var(--primary-lighter);
     }
@@ -93,7 +94,8 @@
     .tabs :global(button) {
         flex: auto;
 
-        padding: 0.3em 0.5em;
+        padding: 0.55em 0.75em;
+        min-height: 40px;
         border-radius: 0;
         transition: background-color 0.15s ease;
     }

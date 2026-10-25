@@ -161,7 +161,8 @@
     .left,
     .right {
         position: relative;
-
+        background: linear-gradient(180deg, #0b2845 0%, #071a2e 100%);
+        border-color: #214b6b;
         display: flex;
         flex-direction: column;
         flex: 1;

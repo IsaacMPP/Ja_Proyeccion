@@ -63,6 +63,8 @@
         display: flex;
         padding: 2px;
         position: relative;
+        border-radius: 7px;
+        overflow: hidden;
     }
 
     .over {
@@ -156,6 +158,7 @@
         justify-content: center;
         /* aspect-ratio: 16/9; */
         background-color: var(--primary);
+        border-radius: 7px;
     }
 
     .loader {

@@ -51,3 +51,16 @@ escáner, convertidor, controles, pruebas y cualquier documentación que la reco
 - Por validar: compilación, renderizado visual real, icono nativo del instalador de Windows y pruebas de regresión.
 
 - Inicio de aplicación: `public/loading.html` y título HTML muestran JA Proyección. Icono nativo de Windows pendiente de recurso final.
+
+## Fase 3 — ajuste de interfaz conforme a la maqueta aprobada
+Referencia visual facilitada por el usuario el 2026-10-25, 1672×941.
+
+- El usuario pidió que la apariencia coincida con la maqueta, no solamente colores similares.
+- Logo real de JA extraído de la imagen que entregó el usuario, guardado como `public/ja-logo.webp`.
+- Fondo oscuro de congregación adaptado visualmente de la maqueta, `public/ja-hero.jpg`. Las zonas con textos del ejemplo se reconstruyeron para no duplicar los textos de la aplicación.
+- Barra de modo superior de 58 px; bienvenida con logo grande, eslogan aprobado y botón primario dorado.
+- Paneles azul marino, barra de bibliotecas inferior de 48 px, imágenes multimedia redondeadas.
+- Valores iniciales: 4 columnas de multimedia y drawer inferior de 365 px. Los ajustes persistidos por el usuario siguen siendo editables y pueden diferir.
+- Los cantos mostrados en la ilustración no se incluyen como contenido. El programa únicamente enseña los archivos reales de las carpetas del usuario.
+- Se conserva la estructura de FreeShow y se mantienen sus créditos/licencia.
+- Falta validar en Windows que la compilación de este commit pase y el diseño funcione en resoluciones distintas.

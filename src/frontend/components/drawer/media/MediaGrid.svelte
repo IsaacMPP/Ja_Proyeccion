@@ -153,7 +153,8 @@
         display: flex;
         flex-wrap: wrap;
         align-content: flex-start;
-        padding: 5px;
+        padding: 8px 10px;
+        background: #071b30;
 
         width: 100%;
         height: 100%;
@@ -167,5 +168,15 @@
     .card {
         display: flex;
         flex-direction: column;
+        padding: 5px 7px 8px;
+        min-width: 0;
+        gap: 2px;
+    }
+    .card :global(.main) {
+        border-radius: 7px;
+    }
+    .card :global(img),
+    .card :global(video) {
+        border-radius: 6px;
     }
 </style>

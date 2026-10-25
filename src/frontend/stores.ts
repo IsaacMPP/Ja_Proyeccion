@@ -342,8 +342,8 @@ export const scriptureSettings: Writable<any> = writable({
 
 // DRAWER
 export const drawerTabsData: Writable<DrawerTabs> = writable({}) // {default}
-export const mediaOptions: Writable<MediaOptions> = writable({ columns: 5, mode: "grid" }) // {default}
-export const drawer: Writable<{ height: number; stored: null | number; autoclosed?: boolean }> = writable({ height: 300, stored: null }) // {default}
+export const mediaOptions: Writable<MediaOptions> = writable({ columns: 4, mode: "grid" }) // {default}
+export const drawer: Writable<{ height: number; stored: null | number; autoclosed?: boolean }> = writable({ height: 365, stored: null }) // {default}
 
 // TAGS
 export const globalTags: Writable<{ [key: string]: Tag }> = writable({}) // {}

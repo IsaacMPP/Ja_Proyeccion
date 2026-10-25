@@ -100,7 +100,7 @@
             <div class="unsaved" />
         {/if}
         <div class="ja-brand" aria-label="JA Proyección">
-            <img src="./ja-logo.svg" alt="Emblema JA" draggable={false} />
+            <img src="./ja-logo.webp" alt="Emblema JA" draggable={false} />
             <div class="ja-name">JA <strong>Proyección</strong></div>
         </div>
     </span>
@@ -159,22 +159,22 @@
     .ja-brand {
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 8px;
+        justify-content: flex-start;
+        gap: 9px;
         width: 100%;
-        height: 40px;
-        padding: 2px 10px;
+        height: 58px;
+        padding: 2px 12px;
         white-space: nowrap;
     }
     .ja-brand img {
-        height: 34px;
-        width: 55px;
+        height: 51px;
+        width: 63px;
         object-fit: contain;
         flex: 0 0 auto;
     }
     .ja-name {
         color: var(--text);
-        font-size: 1.22em;
+        font-size: 1.5em;
         font-weight: 750;
         letter-spacing: -0.035em;
     }
@@ -187,8 +187,10 @@
         display: flex;
         justify-content: space-between;
         z-index: 30;
-        min-height: 40px;
-        height: 40px;
+        min-height: 58px;
+        height: 58px;
+        background: linear-gradient(100deg, #0b2a49 0%, #071b32 70%, #081a30 100%);
+        border-bottom: 1px solid #1a496c;
 
         box-shadow: 0 1px 0 var(--primary-lighter), 0 2px 12px rgb(0 0 0 / 0.18);
 
@@ -197,6 +199,24 @@
     }
     .top span {
         display: flex;
+        align-items: stretch;
+    }
+    .top > span:nth-child(2) {
+        gap: 2px;
+        align-items: center;
+    }
+    .top > span:nth-child(2) :global(button) {
+        min-height: 44px;
+        padding-inline: 15px;
+        border-radius: 7px 7px 3px 3px;
+    }
+    .top > span:nth-child(2) :global(button:hover) {
+        background: rgba(31, 104, 166, 0.28);
+    }
+    @media screen and (max-width: 940px) {
+        .ja-name { font-size: 1.08em; }
+        .ja-brand img { height: 42px; width: 54px; }
+        .top > span:nth-child(2) :global(button) { padding-inline: 6px; }
     }
 
     .top.drag {
