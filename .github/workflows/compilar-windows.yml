@@ -3,7 +3,7 @@ name: Compilar JA Proyeccion (Windows)
 on:
   workflow_dispatch:
   push:
-    branches: [main, feature/fase4-organizador-cultos, feature/fase4-1-biblioteca-central]
+    branches: [main, feature/fase4-organizador-cultos, feature/fase4-1-biblioteca-central, feature/fase4-2-himnario]
 
 permissions:
   contents: read

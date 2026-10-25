@@ -34,6 +34,7 @@
     import { loadFromPixabay } from "./pixabay"
     import { loadFromUnsplash } from "./unsplash"
     import { getJAVideoLibraryName, matchesJAVideoName } from "./jaVideoLibrary"
+    import { compareJAHymns, matchesJAHymn } from "./jaHymnal"
 
     export let active: string | null
     export let searchValue = ""
@@ -67,7 +68,8 @@
     $: isProviderSection = contentProviders.some((p) => p.providerId === active)
     $: notFolders = ["all", ...specialTabs, ...contentProviders.map((p) => p.providerId)]
     $: isLocalFolder = !!(active && $mediaFolders[active])
-    $: jaSearchEverywhere = active === "all" || (isLocalFolder && jaSearchScope === "all")
+    $: isJAHymnal = !!(active && $mediaFolders[active]?.jaLibraryRole === "hymnal")
+    $: jaSearchEverywhere = active === "all" || (isLocalFolder && !isJAHymnal && jaSearchScope === "all")
     $: rootPath = isLocalFolder ? $mediaFolders[active!]?.path || "" : ""
 
     let path = ""
@@ -321,6 +323,7 @@
         if (active === "online" || active === "inputs" || isProviderSection) return
 
         let localFilteredFiles: FileFolder[] = clone(filesList)
+        if (isJAHymnal) localFilteredFiles = localFilteredFiles.filter((a) => !a.isFolder && matchesJAHymn(a.name, ""))
 
         // La vista original de imágenes permanece disponible.
         if (jaVideosOnly && activeView !== "folder") localFilteredFiles = localFilteredFiles.filter((a) => getMediaType(getExtension(a.name)) === "video")
@@ -347,8 +350,10 @@
         else if (sortType === "created") localFilteredFiles = localFilteredFiles.sort((a, b) => (a.isFolder || b.isFolder ? 1 : b.stats.birthtimeMs - a.stats.birthtimeMs))
         else if (sortType === "modified") localFilteredFiles = localFilteredFiles.sort((a, b) => (a.isFolder || b.isFolder ? 1 : b.stats.mtimeMs - a.stats.mtimeMs))
 
+        if (isJAHymnal) localFilteredFiles.sort((a, b) => compareJAHymns(a.name, b.name))
+
         // append folders
-        if (activeView === "all") {
+        if (activeView === "all" && !isJAHymnal) {
             localFilteredFiles = [...sortFilenames(foldersList), ...localFilteredFiles]
         }
 
@@ -362,6 +367,7 @@
 
     // Búsqueda local/global con letras, acentos y números de himno.
     let searchedFiles: FileFolder[] = []
+    $: mediaShiftRange = mediaFilesOnly.map((a) => ({ ...a, type: getMediaType(getExtension(a.name)), name: removeExtension(a.name) }))
     async function filterSearch() {
         if (jaSearchBusy) {
             jaSearchDirty = true
@@ -390,7 +396,7 @@
             }
             searchedFiles = clone(filteredFiles).filter((item) =>
                 !item.isFolder &&
-                matchesJAVideoName(item.name, searchValue) &&
+                (isJAHymnal ? matchesJAHymn(item.name, searchValue) : matchesJAVideoName(item.name, searchValue)) &&
                 (!jaVideosOnly || getMediaType(getExtension(item.name)) === "video")
             )
             scrollElem?.scrollTo(0, 0)
@@ -591,13 +597,15 @@
 {#if isLocalFolder || active === "all"}
     <div class="jaVideoToolbar">
         <span>Buscar en:</span>
-        {#if isLocalFolder}
+        {#if isJAHymnal}
+            <strong>Himnario Adventista · búsqueda exclusiva por número o título</strong>
+        {:else if isLocalFolder}
             <button type="button" class:chosen={jaSearchScope === "folder"} on:click={() => (jaSearchScope = "folder")}>Esta carpeta</button>
             <button type="button" class:chosen={jaSearchScope === "all"} on:click={() => (jaSearchScope = "all")}>Todas las carpetas</button>
         {:else}
             <span>Todas las carpetas</span>
         {/if}
-        <button type="button" class:chosen={jaVideosOnly} aria-pressed={jaVideosOnly} on:click={() => (jaVideosOnly = !jaVideosOnly)}>Solo videos</button>
+        {#if !isJAHymnal}<button type="button" class:chosen={jaVideosOnly} aria-pressed={jaVideosOnly} on:click={() => (jaVideosOnly = !jaVideosOnly)}>Solo videos</button>{/if}
     </div>
 {/if}
 
@@ -631,7 +639,6 @@
             </div>
         {:else if searchedFiles.length}
             <div class="context #media" style="display: contents;">
-                {#key searchedFiles}
                     {#if $mediaOptions.mode === "grid"}
                         <MediaGrid items={searchedFiles} columns={$mediaOptions.columns} let:item>
                             {#if item.isFolder}
@@ -647,7 +654,7 @@
                                     on:open={(e) => (path = e.detail)}
                                 />
                             {:else}
-                                <Media credits={item.credits || {}} name={item.name || ""} path={item.path} thumbnailPath={item.previewUrl || item.thumbnailPath} collectionName={jaSearchEverywhere && searchValue.trim() ? getJAVideoLibraryName(item.path, $mediaFolders) : ""} loadFullImage={$mediaOptions.columns < 3} type={getMediaType(item.extension || getExtension(item.name))} shiftRange={mediaFilesOnly.map((a) => ({ ...a, type: getMediaType(getExtension(a.name)), name: removeExtension(a.name) }))} {active} />
+                                <Media credits={item.credits || {}} name={item.name || ""} path={item.path} thumbnailPath={item.previewUrl || item.thumbnailPath} collectionName={jaSearchEverywhere && searchValue.trim() ? getJAVideoLibraryName(item.path, $mediaFolders) : ""} loadFullImage={$mediaOptions.columns < 3} type={getMediaType(item.extension || getExtension(item.name))} shiftRange={mediaShiftRange} {active} />
                             {/if}
                         </MediaGrid>
                     {:else}
@@ -655,11 +662,10 @@
                             {#if file.isFolder}
                                 <Folder name={file.name} path={file.path} mode={$mediaOptions.mode} on:open={(e) => (path = e.detail)} />
                             {:else}
-                                <Media credits={file.credits || {}} thumbnail={$mediaOptions.mode !== "list"} name={file.name || ""} path={file.path} collectionName={jaSearchEverywhere && searchValue.trim() ? getJAVideoLibraryName(file.path, $mediaFolders) : ""} loadFullImage={$mediaOptions.columns < 3} type={getMediaType(file.extension || getExtension(file.name))} shiftRange={mediaFilesOnly.map((a) => ({ ...a, type: getMediaType(getExtension(a.name)), name: removeExtension(a.name) }))} {active} />
+                                <Media credits={file.credits || {}} thumbnail={$mediaOptions.mode !== "list"} name={file.name || ""} path={file.path} collectionName={jaSearchEverywhere && searchValue.trim() ? getJAVideoLibraryName(file.path, $mediaFolders) : ""} loadFullImage={$mediaOptions.columns < 3} type={getMediaType(file.extension || getExtension(file.name))} shiftRange={mediaShiftRange} {active} />
                             {/if}
                         </VirtualList>
                     {/if}
-                {/key}
             </div>
         {:else}
             <div class={specialTabs.includes(active || "") ? "" : "context #media"} style="display: contents;">

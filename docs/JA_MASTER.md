@@ -208,6 +208,34 @@
 - Alcance deliberado: no se crea copia de medios, no se instala material con derechos, no se altera `Archivos de programa`; aún no crea carpetas físicas, no incorpora biblias a esta estructura ni clasifica automáticamente videos por contenido. El himnario especializado con búsqueda por número/título y miniaturas se hará en Fase 4.2. El organizador y los espacios aislados corresponden a 4.3 y 4.4.
 - **Aceptación pendiente:** CI Windows de rama, vincular carpetas separadas, comprobar persistencia tras reiniciar y proyección de video externo. No marcar terminado sin prueba real.
 
+### Regresión de CI por pérdida de estilos — 25-oct-2026
+- Los runs `40241776049`, `40241808241`, `40241829221` y `40241832154` fallaron en `scripts/ja/branding.test.mjs`: faltaba `border-radius: 7px` porque una sustitución de `MediaGrid.svelte` había eliminado todo el bloque `<style>`.
+- Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
+- La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
+
+### Causa raíz adicional del bloqueo de miniaturas (25-oct-2026)
+
+- Usuario confirmó que el scroll mejora algo, pero el Himnario de 613 videos todavía muestra tarjetas vacías y se congela en Ryzen 9.
+- Auditoría de `src/electron/data/thumbnails.ts`: el sistema original tenía su guardia `working` desactivada, por lo que `addToGenerateQueue` lanzaba capturas simultáneas sin límite práctico; también tenía un tope de 20 capturas en Canvas. Esto puede saturar CPU/GPU y renderizador.
+- Se introdujo cola con **máximo dos capturas activas**, prevención de entradas repetidas y liberación de cupos por identificador al finalizar. Se eliminó `currentlyGenerating.clear()` global cuando terminaba una captura, para no liberar solicitudes todavía activas.
+- Prueba automatizada `scripts/ja/thumbnail-queue.test.mjs`. Pendiente CI Windows y prueba real en biblioteca de 613 himnos; especialmente primera generación, scroll rápido, vuelta atrás, caché tras reiniciar y que la proyección no se bloquee.
+- Si todavía hay atasco: revisar tiempos de espera de solicitudes/IPC y generación inicial gradual priorizada. No declarar resuelto sin prueba del usuario.
+
+### Incidente rendimiento Himnario (25-oct-2026)
+- Usuario observó con 613 MP4 que las miniaturas tardan en aparecer y la interfaz se congela al hacer scroll; se ve panel vacío. No cerrar Fase 4.2 sin ensayo real.
+- Investigación en `MediaGrid.svelte`: la animación `lazyLoader` por cada tarjeta dependía de frames y podía quedar atrás al desplazar rápidamente; reemplazada por ventana directa de tarjetas visibles + margen. `Media.svelte` recalculaba `mediaFilesOnly.map(...)` para cada tarjeta y remontaba toda la cuadrícula con `{#key searchedFiles}`; ahora memoriza la lista derivada y mantiene instancias. Test estático `media-grid-performance.test.mjs`.
+- PENDIENTE: verificar compilación Windows y desplazamiento con 613 himnos; revisar caché/thumbnails fallidos si persiste. No se declara resuelto sólo con CI.
+
+### Fase 4.2 — Himnario Adventista, primera integración (25-oct-2026)
+
+- El usuario confirmó la creación física de las carpetas de biblioteca en Windows («ya está») y autorizó continuar.
+- Rama: `feature/fase4-2-himnario`, derivada de la Fase 4.1. `main` no se modifica.
+- `src/frontend/components/drawer/media/jaHymnal.ts` reconoce archivos numerados como `385 Hablando con Jesus.mp4`, extrae número/título, busca número exacto y nombre sin acentos y ordena numéricamente.
+- Al seleccionar una carpeta vinculada con `jaLibraryRole: "hymnal"`, `Media.svelte` activa búsqueda exclusiva, no permite buscar otras carpetas desde esa vista y presenta únicamente videos MP4 con número y título válido; reutiliza las tarjetas, miniaturas, vista previa, proyección y añadir a proyecto de FreeShow.
+- La carpeta física `Documentos/JA Proyección/Himnario Adventista` debe vincularse una vez desde Medios → Vincular biblioteca JA → Himnario Adventista; en esta entrega no existe registro automático al iniciarse. Evitar afirmar lo contrario.
+- Prueba estática: `scripts/ja/hymnal-library.test.mjs`. Falta CI y comprobación real en Windows con videos del usuario; miniaturas se heredan del motor existente, verificar generación/caché real y navegación.
+- Pendientes de esta fase: vinculación automática (sin duplicados), controles de lista dedicados si el usuario los prefiere, duplicados/ausentes, manejo de nombre sin título y rendimiento con muchos MP4. No declarar la fase completa antes de cerrar esos puntos.
+
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
 > Esta tabla **reemplaza las fases antiguas** descritas en `JA_RUTA_DESARROLLO.md`, que es un documento histórico y aún contiene el orden inicial ya superado.

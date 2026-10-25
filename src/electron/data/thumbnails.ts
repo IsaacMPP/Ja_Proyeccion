@@ -100,25 +100,33 @@ export function createThumbnail(filePath: string, size = 250) {
 
 type Thumbnail = { input: string; output: string; size: number }
 const thumbnailQueue: Thumbnail[] = []
+// Keep video decoding bounded on modest computers. The old implementation launched
+// every queued thumbnail at once, saturating the renderer and GPU.
+const MAX_THUMBNAIL_CAPTURES = 2
+let activeThumbnailCaptures = 0
+const activeThumbnailIds = new Set<string>()
+
 function addToGenerateQueue(data: Thumbnail) {
+    const id = `${data.input}-${data.size}`
+    if (activeThumbnailIds.has(id) || thumbnailQueue.some((item) => item.input === data.input && item.size === data.size)) return
     thumbnailQueue.push(data)
     nextInQueue()
 }
 
-// let working = false
 function nextInQueue() {
-    // if (working) return
-    if (!thumbnailQueue[0]) return
-
-    // working = true
-    generateThumbnail(thumbnailQueue.shift()!)
+    while (activeThumbnailCaptures < MAX_THUMBNAIL_CAPTURES && thumbnailQueue.length) {
+        const next = thumbnailQueue.shift()!
+        const id = `${next.input}-${next.size}`
+        activeThumbnailIds.add(id)
+        activeThumbnailCaptures++
+        void generateThumbnail(next)
+    }
 }
 
 function generationFinished(mediaId: string) {
-    // working = false
-    nextInQueue()
-
+    if (activeThumbnailIds.delete(mediaId)) activeThumbnailCaptures = Math.max(0, activeThumbnailCaptures - 1)
     if (currentlyGenerating.has(mediaId)) currentlyGenerating.delete(mediaId)
+    nextInQueue()
 }
 
 async function generateThumbnail(data: Thumbnail) {
@@ -202,7 +210,7 @@ async function generate(input: string, output: string, size: string, config: Con
 let mediaBeingCaptured = 0
 const captureTimeouts = new Map<string, NodeJS.Timeout>()
 const CAPTURE_TIMEOUT = 15000
-const maxAmount = 20
+const maxAmount = MAX_THUMBNAIL_CAPTURES
 const refillMargin = maxAmount * 0.6
 async function captureWithCanvas(data: { input: string; output: string; size: ResizeOptions; extension: string; config: Config; id: string }) {
     if (!(await doesPathExistAsync(data.input))) {
@@ -254,7 +262,7 @@ export function saveImage(data: { id?: string; path?: string; base64?: string; b
         if (data.openFolder) openInSystem(folderPath, true)
     } else {
         mediaBeingCaptured = Math.max(0, mediaBeingCaptured - 1)
-        if (mediaBeingCaptured === 0) currentlyGenerating.clear()
+        // Do not clear unrelated in-flight thumbnails: each completion releases its own ID.
     }
 
     if ((!dataURL && !buffer) || !savePath) {
