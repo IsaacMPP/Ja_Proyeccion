@@ -3,7 +3,7 @@
 > **DOCUMENTO CANÓNICO / FUENTE ÚNICA DE VERDAD.**
 > Antes de continuar el desarrollo, abrir este archivo **directamente desde `main` en GitHub**, consultar el último commit y revisar las ejecuciones de GitHub Actions. No confiar en respuestas anteriores del chat ni en una copia antigua de este documento.
 >
-> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 2.1. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
+> **Última actualización de contenido:** 25 de octubre de 2026. **Revisión de continuidad tras verificación de GitHub:** 25-oct-2026. **Versión del registro:** 2.1. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
 
 **Enlace directo:** https://github.com/IsaacMPP/Ja_Proyeccion/blob/main/docs/JA_MASTER.md
 
@@ -178,7 +178,7 @@
 - Al elegir color de fondo, se elimina la asociación con la imagen de fondo anterior, y solo se limpia el fondo de salida si era el previamente instalado por el módulo bíblico.
 - Controles grandes y de una sola columna, primero el diseño, colores y fondo, después vista previa desplegable y opciones avanzadas; adaptación a panel estrecho. Si la salida tiene una plantilla especial, se dirige a una copia JA sin modificar la plantilla original.
 - `scripts/ja/scripture-live-controls.test.mjs` añade pruebas de subversos, orden de navegación, controles inmediatos y sustitución segura del fondo.
-- **Estado exacto de esta fase (handoff 25-oct-2026):** la implementación funcional se publicó en commit `3021c51f33` (`fix(scripture): reliable verse navigation and live accessible Bible styling`), con `jaVerseNavigation.ts`, cambios a `Scripture.svelte`, `ScriptureInfo.svelte`, `scripture.ts` y nueva prueba `scripts/ja/scripture-live-controls.test.mjs`. El run `40228820831` **falló en `ja:test`**: una prueba antigua `spanish-bible.test.mjs` esperaba `_moveSelection` llamado directamente desde el teclado; el nuevo flujo usa `navigateVerse` y espera la operación en cola. Se corrigió únicamente esa aserción en commit `d77387ff7d`. **La nueva CI `40229385282` estaba en curso al cierre.** No afirmar que la corrección de navegación y estilos esté validada hasta completar CI y ensayo físico. **La copia del archivo auxiliar que se redactó durante este chat no se publicó por separado: la versión canónica ya existe en GitHub y no debe duplicarse.**
+- **Estado exacto de esta fase (handoff 25-oct-2026):** la implementación funcional se publicó en commit `3021c51f33` (`fix(scripture): reliable verse navigation and live accessible Bible styling`), con `jaVerseNavigation.ts`, cambios a `Scripture.svelte`, `ScriptureInfo.svelte`, `scripture.ts` y nueva prueba `scripts/ja/scripture-live-controls.test.mjs`. El run `40228820831` **falló en `ja:test`**: una prueba antigua `spanish-bible.test.mjs` esperaba `_moveSelection` llamado directamente desde el teclado; el nuevo flujo usa `navigateVerse` y espera la operación en cola. Se corrigió únicamente esa aserción en commit `d77387ff7d`. **La CI `40229385282` terminó EXITOSA** sobre `d77387ff7d`, confirmó pruebas, build e instalador Windows. Sigue pendiente la prueba real del usuario de avance y estilos inmediatos. No afirmar que la corrección de navegación y estilos esté validada hasta completar CI y ensayo físico. **La copia del archivo auxiliar que se redactó durante este chat no se publicó por separado: la versión canónica ya existe en GitHub y no debe duplicarse.**
 - **Pruebas de aceptación pendientes:** avanzar al menos 10 versos con flechas y botones (incluidos versos largos y cambios de capítulo), retroceder, navegar rápidamente, cambiar fuente, tamaño, alineación, color e imagen sin seleccionar otro versículo, probar segundo monitor y reiniciar para verificar persistencia. No declararlo probado en pantalla real solo porque CI compile.
 
 ## 4. Próximas fases y prioridades ACTUALIZADAS
@@ -190,13 +190,13 @@
 | 0 | Base, videoteca, marca y pantalla secundaria | **Integradas; validadas parcialmente en Windows** | Mantener como línea base; corregir regresiones, no rehacer módulos estables. |
 | 1 — VALIDADA | Miniaturas/portadas personalizadas por video | **CI exitosa y el usuario confirmó «quedó súper bien»** | Escoger JPG/PNG, asociarla a cada archivo sin tocar original, conservarla al reiniciar, restaurar miniatura automática, mostrarla en biblioteca/búsqueda. |
 | 2 — VALIDADA | Audio/pistas musicales | **CI exitosa y el usuario confirmó «ya funciona el audio»** (audición por audífonos aún requiere prueba específica) | Carpetas MP3/WAV, búsqueda, escucha previa, controles de volumen, pausa y avance; probar aislamiento de audio antes de declarar monitoreo privado. |
-| **3 — EN DESARROLLO** | Biblia en español | **RV1909 offline compiló en `40226399698` y aparece en la aplicación; correcciones de navegación/diseño publicadas, CI `40229385282` pendiente de confirmar y validación real pendiente.** | Importar traducción autorizada, buscar libro/capítulo/versículo, navegar con flechas, controlar cantidad de versículos y fondos. |
+| **3 — EN DESARROLLO** | Biblia en español | **RV1909 offline y correcciones de navegación/diseño integradas; CI `40229385282` exitosa sobre `d77387ff`; prueba real del usuario aún pendiente.** | Importar traducción autorizada, buscar libro/capítulo/versículo, navegar con flechas, controlar cantidad de versículos y fondos. |
 | 4 | Organización de un culto | **Propuesta aprobada como ruta, no implementada** | Preparar orden de videos, especiales, versículos y anuncios reutilizando proyectos de FreeShow. |
 | 5 | Temporizadores y mejoras de operación | **Hay componentes heredados; falta adaptar/probar** | Cronómetro/reloj, cuentas regresivas, avisos y controles rápidos comprobados en salida real. |
 | 6 | Auditoría de funciones avanzadas heredadas | **Dejar para el final (instrucción del usuario)** | NDI, control por celular, StageShow, OBS, OMT, cámaras y demás: inventario, configuración y pruebas independientes. |
 | 7 | Estabilización/versión de distribución | **Pendiente** | Pruebas con distintos Windows/monitores/códecs, rendimiento, respaldos de datos y documentación GPL. |
 
-**Próxima acción obligatoria:** (1) confirmar resultado de CI `40229385282` sobre commit `d77387ff7d` y de las ejecuciones posteriores; si hay fallo, leer logs y arreglar raíz sin parches redundantes; (2) si build y artefacto son correctos, pedir al usuario prueba en su Windows: 10-15 versículos sucesivos, retrocesos, fragmentos largos, límites de capítulo, personalización INMEDIATA mientras se proyecta y panel cómodo a tamaño de ventana real; (3) registrar resultados en este maestro. **No empezar organizador de cultos ni otra fase hasta cerrar estos dos errores.** RVR60/RVR95/NVI completas requieren permisos.
+**Próxima acción obligatoria:** (1) verificar HEAD y ejecuciones posteriores a la última CI de código exitosa `40229385282`; si hay fallo, leer logs y arreglar raíz sin parches redundantes; (2) pedir al usuario prueba en su Windows: 10-15 versículos sucesivos, retrocesos, fragmentos largos, límites de capítulo, personalización INMEDIATA mientras se proyecta y panel cómodo a tamaño de ventana real; (3) registrar resultados en este maestro. **No empezar organizador de cultos ni otra fase hasta cerrar estos dos errores.** RVR60/RVR95/NVI completas requieren permisos.
 
 ### Aspectos que NO deben contarse como terminados
 
@@ -282,7 +282,7 @@
 | 2026-10-25 | Audio general validado por usuario («ya funciona»), CI exitosa; audífonos por separado pendientes de ensayo | `a03635c`, Actions `40213108136` |
 | 2026-10-25 | Biblia española: catálogo, estilo JA, navegación con flechas implementados; pendiente CI/licencias | `docs/JA_BIBLIA_ESPANOL.md` |
 | 2026-10-25 | Falló CI Biblia `40216920921` en Svelte (TS aserción dentro de markup); corregido en `7d66e1e`. Nueva CI `40218691694` **exitosa**, instalador Windows publicado; prueba real de Biblia pendiente | `ScriptureInfo.svelte`, `scripts/ja/scripture-svelte-compile.test.mjs` |
-| 2026-10-25 | Nueva implementación para corregir avance de subversos, navegación serializada, estilos en vivo y panel bíblico accesible; `40228820831` falló en test antiguo, test alineado en `d77387f`; `40229385282` en curso al corte; usuario aún no validó | `3021c51f33`, `d77387ff7d`; `scripts/ja/scripture-live-controls.test.mjs` |
+| 2026-10-25 | Nueva implementación para corregir avance de subversos, navegación serializada, estilos en vivo y panel bíblico accesible; `40228820831` falló en test antiguo, test alineado en `d77387f`; `40229385282` exitosa y artefacto generado; usuario aún no validó | `3021c51f33`, `d77387ff7d`; `scripts/ja/scripture-live-controls.test.mjs` |
 | 2026-10-25 | Integración RV1909 de dominio público; compilación TS corregida al declarar tupla validada [ID, Bible] y registro al abrir Biblia; pendiente CI y prueba física | `scripts/ja/build_rv1909.py`, `docs/JA_BIBLIA_RV1909_INTEGRADA.md` |
 
 ## 8.1 Entrega al siguiente chat — NO PERDER ESTE CONTEXTO
@@ -292,8 +292,23 @@
 - **Problema C (usabilidad):** la sección de ajustes de Biblia es muy estrecha en la ventana real; agrandar controles y distribuirlos con prioridad para operadores no técnicos, sin rediseñar la disposición general de FreeShow.
 - **Código para revisar antes de modificar:** `src/frontend/components/drawer/bible/{Scripture.svelte,scripture.ts,jaVerseNavigation.ts,jaScriptureDesign.ts}`, `src/frontend/components/drawer/info/ScriptureInfo.svelte`, `scripts/ja/{scripture-live-controls.test.mjs,spanish-bible.test.mjs,scripture-svelte-compile.test.mjs}`.
 - **Acción inicial obligatoria:** leer últimos commits, CI y este maestro; el intento de arreglo ya **existe** en `main`. Evaluarlo y corregir lo que falle; **no volver a implementar desde cero sin necesidad**.
-- **CI observada antes de este documento:** `40229385282` sobre `d77387ff7d`, EN CURSO. Un commit **solo de documentación** al actualizar este maestro puede activar otra compilación automática: distinguir ese run de la compilación del código funcional.
+- **CI funcional confirmada:** `40229385282` sobre `d77387ff7d`, EXITOSA. **Último commit de documentación:** `d5376ce9` en `main`. Su ejecución `40229915007` estaba EN CURSO durante la revisión; no confundirla con fallo funcional. Un commit **solo de documentación** al actualizar este maestro puede activar otra compilación automática: distinguir ese run de la compilación del código funcional.
 - **Criterio de cierre:** pruebas de regresión + compilación Windows/NSIS + confirmación real del usuario en su monitor/proyector, incluyendo navegación repetida y cambios de diseño inmediatos. No declarar solucionado solo por GitHub verde.
+
+## 8.2 Corte de continuidad verificado — 25 de octubre de 2026
+
+**Repositorio:** `IsaacMPP/Ja_Proyeccion`. **Rama remota única observada:** `main` (no se publicó otra rama de trabajo). **HEAD antes de este nuevo registro:** `d5376ce9b568b6a01afd066af118fe78777cfccd` (`docs: record Bible live-preview regression, CI state and next-chat handoff`; solo documentación).
+
+**Estado de GitHub Actions comprobado:**
+- `40229385282`, commit `d77387ff7dc019f1c3dd0876b5604a7672133e27`, **success** (última ejecución de código funcional).
+- `40228820831`, commit `3021c51f33328ffd54c08364d27dfd39c42e5f3e`, **failure** por aserción anterior de navegación; corregida en `d77387ff`.
+- `40226399698`, commit `a18be441a6e093559c0ae7dea31b2a18ac0d81e5`, **success**, edición RV1909 offline empaquetada.
+- `40229915007`, commit `d5376ce9b568b6a01afd066af118fe78777cfccd`, **in_progress** en instalación de dependencias al momento de esta revisión; es un commit de **solo documentación**, no una implementación adicional. Consultar nuevamente al entrar al próximo chat.
+- **Al subir esta actualización del maestro puede iniciarse una nueva ejecución automática de CI de solo documentación.** Evitar interpretarla como cambio funcional.
+
+**Último problema funcional pendiente:** validar con el usuario la corrección de navegación de subversos y los cambios inmediatos de diseño de la Biblia en pantalla secundaria. El usuario reportó inicialmente que después de dos versículos los demás no cambiaban y que el fondo, fuente, alineación y colores solo se aplicaban después de seleccionar otro versículo. La CI exitosa **no sustituye** esta prueba física. Revisar `Scripture.svelte`, `ScriptureInfo.svelte`, `scripture.ts`, `jaVerseNavigation.ts` y tests `scripts/ja/scripture-*.test.mjs`.
+
+**Instrucción de continuación:** no duplicar ni reescribir el módulo ya corregido; primero verificar HEAD/CI, abrir compilación válida, probar secuencia de 10–15 versículos y ajustes en vivo, documentar resultados y solo entonces avanzar al organizador de cultos. No incluir RVR1960/RVR1995/NVI completas sin permisos de distribución.
 
 ## 9. Texto para comenzar una conversación nueva
 
