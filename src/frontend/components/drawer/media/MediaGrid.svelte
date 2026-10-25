@@ -59,6 +59,7 @@
             <div style="width: {100 / columns}%;height: {cardHeight}px;"></div>
         {/if}
     {/each}
+</div>
 
 <style>
     .grid {
