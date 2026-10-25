@@ -73,6 +73,13 @@
         }
     }
 
+    // Svelte 3 no admite aserciones TypeScript dentro del markup.
+    function changeJAAlignment(value: string) {
+        if (value === "left" || value === "center" || value === "right") {
+            setJAStyle("align", value)
+        }
+    }
+
     let slides: Item[][] = [[]]
 
     // background
@@ -83,7 +90,7 @@
     // auto change template based on number of bibles (if default)
     // if collection, but only one of the Bibles load, biblesContent will be length 1 & not change the template, which is fine, but maybe confusing
     $: if (activeScriptureId || templateId || biblesContent.length) setTimeout(checkTemplate, 100)
-    $: isDefault = typeof templateId === "string" ? /^scripture(?:_\\d+)?$/.test(templateId) : false
+    $: isDefault = typeof templateId === "string" ? (templateId === "scripture" || /^scripture_[0-9]+$/.test(templateId)) : false
     function checkTemplate() {
         if (!isDefault || !biblesContent.length) return
 
@@ -194,7 +201,7 @@
     // auto convert
     $: if (useOldSystem && usingDefault && (!styleScriptureTemplate || styleScriptureTemplate.includes("scripture"))) convertToNew()
     $: useOldSystem = useOldScriptureSystem(templateId, $templates) && !styleScriptureTemplate
-    $: usingDefault = typeof templateId === "string" ? /^scripture(?:_\\d+)?$/.test(templateId) : false
+    $: usingDefault = typeof templateId === "string" ? (templateId === "scripture" || /^scripture_[0-9]+$/.test(templateId)) : false
     async function convertToNew() {
         if (!usingDefault) {
             if (!(await confirmCustom("This will apply the default template, and convert that to the new format. Your current template will not change.<br>You can use it as an example to adapt your existing templates. Continue?"))) return
@@ -304,7 +311,7 @@
                         <input type="range" min="30" max="160" step="2" value={jaDesign.fontSize} on:change={(e) => setJAStyle("fontSize", Number(e.currentTarget.value))} />
                     </label>
                     <label>Alineación
-                        <select value={jaDesign.align} on:change={(e) => setJAStyle("align", e.currentTarget.value as JAScriptureDesign["align"])}>
+                        <select value={jaDesign.align} on:change={(e) => changeJAAlignment(e.currentTarget.value)}>
                             <option value="left">Izquierda</option><option value="center">Centro</option><option value="right">Derecha</option>
                         </select>
                     </label>
