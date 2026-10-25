@@ -322,10 +322,13 @@ export function loadScripture(msg: { id: string; name: string }) {
     if (msg.id === "ja-rv1909") {
         try {
             const bundledFile = path.join(app.getAppPath(), "public", "ja-bibles", "rv1909.fsb")
-            const content = JSON.parse(readFileSync(bundledFile, "utf8"))
-            if (!Array.isArray(content) || content[0] !== "ja-rv1909" || content[1]?.books?.length !== 66) {
+            const parsed: unknown = JSON.parse(readFileSync(bundledFile, "utf8"))
+            if (!Array.isArray(parsed) || parsed.length !== 2 || parsed[0] !== "ja-rv1909" || !parsed[1] || !Array.isArray(parsed[1].books) || parsed[1].books.length !== 66) {
                 throw new Error("RV1909 integrada está incompleta")
             }
+            // El formato FSB es una tupla fija [ID, Biblia], como Main.BIBLE exige.
+            // JSON.parse no deduce tuplas de TypeScript; validamos antes de convertir.
+            const content = parsed as [string, import("json-bible/lib/Bible").Bible]
             return { id: msg.id, content }
         } catch (error) {
             console.error("JA: no se encontró Biblia RV1909 empaquetada", error)

@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { onMount } from "svelte"
+    import { registerJARV1909 } from "../bible/jaBundledBible"
     import { activePopup, activeScripture, drawerTabsData, labelsDisabled, openScripture, scriptures } from "../../../stores"
     import { getAccess } from "../../../utils/profile"
     import { setDrawerTabData } from "../../helpers/historyHelpers"
@@ -8,6 +10,10 @@
     import T from "../../helpers/T.svelte"
     import MaterialButton from "../../inputs/MaterialButton.svelte"
     import NavigationSections from "./NavigationSections.svelte"
+
+    // Al abrir la pestaña Biblia, registra la edición incluida sin Internet.
+    // Repetir la apertura es seguro: el registro evita duplicados.
+    onMount(() => { void registerJARV1909() })
 
     const profile = getAccess("scripture")
     $: readOnly = profile.global === "read"

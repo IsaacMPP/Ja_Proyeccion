@@ -225,6 +225,13 @@
 | Packaging Windows | `config/building/electron-builder.yaml` |
 | Historial previo | `docs/JA_CONTINUIDAD.md`, `docs/JA_DECISIONES.md`, `docs/JA_RUTA_DESARROLLO.md` |
 
+### Incidente técnico de RV1909 (25-oct-2026)
+
+- El commit `6c7ac114` generó correctamente los 66 libros y pasó 42 pruebas, pero **falló el compilador Electron/TypeScript** en `src/electron/IPC/responsesMain.ts(91,29)`: `JSON.parse` devolvía `any[]` y el contrato `Main.BIBLE` requiere una tupla `[string, Bible]`.
+- Solución: validar que el JSON sea una matriz de exactamente 2 elementos con el ID correcto y 66 libros y **solo entonces** convertir a la tupla tipada. No cambiar los textos bíblicos.
+- Se registrará la Biblia empaquetada cuando el usuario abra el panel Biblia para no depender de un perfil nuevo; no se duplican versiones ya registradas.
+- **No cerrar como terminado hasta que Actions compile el EXE y el usuario pruebe Juan 3 y Salmo 23 sin conexión.**
+
 ## 8. Protocolo OBLIGATORIO de actualización del maestro
 
 **Después de cada cambio significativo, antes de cerrar la conversación:**
@@ -252,7 +259,7 @@
 | 2026-10-25 | Audio general validado por usuario («ya funciona»), CI exitosa; audífonos por separado pendientes de ensayo | `a03635c`, Actions `40213108136` |
 | 2026-10-25 | Biblia española: catálogo, estilo JA, navegación con flechas implementados; pendiente CI/licencias | `docs/JA_BIBLIA_ESPANOL.md` |
 | 2026-10-25 | Falló CI Biblia `40216920921` en Svelte (TS aserción dentro de markup); corregido en `7d66e1e`. Nueva CI `40218691694` **exitosa**, instalador Windows publicado; prueba real de Biblia pendiente | `ScriptureInfo.svelte`, `scripts/ja/scripture-svelte-compile.test.mjs` |
-| 2026-10-25 | Integración de RV1909 de dominio público dentro del instalador, 66 libros, sin conexión; pendiente CI y prueba física | `scripts/ja/build_rv1909.py`, `docs/JA_BIBLIA_RV1909_INTEGRADA.md` |
+| 2026-10-25 | Integración RV1909 de dominio público; compilación TS corregida al declarar tupla validada [ID, Bible] y registro al abrir Biblia; pendiente CI y prueba física | `scripts/ja/build_rv1909.py`, `docs/JA_BIBLIA_RV1909_INTEGRADA.md` |
 
 ## 9. Texto para comenzar una conversación nueva
 
