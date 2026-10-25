@@ -18,18 +18,18 @@ Un **solo programa de proyección**, sencillo de usar en cultos generales, culto
 
 **Entregables:** copia fuente separada, mapa de arquitectura, documentación, verificador estático, instrucciones de Windows. **Pendiente fuera de este entorno:** instalación completa de dependencias, compilación y arranque en Windows.
 
-## Fase 2 — Catálogo de cantos e himnos (primera funcionalidad nueva)
+## Fase 2 — Biblioteca de videos de cantos e himnos
 
-1. Carpetas de usuario como bibliotecas: Himnario Adventista, Jóvenes, Conquistadores, Aventureros, Especiales; nombres personalizados.
-2. Buscar **solo en carpeta seleccionada** o **en todas**, con opción visible; búsqueda instantánea por número, título y contenido cuando las letras estén disponibles.
-3. Los números se muestran junto con la carpeta para resolver homónimos (por ejemplo, Himno 25 y Canto Joven 25).
-4. Importación masiva empezando por formatos de letras compatibles con FreeShow (priorizar TXT/OpenSong y ampliar según archivos reales), con informe de errores; no prometer lectura inteligente de PDFs escaneados.
-5. Portada o miniatura editable por canto, independiente del fondo de proyección.
-6. Asociar opcionalmente una pista de audio o video sin mezclar el archivo original con la letra.
-7. Caché de búsquedas, seguimiento de origen, deduplicación revisable y actualización manual de carpetas.
-8. Pruebas con búsquedas sin acentos, duplicados, cambios de nombre y archivos ausentes.
+1. Usar carpetas existentes como bibliotecas independientes: Himnario Adventista, Jóvenes y clubes.
+2. Reconocer archivos multimedia MP4, AVI, MKV y otros formatos compatibles sin convertirlos.
+3. Buscar por número y nombre, dentro de la carpeta o en todas, respetando bibliotecas.
+4. Mostrar miniaturas automáticas y carpeta de origen en resultados globales.
+5. Conservar vista previa privada, reproducción y salidas múltiples del motor FreeShow.
+6. Mantener imágenes y audio existentes, con filtro opcional solo videos.
+7. Posteriormente, permitir portadas personalizadas sin alterar el video fuente.
+8. Pruebas con carpetas reales, nombres repetidos, subcarpetas y diversidad de códecs.
 
-**Criterio de aceptación:** agregar dos carpetas de prueba, encontrar un canto en su carpeta, buscar globalmente y comprobar que no se altera ningún archivo fuente. Elegir canto, previsualizar estrofas y proyectarlo cuando se confirme.
+**Criterio de aceptación:** registrar dos carpetas de videos, encontrar el mismo título en ambas con búsqueda global, revisar en vista previa y proyectar solo el archivo seleccionado.
 
 ## Fase 3 — Biblia en español y teclas
 

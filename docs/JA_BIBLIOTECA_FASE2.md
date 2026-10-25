@@ -1,33 +1,42 @@
-# JA Proyección — Biblioteca de himnos y cantos (Fase 2, primera entrega)
+# JA Proyección — Videoteca (Fase 2)
 
-## Funciones implementadas en esta entrega
+## Objetivo real
+Los cantos e himnos son VIDEOS almacenados en carpetas de Windows.
+No se utiliza TXT para esta función. No se copian ni se modifican los archivos originales.
 
-- **Importar carpeta de cantos TXT** desde la navegación de Presentaciones. Se abre el selector nativo de carpetas Windows.
-- Se leen TXT UTF-8 de la carpeta seleccionada y subcarpetas (hasta ocho niveles), sin modificar los archivos originales.
-- Cada carpeta raíz importada crea una categoría independiente y persistente (identificador derivado de la ruta local, sin guardar la ruta completa en los cantos).
-- Reimportar la misma carpeta añade solamente archivos nuevos: los ya importados se omiten para evitar duplicados. Los cambios en archivos existentes **no se sincronizan aún**.
-- Nombres tipo `070 - Santo, Santo, Santo.txt` muestran el número `070` en la columna de himnos.
-- Las estrofas separadas por líneas en blanco usan el convertidor de letras que FreeShow ya tiene.
-- **Buscar en: Carpeta actual / Todas las carpetas**, en Presentaciones. Búsqueda por título, número y letras (según caché disponible) con normalización de acentos. Los resultados globales indican su categoría.
+## Cómo se utiliza
+1. Abrir **Multimedia**.
+2. Pulsar **Agregar carpeta**, seleccionar la carpeta real de videos: «Himnario Adventista».
+3. Repetir con «Cantos Jóvenes», «Conquistadores», «Aventureros» y otras carpetas.
+4. Seleccionar una carpeta del menú lateral y utilizar el buscador de la pestaña.
+5. Elegir **Esta carpeta** (solo esa biblioteca y sus subcarpetas) o **Todas las carpetas**.
+6. Activar **Solo videos** para excluir fotos y otros recursos durante la búsqueda.
+7. Seleccionar un video para verlo en la vista previa; usar la proyección en vivo solo
+   cuando corresponda. Se conserva el sistema multimedia y sus controles originales.
 
-## Límites deliberados de seguridad y alcance
+## Implementación técnica
+- Utiliza `mediaFolders` persistente, `Main.READ_FOLDER` y las tarjetas de FreeShow.
+- Para buscar se consultan hasta 5 niveles de profundidad por carpeta, según la
+  implementación actual de `READ_FOLDER`. Carpetas más profundas están fuera del alcance
+  de esta primera entrega.
+- El filtrado posterior funciona en memoria, acepta un carácter y normaliza tildes,
+  mayúsculas y números con o sin ceros a la izquierda.
+- Los resultados globales identifican la biblioteca registrada más específica.
+- Las miniaturas y reproducción se conservan desde FreeShow, sin crear reproductores paralelos.
+- Los archivos AVI y MKV pueden depender de los códecs presentes en el reproductor;
+  estar reconocidos por extensión NO equivale a garantizar la reproducción.
 
-- **Solo TXT** en esta primera iteración. PDFs, Word, PPT, OpenSong y video conservan los importadores originales del programa, pero no se incluyen en este nuevo botón de carpetas.
-- Máximo 1,000 TXT y 1 MiB por archivo; no se siguen enlaces simbólicos. Si una carpeta contiene más, se informa cuántos archivos fueron omitidos.
-- La importación copia letras al catálogo de presentaciones: no altera ni borra archivos fuente.
-- El resto del motor de proyección, multimedia y salidas no se modifica.
-- No se han implementado todavía miniaturas por canto ni pistas asociadas. Esas funciones siguen pendientes.
+## No implementado todavía
+- Elegir una portada distinta de la miniatura que genera FreeShow.
+- Generación automática de letras ni conversión de videos en diapositivas.
+- Reconversión automática de códecs ni motor de decodificación adicional.
+- Asociación individual de una pista de audio a cada video; FreeShow ya tiene una pestaña Audio.
 
-## Prueba manual después de compilar GitHub Actions
-
-1. Crear dos carpetas distintas con archivos `.txt`; dejar una línea en blanco entre estrofas.
-2. En Presentaciones elegir **Importar carpeta de cantos TXT** y seleccionar cada carpeta por separado.
-3. Confirmar que aparecen dos categorías y que cada una muestra solo sus cantos.
-4. Escribir un título en el buscador; cambiar **Carpeta actual / Todas las carpetas**, comprobar categoría de cada coincidencia.
-5. Buscar `1` o `070`, y un título con/sin tildes; verificar resultados.
-6. Reimportar la misma carpeta y comprobar que no aparecen cantos duplicados.
-7. Abrir y proyectar un canto con doble clic; revisar cambio de estrofas y que multimedia continúe funcionando.
-
-## No confundir con hecho verificado
-
-El código queda incorporado al repositorio, pero hasta que GitHub Actions compile y se compruebe el instalador en Windows, las nuevas funciones no deben considerarse validadas en producción.
+## Pruebas de aceptación
+- Agregar dos bibliotecas con nombres diferentes y dos videos de igual título.
+- Buscar «001», «1», parte del título con y sin acentos; revisar coincidencias.
+- Cambiar entre búsqueda local y global sin mezclar bibliotecas.
+- Buscar videos en subcarpetas.
+- Comprobar miniaturas y reproducción previa sin proyectar.
+- Proyectar, pausar, adelantar, retroceder y detener; probar la pantalla secundaria.
+- Confirmar que se mantienen las imágenes y las herramientas antiguas de FreeShow.

@@ -17,6 +17,7 @@
     import MediaLoader from "./MediaLoader.svelte"
 
     export let name: string
+    export let collectionName = ""
     export let path: string
     export let credits: any = {}
     export let type: ShowType
@@ -215,7 +216,7 @@
         preview={$activeShow?.id === path}
         outlineColor={findMatchingOut(path, $outputs)}
         active={findMatchingOut(path, $outputs) !== null}
-        label={displayName}
+        label={collectionName ? `${displayName} · ${collectionName}` : displayName}
         title={contentProvider ? "" : path}
         icon={thumbnail ? icon : null}
         white={type === "image"}

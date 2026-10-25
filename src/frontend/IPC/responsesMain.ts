@@ -40,7 +40,6 @@ import { convertQuelea } from "../converters/quelea"
 import { convertSoftProjector } from "../converters/softprojector"
 import { convertSongbeamerFiles } from "../converters/songbeamer"
 import { convertTexts } from "../converters/txt"
-import { receiveSongTextFolder } from "../converters/jaSongLibrary"
 import { convertVerseVIEW } from "../converters/verseview"
 import { convertVideopsalm } from "../converters/videopsalm"
 import {
@@ -550,7 +549,6 @@ export const mainResponses: MainResponses = {
         if (!receiveFOLDER[a.channel]) return
         receiveFOLDER[a.channel]()
     },
-    [ToMain.JA_SONG_FOLDER_RESULT]: (data) => receiveSongTextFolder(data),
     [ToMain.IMPORT2]: (a) => {
         const mainData = a.data
 

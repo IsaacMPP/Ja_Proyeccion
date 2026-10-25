@@ -1,7 +1,5 @@
 <script lang="ts">
     import type { TrimmedShow } from "../../../../types/Show"
-    import { Main } from "../../../../types/IPC/Main"
-    import { sendMain } from "../../../IPC/main"
     import { activeProfile, categories, drawerTabsData, labelsDisabled, shows } from "../../../stores"
     import { hasNewerUpdate } from "../../../utils/common"
     import { getAccess } from "../../../utils/profile"
@@ -76,10 +74,6 @@
         <MaterialButton style="width: 100%;" title="new.category" variant="outlined" disabled={readOnly} on:click={newCategory} small>
             <Icon id="add" size={$labelsDisabled ? 0.9 : 1} white={$labelsDisabled} />
             {#if !$labelsDisabled}<T id="new.category" />{/if}
-        </MaterialButton>
-        <MaterialButton style="width: 100%;margin-top: 6px;" variant="outlined" disabled={readOnly} on:click={() => sendMain(Main.JA_IMPORT_SONG_FOLDER)} small>
-            <Icon id="import" size={1} white={false} />
-            {#if !$labelsDisabled}<span>Importar carpeta de cantos TXT</span>{/if}
         </MaterialButton>
     </div>
 </NavigationSections>

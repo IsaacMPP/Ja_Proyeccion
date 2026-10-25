@@ -1,36 +1,41 @@
-# JA Proyección — Continuidad
+# JA Proyección — Estado y continuidad
 
 Repositorio: https://github.com/IsaacMPP/Ja_Proyeccion
-Rama principal: main
-Base: FreeShow 1.6.7, licencia GPL-3.0.
+Rama: main
+Base: FreeShow 1.6.7, GPL-3.0.
 
-## Estado
+## Confirmado
+- El usuario instaló y abrió correctamente JA Proyección compilado con GitHub Actions.
+- El usuario confirmó funcionamiento básico de proyección, multimedia y pantallas.
+- Conservamos el reproductor, las miniaturas y el gestor de carpetas multimedia de FreeShow.
+- La aplicación no es todavía una interfaz adventista completa.
 
-- Código base y adaptaciones iniciales disponibles en GitHub.
-- Compilación de Windows definida únicamente en .github/workflows/compilar-windows.yml.
-- Retirados scripts CMD de instalación local, instrucciones de carga manual y workflow de importación temporal.
-- No considerar el instalador funcional hasta pasar compilación y pruebas reales de Windows.
+## Corrección del alcance de fase 2
+Los himnos y cantos de la iglesia **son videos** (MP4/AVI/MKV y otros formatos), NO letras TXT.
+La anterior implementación TXT se cancela por completo: se eliminan sus IPC, importador,
+escáner, convertidor, controles, pruebas y cualquier documentación que la recomiende.
 
-## Pendientes
+## Fase 2 — primera versión de videoteca
+- Biblioteca basada en carpetas del disco añadidas desde la pestaña **Multimedia** (sin copias).
+- Selector «Esta carpeta / Todas las carpetas» durante la búsqueda de contenido local.
+- Búsqueda por nombre y número (con/sin ceros), sin depender de tildes.
+- Incluye subcarpetas hasta la profundidad que admite la consulta existente (5 niveles).
+- Filtro opcional «Solo videos». Los formatos AVI/MKV figuran en la lista admitida, pero los
+  códecs reales requieren pruebas de reproducción en Windows.
+- En resultados globales aparece la biblioteca de origen para distinguir archivos homónimos.
+- Miniatura automática, selección, vista previa, reproducción, controles y salidas siguen usando
+  el código existente de FreeShow, que el usuario ya probó.
+- La portada personalizada por video es una mejora posterior: no confundirla con miniaturas automáticas.
 
-1. Verificar o corregir GitHub Actions: npm ci, compilación, empaquetado y artefacto EXE.
-2. Biblioteca por carpetas para himnos, Jóvenes, Conquistadores y Aventureros.
-3. Buscador de carpeta y global; miniaturas personalizables y pistas de especiales.
-4. Vista previa de video/audio separada de la proyección y salidas múltiples.
-5. Biblia en español con licencia válida y navegación mediante flechas.
-6. Temporizadores y controles sencillos, verificando cada función.
+## Próximos pasos
+1. Revisar el resultado de GitHub Actions del cambio a videoteca.
+2. Probar en Windows con dos carpetas reales (Himnario Adventista y Jóvenes) y nombres repetidos.
+3. Validar búsquedas de subcarpetas, miniaturas y códecs específicos de AVI/MKV.
+4. Diseñar opcionalmente portadas personalizadas y gestionar pistas musicales desde Audio.
+5. Biblia en español autorizada, navegación de versículos y simplificación de UI.
 
 ## Reglas
-
-- No mezclar este proyecto con IsaacMPP/Prueba.
-- No subir node_modules, instaladores, CMD locales, cachés, logs ni datos de usuarios.
-- Conservar atribuciones y licencia GPL-3.0 del proyecto original.
-
-## Fase 2 — primera entrega de biblioteca (2026-10-25)
-
-- Implementado selector de carpeta de letras TXT en Presentaciones (Electron dialog, lectura limitada y no destructiva).
-- Cada carpeta importada se asocia a su propia categoría FreeShow y se evitan duplicados por origen al reimportar.
-- Interfaz de búsqueda con ámbito **Carpeta actual / Todas las carpetas**; resultados globales muestran categoría.
-- Se añadieron pruebas del escáner de TXT, y documentación en [JA_BIBLIOTECA_FASE2.md](JA_BIBLIOTECA_FASE2.md).
-- **Por validar:** compilación de GitHub Actions del commit de esta fase, instalación y pruebas manuales con cantos reales.
-- Pendientes deliberados: portadas/miniaturas, pistas asociadas, formatos adicionales (Word, PowerPoint y otros), sincronización de cambios en archivos ya importados.
+- Nunca mezclar este proyecto con IsaacMPP/Prueba.
+- No reinstalar dependencias en equipos de iglesia: empaquetar desde GitHub Actions.
+- No subir node_modules, CMD, instaladores, cachés, logs, multimedia personal o datos de usuarios.
+- Conservar licencia GPL-3.0 y atribución a ChurchApps / FreeShow.

@@ -58,7 +58,6 @@ export enum Main {
     /////
     IMPORT = "IMPORT",
     IMPORT_FILES = "IMPORT_FILES",
-    JA_IMPORT_SONG_FOLDER = "JA_IMPORT_SONG_FOLDER",
     BIBLE = "BIBLE",
     SHOW = "SHOW",
     SAVE = "SAVE",
