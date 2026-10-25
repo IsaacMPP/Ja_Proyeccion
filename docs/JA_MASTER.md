@@ -193,6 +193,12 @@
 - La importación JSON personal fue validada por el usuario previamente, pero sus cambios siguen en PR #1 y rama separada; no se mezclan ni redistribuyen traducciones protegidas en este trabajo.
 - RVR1995 y API bíblica quedaron pospuestas a petición del usuario.
 
+### Ajuste visual solicitado en Windows — carpetas de biblioteca
+- El usuario mostró la ruta `Documentos/JA Proyección` con solamente Audio, Bibles, Config, Imports y Shows, y precisó que las bibliotecas deben ser **carpetas físicas visibles** allí.
+- Se añadió `src/electron/data/jaLibraryDirectories.ts` y creación idempotente al finalizar `setupStores`: `Himnario Adventista`, `Cantos Juveniles`, `Fondos Personalizados` y `Especiales`. `Bibles` existe previamente y sigue gestionada por el importador; no se duplica ni cambia de nombre. No mover, eliminar ni copiar archivos.
+- Las carpetas aparecen tras ejecutar la nueva versión del programa y pueden vincularse desde Medios mediante las opciones de bibliotecas JA. La vinculación automática y búsqueda especializada del Himnario aún no están cerradas.
+- Requiere CI Windows y confirmación de carpetas físicas visibles y persistentes en PC real. Prueba estática `scripts/ja/library-directories.test.mjs`.
+
 ### Fase 4.1 — Biblioteca central vinculada (25-oct-2026)
 
 - **Autorización:** usuario aprobó el orden Fase 4.1–4.5 y pidió «procede».
