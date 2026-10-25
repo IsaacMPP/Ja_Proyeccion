@@ -1,0 +1,67 @@
+name: Compilar JA Proyeccion (Windows)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    env:
+      CI: "true"
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.16.0
+          cache: npm
+
+      - name: Preparar Python para node-gyp
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Configurar dependencias Git HTTPS y Python
+        shell: pwsh
+        run: |
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+          git config --global --add url."https://github.com/".insteadOf "git@github.com:"
+          "npm_config_python=$((Get-Command python).Source)" >> $env:GITHUB_ENV
+          node -v
+          npm -v
+          python --version
+          git --version
+
+      - name: Verificar la estructura
+        run: node scripts/ja/verify-base.mjs
+
+      - name: Instalar dependencias (incluidas las nativas)
+        run: npm ci --no-audit --no-fund
+
+      - name: Pruebas de estructura
+        run: npm run ja:test
+
+      - name: Compilar el proyecto
+        run: npm run build
+
+      - name: Crear instalador EXE (sin publicar)
+        run: npx electron-builder --config config/building/electron-builder.yaml --win nsis --x64 --publish never
+
+      - name: Subir instalador para descarga
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: JA-Proyeccion-Windows-pruebas
+          path: |
+            dist/*.exe
+          if-no-files-found: error
+          retention-days: 14
