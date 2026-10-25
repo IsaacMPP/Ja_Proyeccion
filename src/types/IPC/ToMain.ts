@@ -32,6 +32,7 @@ export enum ToMain {
     GET_DYNAMIC_VALUES = "GET_DYNAMIC_VALUES",
     // Main
     IMPORT2 = "IMPORT2",
+    JA_SONG_FOLDER_RESULT = "JA_SONG_FOLDER_RESULT",
     SHOW2 = "SHOW2",
     SAVE2 = "SAVE2",
     REFRESH_SHOWS2 = "REFRESH_SHOWS2",
@@ -67,6 +68,12 @@ export interface ToMainSendPayloads {
     [ToMain.GET_DYNAMIC_VALUES]: string[]
     ///
     [ToMain.IMPORT2]: { channel: string; data: ({ content: Buffer | string | object; name?: string; extension?: string } | string)[] }
+    [ToMain.JA_SONG_FOLDER_RESULT]: {
+        folderId: string
+        folderName: string
+        files: { name: string; relativePath: string; content: string }[]
+        ignored: number
+    }
     [ToMain.SHOW2]: { error?: string; err?: NodeJS.ErrnoException; id: string }
     [ToMain.SAVE2]: { closeWhenFinished: boolean; customTriggers: any }
     [ToMain.REFRESH_SHOWS2]: TrimmedShows

@@ -4,6 +4,7 @@ Programa de proyección para iglesias adventistas, derivado de FreeShow 1.6.7, b
 
 - [Compilación Windows en GitHub Actions](https://github.com/IsaacMPP/Ja_Proyeccion/actions/workflows/compilar-windows.yml): genera un instalador de prueba en Artifacts solo si finaliza correctamente.
 - [Ruta de desarrollo](docs/JA_RUTA_DESARROLLO.md) y [estado de continuidad](docs/JA_CONTINUIDAD.md).
+- [Fase 2: Importación de carpetas TXT y búsqueda por biblioteca](docs/JA_BIBLIOTECA_FASE2.md) (pendiente de prueba con instalador).
 - No es necesario ejecutar archivos CMD locales para compilar en GitHub.
 - El instalador y la ejecución en Windows aún requieren validación.
 

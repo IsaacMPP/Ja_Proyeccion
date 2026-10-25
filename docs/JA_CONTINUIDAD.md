@@ -25,3 +25,12 @@ Base: FreeShow 1.6.7, licencia GPL-3.0.
 - No mezclar este proyecto con IsaacMPP/Prueba.
 - No subir node_modules, instaladores, CMD locales, cachés, logs ni datos de usuarios.
 - Conservar atribuciones y licencia GPL-3.0 del proyecto original.
+
+## Fase 2 — primera entrega de biblioteca (2026-10-25)
+
+- Implementado selector de carpeta de letras TXT en Presentaciones (Electron dialog, lectura limitada y no destructiva).
+- Cada carpeta importada se asocia a su propia categoría FreeShow y se evitan duplicados por origen al reimportar.
+- Interfaz de búsqueda con ámbito **Carpeta actual / Todas las carpetas**; resultados globales muestran categoría.
+- Se añadieron pruebas del escáner de TXT, y documentación en [JA_BIBLIOTECA_FASE2.md](JA_BIBLIOTECA_FASE2.md).
+- **Por validar:** compilación de GitHub Actions del commit de esta fase, instalación y pruebas manuales con cantos reales.
+- Pendientes deliberados: portadas/miniaturas, pistas asociadas, formatos adicionales (Word, PowerPoint y otros), sincronización de cambios en archivos ya importados.

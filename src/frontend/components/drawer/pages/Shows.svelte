@@ -26,7 +26,10 @@
     export let searchValue: string
 
     $: query = searchValue.trim()
-    $: isSearching = formatSearch(query).trim().length > 1
+    // One-character hymn numbers (e.g. 1) are valid searches.
+    $: isSearching = formatSearch(query).trim().length > 0
+    let searchScope: "category" | "all" = "category"
+    $: effectiveActive = isSearching && searchScope === "all" ? "all" : active
     $: showsSorted = $sortedShowsList
 
     // // don't update unless it's changed
@@ -42,12 +45,12 @@
     let filteredShows: ShowList[] = []
     let filteredStored: ShowList[] = []
     $: filteredStored = filteredShows =
-        active === "all"
+        effectiveActive === "all"
             ? showsSorted.filter((a) => !$categories[a?.category || ""]?.isArchive && profile[a?.category || ""] !== "none")
             : // : active === "number" ? sortByNameAndNumber(showsSorted.filter((a) => a.quickAccess?.number), "asc")
-              active === "locked"
+              effectiveActive === "locked"
               ? showsSorted.filter((a) => a.locked)
-              : showsSorted.filter((s) => profile[s?.category || ""] !== "none" && (active === s.category || (active === "unlabeled" && (s.category === null || !$categories[s.category]))))
+              : showsSorted.filter((s) => profile[s?.category || ""] !== "none" && (effectiveActive === s.category || (effectiveActive === "unlabeled" && (s.category === null || !$categories[s.category]))))
 
     export let firstMatch: null | any = null
 
@@ -95,7 +98,7 @@
             firstMatch = filteredShows[0] || null
 
             // if nothing matches (or match confidence is very low on long search)
-            if (!showLoading && (!filteredShows.length || (active === "all" && query.length > 5 && (firstMatch?.match || 0) < 48))) {
+            if (!showLoading && (!filteredShows.length || (effectiveActive === "all" && query.length > 5 && (firstMatch?.match || 0) < 48))) {
                 firstMatch = "SEARCH_CREATE"
                 createFromSearch = true
             } else {
@@ -250,6 +253,13 @@
             </div>
         {/if}
 
+        <div class="ja-search-scope" role="group" aria-label="Buscar cantos en la biblioteca">
+            <span class="ja-scope-hint">Buscar en:</span>
+            <button type="button" class:chosen={searchScope === "category"} on:click={() => (searchScope = "category")}>Carpeta actual</button>
+            <button type="button" class:chosen={searchScope === "all"} on:click={() => (searchScope = "all")}>Todas las carpetas</button>
+            {#if !isSearching}<span class="ja-scope-hint">Escribe arriba para buscar</span>{/if}
+        </div>
+
         {#if filteredShows.length}
             <div class="sort-header" role="group">
                 {#each sortHeaders as header}
@@ -272,7 +282,7 @@
                 <VirtualList items={filteredShows} let:item={show} activeIndex={!isSearching || $activeShow?.data?.searchInput ? filteredShows.findIndex((a) => a.id === $activeShow?.id) : -1}>
                     <SelectElem id="show_drawer" data={{ id: show.id }} shiftRange={filteredShows} draggable>
                         {#if !isSearching || show.match}
-                            <ShowButton id={show.id} {show} data={dateToString(show.timestamps?.[sortType.replace("_old", "")] || show.timestamps?.modified || show.timestamps?.created || "", true)} class="#drawer_show_button" match={show.match || null} searchValue={query} isFirst={firstMatch?.id === show.id && activeIsSearch} />
+                            <ShowButton id={show.id} {show} data={isSearching && searchScope === "all" ? ($categories[show.category || ""]?.name || "Sin carpeta") : dateToString(show.timestamps?.[sortType.replace("_old", "")] || show.timestamps?.modified || show.timestamps?.created || "", true)} class="#drawer_show_button" match={show.match || null} searchValue={query} isFirst={firstMatch?.id === show.id && activeIsSearch} />
                         {/if}
                     </SelectElem>
                 </VirtualList>
@@ -310,6 +320,31 @@
 </FloatingInputs>
 
 <style>
+    .ja-search-scope {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 6px 9px;
+        border-bottom: 1px solid var(--primary-lighter);
+        background: var(--primary-darkest);
+        font-size: 0.72rem;
+    }
+    .ja-scope-hint { opacity: 0.7; }
+    .ja-search-scope button {
+        color: var(--text);
+        background: var(--primary-darker);
+        border: 1px solid var(--primary-lighter);
+        border-radius: 5px;
+        cursor: pointer;
+        padding: 4px 8px;
+    }
+    .ja-search-scope button.chosen {
+        border-color: var(--secondary);
+        color: var(--secondary);
+    }
+    .ja-search-scope button:focus-visible { outline: 2px solid var(--secondary); }
+
     .column {
         overflow-y: auto;
         display: flex;
