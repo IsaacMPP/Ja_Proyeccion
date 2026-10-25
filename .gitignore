@@ -33,3 +33,7 @@ node_modules/
 /.vs/
 /.vscode/*.user
 /release/
+
+# Utilidades locales, no versionar
+*.cmd
+JA_ELECTRON_REPARACION*

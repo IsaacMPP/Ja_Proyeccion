@@ -1,6 +1,15 @@
-> **IMPORTANTE: Preparación para compilar JA Proyección en GitHub Actions.** Primero lee [GITHUB_INICIO.md](GITHUB_INICIO.md). Derivado GPL-3.0 de FreeShow; **no se ha demostrado la compilación ni ejecución de esta versión**.
+# JA Proyección (en desarrollo)
 
-> **Derivación en preparación para proyección adventista:** abre [`INICIO_AQUI.md`](INICIO_AQUI.md) y [`docs/JA_CONTINUIDAD.md`](docs/JA_CONTINUIDAD.md). La interfaz original de FreeShow se conserva en esta fase.
+Programa de proyección para iglesias adventistas, derivado de FreeShow 1.6.7, bajo licencia GPL-3.0.
+
+- [Compilación Windows en GitHub Actions](https://github.com/IsaacMPP/Ja_Proyeccion/actions/workflows/compilar-windows.yml): genera un instalador de prueba en Artifacts solo si finaliza correctamente.
+- [Ruta de desarrollo](docs/JA_RUTA_DESARROLLO.md) y [estado de continuidad](docs/JA_CONTINUIDAD.md).
+- No es necesario ejecutar archivos CMD locales para compilar en GitHub.
+- El instalador y la ejecución en Windows aún requieren validación.
+
+## Proyecto original: FreeShow
+
+Se mantiene la información y atribución al proyecto original:
 
 <p align='center'>
  <a href='https://freeshow.app/'>
