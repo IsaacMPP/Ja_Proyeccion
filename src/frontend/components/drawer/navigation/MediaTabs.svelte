@@ -14,6 +14,8 @@
     import T from "../../helpers/T.svelte"
     import MaterialButton from "../../inputs/MaterialButton.svelte"
     import NavigationSections from "./NavigationSections.svelte"
+    import { JA_LIBRARY_ROLES, type JALibraryRole, isJALibraryRole } from "../media/jaLibraryRoles"
+    import { history } from "../../helpers/history"
 
     const profile = getAccess("media")
     $: readOnly = profile.global === "read"
@@ -21,6 +23,8 @@
     $: activeSubTab = $drawerTabsData.media?.activeSubTab || ""
 
     $: foldersList = keysToID($mediaFolders)
+    $: categorizedFolders = foldersList.filter((a) => isJALibraryRole(a.jaLibraryRole))
+    $: regularFolders = foldersList.filter((a) => !isJALibraryRole(a.jaLibraryRole))
     $: favoritesListLength = Object.values($media).filter((a) => !a.audio && a.favourite).length
 
     let allCount = 0
@@ -68,7 +72,8 @@
         ],
         ...(curriculumProviders.length ? [[{ id: "TITLE", label: "Curriculum" }, ...curriculumProviders.map((a) => ({ id: a.providerId, label: a.displayName, icon: "web" }))]] : []),
         [{ id: "inputs", label: "emitters.inputs", icon: "input" }, "SEPARATOR", { id: "online", label: "media.online", icon: "web" }].filter(Boolean),
-        [{ id: "TITLE", label: "media.folders" }, ...convertToButton(foldersList, folderLengths)]
+        [{ id: "TITLE", label: "Bibliotecas JA" }, ...convertToButton(categorizedFolders, folderLengths)],
+        [{ id: "TITLE", label: "media.folders" }, ...convertToButton(regularFolders, folderLengths)]
     ]
 
     function convertToButton(categories: any[], lengths: { [key: string]: number }) {
@@ -80,12 +85,28 @@
     }
 
     const PICK_ID = uid()
-    function addFolder() {
+    let pendingLibraryRole: JALibraryRole | null = null
+    function addFolder(role: JALibraryRole | null = null) {
+        pendingLibraryRole = role
         sendMain(Main.OPEN_FOLDER, { channel: PICK_ID })
     }
     let listenerId = receiveToMain(ToMain.OPEN_FOLDER2, (data) => {
         if (data.channel !== PICK_ID || !data.path) return
-        addDrawerFolder(data, "media")
+        const role = pendingLibraryRole
+        pendingLibraryRole = null
+        if (!role) {
+            addDrawerFolder(data, "media")
+            return
+        }
+        const path = data.path
+        if (Object.values($mediaFolders).some((folder) => folder.path === path)) return
+        const definition = JA_LIBRARY_ROLES.find((item) => item.id === role)
+        if (!definition) return
+        history({
+            id: "UPDATE",
+            newData: { data: { name: definition.name, icon: "folder", path, jaLibraryRole: role } },
+            location: { page: "drawer", id: "category_media" }
+        })
     })
     onDestroy(() => destroyMain(listenerId))
 
@@ -108,10 +129,22 @@
             </MaterialButton>
         {/if}
     </div>
-    <div slot="section_3" style="padding: 8px;{foldersList.length ? 'padding-top: 12px;' : ''}">
+    <div slot="section_3" style="padding: 8px;">
+        <div class="ja-library-title">Vincular biblioteca JA</div>
+        {#each JA_LIBRARY_ROLES as library}
+            <MaterialButton style="width: 100%;margin-top: 5px;" variant="outlined" disabled={readOnly} on:click={() => addFolder(library.id)} small>
+                <Icon id="folder" size={0.9} />
+                {library.name}
+            </MaterialButton>
+        {/each}
+    </div>
+    <div slot="section_4" style="padding: 8px;{foldersList.length ? 'padding-top: 12px;' : ''}">
         <MaterialButton style="width: 100%;" title="new.system_folder" variant="outlined" disabled={readOnly} on:click={addFolder} small>
             <Icon id="add" size={$labelsDisabled ? 0.9 : 1} white={$labelsDisabled} />
             {#if !$labelsDisabled}<T id="new.system_folder" />{/if}
         </MaterialButton>
     </div>
 </NavigationSections>
+<style>
+    .ja-library-title { font-size: 0.82em; opacity: 0.75; margin-bottom: 6px; }
+</style>
