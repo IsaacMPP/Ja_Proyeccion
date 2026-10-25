@@ -9,7 +9,7 @@ test("La identidad JA se muestra en la cabecera, inicio y créditos", async () =
         readFile("src/frontend/components/main/popups/About.svelte", "utf8")
     ])
     for (const view of [top, splash, about]) {
-        assert.match(view, /ja-logo\.webp/)
+        assert.match(view, /ja-logo\.png/)
         assert.match(view, /Proyección/)
     }
     assert.doesNotMatch(top, /<h1[^>]*>FreeShow<\/h1>/)
@@ -34,7 +34,7 @@ test("La ventana de carga y el título del navegador usan JA Proyección", async
         readFile("public/index.html", "utf8")
     ])
     assert.match(loading, /JA Proyección/)
-    assert.match(loading, /ja-logo\.webp/)
+    assert.match(loading, /ja-logo\.png/)
     assert.match(index, /<title>JA Proyección<\/title>/)
 })
 
@@ -69,6 +69,9 @@ test("El icono de Windows y el logotipo JA coinciden y no usan AOP", async () =>
         readFile("public/loading.html", "utf8")
     ])
     assert.ok(logo.equals(icon), "El icono y el logo usan el mismo emblema JA")
+    assert.equal(logo.subarray(0, 8).toString("hex"), "89504e470d0a1a0a", "El logo debe ser un PNG válido")
+    assert.ok(logo.readUInt32BE(16) >= 256, "El logo debe tener al menos 256 px de ancho")
+    assert.ok(logo.readUInt32BE(20) >= 256, "El logo debe tener al menos 256 px de alto")
     assert.match(loading, /object-fit: cover/)
     assert.doesNotMatch(loading, /AOP/)
     assert.match(loading, /justify-content: center/)
