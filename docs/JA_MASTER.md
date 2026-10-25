@@ -3,7 +3,7 @@
 > **DOCUMENTO CANÓNICO / FUENTE ÚNICA DE VERDAD.**
 > Antes de continuar el desarrollo, abrir este archivo **directamente desde `main` en GitHub**, consultar el último commit y revisar las ejecuciones de GitHub Actions. No confiar en respuestas anteriores del chat ni en una copia antigua de este documento.
 >
-> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.7. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
+> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.8. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
 
 **Enlace directo:** https://github.com/IsaacMPP/Ja_Proyeccion/blob/main/docs/JA_MASTER.md
 
@@ -154,7 +154,8 @@
 - `registerJARV1909` en frontend registra la versión únicamente si el recurso dentro del instalador es válido; en primera incorporación la selecciona si no había selección o estaba una Biblia inglesa de ejemplo. Conserva otros libros y configuraciones.
 - Se añadió prueba integral de empaquetado `scripts/ja/bundled-rv1909.test.mjs` y guía `docs/JA_BIBLIA_RV1909_INTEGRADA.md`.
 - **Incidencia en CI inicial**: run `40221454883` detuvo el empaquetado al detectar SHA de ZIP diferente del registro del 7-ago-2026: el ZIP oficial de eBible.org devolvió `c901a31a89421eafa54e82a0a2ad94962c6889e3c5556c2a0834529789c4ac76` en GitHub Actions. Se actualizó el pin al valor realmente descargado desde la fuente oficial. El script **aún exige** 66 libros, 1.189 capítulos, volumen de versículos y contenido de referencia; NO se ignoran fallos de integridad.
-- **Estado:** pendiente de nueva CI y validación de texto e instalador; después prueba real del usuario.
+- **Segunda incidencia:** run `40222040901` descargó el ZIP verificado, pero el conversor no identificó Cantar de los Cantares (`SNG`). Se añadieron equivalencias de nombres/abreviaturas bíblicas y diagnóstico de prefijos desconocidos. El paso de generación RV1909 ahora corre **antes** de instalar Electron, para detectar diferencias de texto rápidamente sin gastar cinco minutos en dependencias.
+- **Estado:** pendiente de tercera CI, prueba de completitud y EXE; después prueba física del usuario.
 
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 

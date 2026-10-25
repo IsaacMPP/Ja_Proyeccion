@@ -44,11 +44,11 @@ jobs:
       - name: Verificar la estructura
         run: node scripts/ja/verify-base.mjs
 
-      - name: Instalar dependencias (incluidas las nativas)
-        run: npm ci --no-audit --no-fund
-
       - name: Incorporar Biblia RV1909 completa y verificar integridad
         run: python scripts/ja/build_rv1909.py
+
+      - name: Instalar dependencias (incluidas las nativas)
+        run: npm ci --no-audit --no-fund
 
       - name: Pruebas de estructura
         run: npm run ja:test

@@ -59,6 +59,12 @@ OTHERS = {
 "cant":"SNG","song":"SNG","acts":"ACT",
 }
 ALIASES.update(OTHERS)
+# Formas usuales de Cantar de los Cantares en archivos VPL/BibleWorks
+# (el código fuente puede indicar "Cant", "Ct", "Song", "SOS", etc.).
+for alias in ("cantares","cantarde loscantares","cantardeloscantares","cantico","canticodeloscanticos",
+              "canticodesalomon","canticles","songofsolomon","songofsongs","song","songs",
+              "solomonssong","sos","ss","ct","cnt","ca","cant","can","son","sol","so"):
+    ALIASES[re.sub(r"[\s._-]+", "", alias)] = "SNG"
 ALIASES.update({"MT":"MAT","MK":"MRK","LK":"LUK","JN":"JHN","AC":"ACT","GE":"GEN",
 "EX":"EXO","LE":"LEV","NU":"NUM","DT":"DEU","JS":"JOS","JG":"JDG","RU":"RUT",
 "PS":"PSA","PR":"PRO","EC":"ECC","SO":"SNG","IS":"ISA","JE":"JER","LA":"LAM",
@@ -107,6 +113,21 @@ def main():
             if not item: continue
             book, chapter, verse, text = item
             parsed[(book, chapter, verse)] = text
+    if len({key[0] for key in parsed}) < 66:
+        # Diagnóstico de etiquetas no reconocidas. Solo se imprimen referencias,
+        # no se vuelcan al registro los textos íntegros de versículos.
+        unknown = {}
+        for filename, content in entries:
+            for line in content.decode("utf-8-sig", errors="replace").splitlines():
+                for pattern in REFERENCE_PATTERNS:
+                    m = pattern.match(line)
+                    if not m: continue
+                    prefix = m.group(1).strip()
+                    clean = re.sub(r"[\s._-]+", "", prefix).casefold()
+                    if not (ALIASES.get(prefix.upper()) or ALIASES.get(clean)):
+                        unknown[prefix] = unknown.get(prefix, 0) + 1
+                    break
+        print("Etiquetas VPL sin asignar:", sorted(unknown.items(), key=lambda item: -item[1])[:25], flush=True)
     if not parsed:
         raise ValueError("No se encontraron versículos. ZIP=" + repr([n for n,_ in entries])+
                          " Ejemplo=" + repr(entries[0][1][:400]))
