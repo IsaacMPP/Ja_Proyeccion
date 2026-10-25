@@ -9,7 +9,7 @@ import type { Output } from "../../types/Output"
 import type { Resolution } from "../../types/Settings"
 import { requestToMain, sendToMain } from "../IPC/main"
 import { OutputHelper } from "../output/OutputHelper"
-import { createFolder, deleteFile, doesPathExist, doesPathExistAsync, getDataFolderPath, getFileStatsAsync, makeDir, openInSystem, sanitizeFileName } from "../utils/files"
+import { createFolder, deleteFile, doesPathExist, doesPathExistAsync, getDataFolderPath, getDataFolderRoot, getFileStatsAsync, makeDir, openInSystem, sanitizeFileName } from "../utils/files"
 import { waitUntilValueIsDefined } from "../utils/helpers"
 import { captureOptions } from "../utils/windowOptions"
 import { imageExtensions, videoExtensions } from "./media"
@@ -148,25 +148,36 @@ let thumbnailFolderPath = ""
 export function getThumbnailFolderPath() {
     if (thumbnailFolderPath) return thumbnailFolderPath
 
-    // use app data path for cache, fallback to temp if appData is not available
-    let folderPath: string
+    // Persist alongside the user's JA Proyección library, not in an OS temp directory.
+    // Honour an explicitly configured data root (portable/custom installations).
+    const preferred = path.join(getDataFolderRoot(), "Cache", "Miniaturas")
     try {
-        folderPath = path.join(appDataPath, "media-cache")
-        if (!doesPathExist(folderPath)) makeDir(folderPath)
-    } catch (err) {
-        // fallback to temp directory if app data path is not accessible
-        // temp folder is periodically deleted on macOS
-        folderPath = path.join(app.getPath("temp"), "freeshow-cache")
-        if (!doesPathExist(folderPath)) makeDir(folderPath)
+        fs.mkdirSync(preferred, { recursive: true })
+        fs.accessSync(preferred, fs.constants.W_OK)
+        thumbnailFolderPath = preferred
+    } catch (error) {
+        // Do not prevent playback if the custom data volume is read-only/offline.
+        const legacy = path.join(appDataPath, "media-cache")
+        fs.mkdirSync(legacy, { recursive: true })
+        thumbnailFolderPath = legacy
+        console.warn("JA: thumbnail directory is unavailable, using persistent app cache", error)
     }
-
-    thumbnailFolderPath = folderPath
-    return folderPath
+    return thumbnailFolderPath
 }
 
 function getThumbnailPath(filePath: string, size = 250) {
-    const folderPath = thumbnailFolderPath || getThumbnailFolderPath()
-    return path.join(folderPath, `${filePathHashCode(filePath)}-${size}.png`)
+    const fileName = `${filePathHashCode(filePath)}-${size}.png`
+    const target = path.join(getThumbnailFolderPath(), fileName)
+
+    // Reuse existing generated previews when moving from the old persistent location.
+    // Never modify originals or regenerate a video just to move the cache.
+    const legacy = path.join(appDataPath, "media-cache", fileName)
+    if (target !== legacy && !doesPathExist(target) && doesPathExist(legacy)) {
+        try { fs.copyFileSync(legacy, target) } catch (error) {
+            console.warn("JA: could not reuse legacy thumbnail", error)
+        }
+    }
+    return target
 }
 
 export function filePathHashCode(str: string) {
