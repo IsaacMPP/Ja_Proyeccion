@@ -49,3 +49,5 @@ escáner, convertidor, controles, pruebas y cualquier documentación que la reco
 - Se añade un emblema vectorial estilizado de referencia (public/ja-logo.svg); se recomienda sustituirlo por un recurso oficial de alta resolución con autorización de uso cuando esté disponible.
 - No se alteraron la reproducción, las salidas ni los archivos multimedia del usuario.
 - Por validar: compilación, renderizado visual real, icono nativo del instalador de Windows y pruebas de regresión.
+
+- Inicio de aplicación: `public/loading.html` y título HTML muestran JA Proyección. Icono nativo de Windows pendiente de recurso final.
