@@ -3,7 +3,7 @@
 > **DOCUMENTO CANÓNICO / FUENTE ÚNICA DE VERDAD.**
 > Antes de continuar el desarrollo, abrir este archivo **directamente desde `main` en GitHub**, consultar el último commit y revisar las ejecuciones de GitHub Actions. No confiar en respuestas anteriores del chat ni en una copia antigua de este documento.
 >
-> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.2. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
+> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.3. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
 
 **Enlace directo:** https://github.com/IsaacMPP/Ja_Proyeccion/blob/main/docs/JA_MASTER.md
 
@@ -132,7 +132,18 @@
 - No se conoce automáticamente si el dispositivo seleccionado es el mismo amplificador de la congregación. Debe **probarse con audífonos separados** para evitar que la audición se escuche en el culto.
 - Código: `src/frontend/components/drawer/audio/{Audio.svelte,AudioFile.svelte,AudioAudition.svelte,jaAudioLibrary.ts}`.
 - Pruebas `scripts/ja/audio-library.test.mjs`; guía `docs/JA_BIBLIOTECA_AUDIO.md`.
-- **Estado inicial de esta entrega:** integrado en código; pendiente verificar compilación e instalación y prueba de audio real. NDI y control desde celular continúan para el final.
+- **Estado confirmado:** GitHub Actions `40213108136` exitosa; el usuario confirmó «ya funciona el audio». **Precaución:** no hay confirmación específica de aislamiento por audífonos; verificar antes de usar en el culto. NDI y control desde celular continúan para el final.
+
+### 3.7 Biblia en español: traducciones, diseño y flechas (implementación — CI pendiente)
+
+- Solicitud explícita del usuario después de confirmar que el audio funciona: **RVR1960, RVR1995, NVI y otras traducciones populares**, cambio rápido de versión, fondo de color o imagen, fuente, tamaño, alineación y navegación con flechas.
+- **Catálogo** de RVR60, RVR95, NVI, NTV, NBLA, DHH, RV1909 en `jaSpanishBibles.ts`. Muestra qué ediciones están realmente instaladas, permite elegirlas y abre el importador existente para las ausentes.
+- **No** se adjuntan textos completos protegidos al proyecto. RVR60, RVR95 y NVI requieren permisos de sus titulares para redistribución; RV1909 es de dominio público. Catálogo ≠ Biblia instalada. Se reutiliza importación local/API de FreeShow según sus propios permisos.
+- **Estilo JA** en `ScriptureInfo.svelte` con plantilla independiente `ja_scripture_custom`: fuente (Arial/Montserrat/Inter/Tahoma/Verdana/Georgia), tamaño 30–160 px, alineación, color de texto, color de fondo e imagen de fondo; se guarda en las plantillas persistentes. No sobreescribir plantillas originales.
+- **Flechas** normales izquierda/derecha dentro del módulo Biblia; no interceptar búsquedas, selects, botones, edición ni atajos con modificadores. Opción visible para activar/desactivar; conserva navegación previa Ctrl+flechas.
+- Código: `src/frontend/components/drawer/bible/{Scripture.svelte,jaScriptureDesign.ts,jaSpanishBibles.ts}`, `src/frontend/components/drawer/info/ScriptureInfo.svelte`, `src/frontend/components/drawer/navigation/ScriptureTabs.svelte`.
+- Guía `docs/JA_BIBLIA_ESPANOL.md` y pruebas `scripts/ja/spanish-bible.test.mjs`.
+- **Estado al crear:** código pendiente de CI y pruebas reales con versión bíblica cargada. No afirmar que RVR60/95/NVI estén listas para proyectarse offline antes de licencia y datos correspondientes.
 
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
@@ -142,20 +153,20 @@
 | --- | --- | --- | --- |
 | 0 | Base, videoteca, marca y pantalla secundaria | **Integradas; validadas parcialmente en Windows** | Mantener como línea base; corregir regresiones, no rehacer módulos estables. |
 | 1 — VALIDADA | Miniaturas/portadas personalizadas por video | **CI exitosa y el usuario confirmó «quedó súper bien»** | Escoger JPG/PNG, asociarla a cada archivo sin tocar original, conservarla al reiniciar, restaurar miniatura automática, mostrarla en biblioteca/búsqueda. |
-| **2 — EN DESARROLLO** | Audio/pistas musicales | **Código integrado en esta fase; pendiente CI y prueba real** | Carpetas MP3/WAV, búsqueda, escucha previa, controles de volumen, pausa y avance; probar aislamiento de audio antes de declarar monitoreo privado. |
-| 3 | Biblia en español | **Por implementar / validar licencia** | Importar traducción autorizada, buscar libro/capítulo/versículo, navegar con flechas, controlar cantidad de versículos y fondos. |
+| 2 — VALIDADA | Audio/pistas musicales | **CI exitosa y el usuario confirmó «ya funciona el audio»** (audición por audífonos aún requiere prueba específica) | Carpetas MP3/WAV, búsqueda, escucha previa, controles de volumen, pausa y avance; probar aislamiento de audio antes de declarar monitoreo privado. |
+| **3 — EN DESARROLLO** | Biblia en español | **Controles y catálogo integrados; pendiente CI y prueba real. No se distribuyen textos protegidos.** | Importar traducción autorizada, buscar libro/capítulo/versículo, navegar con flechas, controlar cantidad de versículos y fondos. |
 | 4 | Organización de un culto | **Propuesta aprobada como ruta, no implementada** | Preparar orden de videos, especiales, versículos y anuncios reutilizando proyectos de FreeShow. |
 | 5 | Temporizadores y mejoras de operación | **Hay componentes heredados; falta adaptar/probar** | Cronómetro/reloj, cuentas regresivas, avisos y controles rápidos comprobados en salida real. |
 | 6 | Auditoría de funciones avanzadas heredadas | **Dejar para el final (instrucción del usuario)** | NDI, control por celular, StageShow, OBS, OMT, cámaras y demás: inventario, configuración y pruebas independientes. |
 | 7 | Estabilización/versión de distribución | **Pendiente** | Pruebas con distintos Windows/monitores/códecs, rendimiento, respaldos de datos y documentación GPL. |
 
-**Próxima acción planificada:** validar la **biblioteca de audio y audición separada** con CI y pruebas reales de Windows. Tras confirmación del usuario, continuar con la Biblia en español.
+**Próxima acción planificada:** validar en CI y Windows los controles de **Biblia en español** (cambio de ediciones ya instaladas, tipografía, tamaño, alineación, color/fondo y flechas). Gestionar derechos antes de integrar RVR60/RVR95/NVI completas.
 
 ### Aspectos que NO deben contarse como terminados
 
 - Portadas personalizadas **validadas por el usuario** en Windows; conservar como función estable.
-- Biblioteca de audio y audición por dispositivo independiente **integradas en código**; falta validar la separación física de sonido y la compatibilidad de `setSinkId` con equipos reales.
-- Traducción bíblica en español empaquetada o importada con permiso.
+- Biblioteca de audio general **confirmada por el usuario** y compilada correctamente (run `40213108136`); la separación física de audio con audífonos y `setSinkId` sigue requiriendo verificación específica.
+- Biblia en español: **catálogo y personalización integrados en código**; NO se han empaquetado ediciones completas RVR60/RVR95/NVI sin permiso; falta prueba en Windows y, para textos completos, autorización del titular.
 - Control remoto por celular y NDI funcionando; existen bases heredadas pero faltan ensayos reales.
 - Prueba de cada formato/códec, monitores 3+, reconexión HDMI, escalados de Windows.
 - Instalador final firmado/distribuido estable; los EXE de Actions son **de prueba**.
@@ -225,7 +236,8 @@
 | 2026-10-25 | Corrección final de ruta de salida; usuario confirma proyector secundario | `74709e0`; CI `40167451587` **exitosa** |
 | 2026-10-25 | Creación del documento maestro y establecimiento de protocolo de continuidad | **Este documento** |
 | 2026-10-25 | Portadas personalizadas validadas en Windows por usuario («súper bien») | `6078eb9`, CI `40169389141` exitosa |
-| 2026-10-25 | Biblioteca de audio, búsqueda global y audición segura por dispositivo separada incorporadas; CI y prueba real pendientes | `src/frontend/components/drawer/audio/`, `docs/JA_BIBLIOTECA_AUDIO.md` |
+| 2026-10-25 | Audio general validado por usuario («ya funciona»), CI exitosa; audífonos por separado pendientes de ensayo | `a03635c`, Actions `40213108136` |
+| 2026-10-25 | Biblia española: catálogo, estilo JA, navegación con flechas implementados; pendiente CI/licencias | `docs/JA_BIBLIA_ESPANOL.md` |
 
 ## 9. Texto para comenzar una conversación nueva
 

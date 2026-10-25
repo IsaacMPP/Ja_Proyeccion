@@ -899,6 +899,23 @@
             return
         }
 
+        // JA: las flechas solas avanzan y retroceden versículos cuando la Biblia
+        // está activa. Nunca interceptar flechas dentro de búsquedas o controles.
+        if (
+            $scriptureSettings.jaArrowsEnabled !== false &&
+            (e.key === "ArrowLeft" || e.key === "ArrowRight") &&
+            !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey &&
+            !$activeEdit.items.length && !!activeReference.book &&
+            !(e.target instanceof HTMLElement && (
+                e.target.closest("input, textarea, select, button, [contenteditable='true'], [role='textbox']") ||
+                e.target.isContentEditable
+            ))
+        ) {
+            e.preventDefault()
+            void _moveSelection(e.key === "ArrowLeft")
+            return
+        }
+
         if (!e.ctrlKey && !e.metaKey) return
 
         const ctrlKey = e.shiftKey || e.altKey ? "" : getNormalizedKey(e)

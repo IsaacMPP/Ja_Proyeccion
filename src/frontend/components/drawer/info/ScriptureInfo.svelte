@@ -4,6 +4,7 @@
     import type { Item } from "../../../../types/Show"
     import { activeEdit, activePage, activeScripture, activeStyle, drawerTabsData, media, outputs, scriptureSettings, settingsTab, styles, templates } from "../../../stores"
     import { setDefaultScriptureTemplates } from "../../../utils/createData"
+    import { save } from "../../../utils/save"
     import { confirmCustom } from "../../../utils/popup"
     import { mediaExtensions } from "../../../values/extensions"
     import T from "../../helpers/T.svelte"
@@ -23,6 +24,8 @@
     import Textbox from "../../slide/Textbox.svelte"
     import Zoomed from "../../slide/Zoomed.svelte"
     import { createScriptureShow, getActiveScripturesContent, getMergedAttribution, getScriptureSlidesNew, textKeys, useOldScriptureSystem } from "../bible/scripture"
+    import { applyJAScriptureDesign, readJAScriptureDesign, DEFAULT_JA_SCRIPTURE_DESIGN, JA_SCRIPTURE_FONTS, JA_SCRIPTURE_TEMPLATE_ID } from "../bible/jaScriptureDesign"
+    import type { JAScriptureDesign } from "../bible/jaScriptureDesign"
 
     export let optionsOpen: boolean
 
@@ -42,6 +45,34 @@
         }
     }
 
+    // Los cambios se aplican solo a la plantilla independiente JA.
+    let jaDesign: JAScriptureDesign = { ...DEFAULT_JA_SCRIPTURE_DESIGN }
+    let jaStyleMessage = ""
+    $: if ($templates[JA_SCRIPTURE_TEMPLATE_ID]) {
+        jaDesign = readJAScriptureDesign($templates[JA_SCRIPTURE_TEMPLATE_ID])
+    }
+
+    function setJAStyle<K extends keyof JAScriptureDesign>(key: K, value: JAScriptureDesign[K]) {
+        const updated = { ...jaDesign, [key]: value }
+        if (styleScriptureTemplate) {
+            jaStyleMessage = "La salida tiene una plantilla bíblica avanzada que tiene prioridad. Ábrela con Editar plantilla para cambiar sus estilos."
+            return
+        }
+        try {
+            const original = $templates[JA_SCRIPTURE_TEMPLATE_ID] || $templates[templateId] || $templates.scripture
+            if (!original) throw new Error("No hay plantilla bíblica disponible")
+            const next = applyJAScriptureDesign(original, updated)
+            templates.update((current) => ({ ...current, [JA_SCRIPTURE_TEMPLATE_ID]: next }))
+            scriptureSettings.update((settings) => ({ ...settings, template: JA_SCRIPTURE_TEMPLATE_ID }))
+            jaDesign = updated
+            jaStyleMessage = "Diseño bíblico JA guardado."
+            save()
+        } catch (error) {
+            console.error("JA: No pudimos ajustar la Biblia:", error)
+            jaStyleMessage = "No se pudo aplicar el diseño. Comprueba la plantilla activa."
+        }
+    }
+
     let slides: Item[][] = [[]]
 
     // background
@@ -52,7 +83,7 @@
     // auto change template based on number of bibles (if default)
     // if collection, but only one of the Bibles load, biblesContent will be length 1 & not change the template, which is fine, but maybe confusing
     $: if (activeScriptureId || templateId || biblesContent.length) setTimeout(checkTemplate, 100)
-    $: isDefault = typeof templateId === "string" ? templateId.includes("scripture") && !templateId.includes("LT") : false
+    $: isDefault = typeof templateId === "string" ? /^scripture(?:_\\d+)?$/.test(templateId) : false
     function checkTemplate() {
         if (!isDefault || !biblesContent.length) return
 
@@ -163,7 +194,7 @@
     // auto convert
     $: if (useOldSystem && usingDefault && (!styleScriptureTemplate || styleScriptureTemplate.includes("scripture"))) convertToNew()
     $: useOldSystem = useOldScriptureSystem(templateId, $templates) && !styleScriptureTemplate
-    $: usingDefault = typeof templateId === "string" ? templateId.includes("scripture") : false
+    $: usingDefault = typeof templateId === "string" ? /^scripture(?:_\\d+)?$/.test(templateId) : false
     async function convertToNew() {
         if (!usingDefault) {
             if (!(await confirmCustom("This will apply the default template, and convert that to the new format. Your current template will not change.<br>You can use it as an example to adapt your existing templates. Continue?"))) return
@@ -213,6 +244,11 @@
 
     <!-- settings -->
     <div class="settings border">
+        <label class="ja-scripture-arrows">
+            <input type="checkbox" checked={$scriptureSettings.jaArrowsEnabled !== false}
+                on:change={(e) => { update("jaArrowsEnabled", e.currentTarget.checked); save() }} />
+            <span>Flechas del teclado: <strong>← anterior · → siguiente</strong></span>
+        </label>
         {#if optionsOpen}
             <!-- Verse numbers -->
             <MaterialToggleSwitch label="scripture.verse_numbers" style="width: 100%;" checked={$scriptureSettings.verseNumbers} on:change={(e) => update("verseNumbers", e.detail)} />
@@ -252,6 +288,49 @@
                 <MaterialNumberInput label="scripture.max_verses" value={$scriptureSettings.versesPerSlide} defaultValue={3} min={1} max={100} on:change={(e) => update("versesPerSlide", e.detail)} hideWhenZero />
             {/if}
         {:else}
+            <!-- Controles sencillos JA: una copia propia, sin alterar las plantillas de FreeShow. -->
+            <section class="ja-bible-design" aria-label="Personalizar Biblia JA">
+                <h3>Diseño de la Biblia</h3>
+                <p>Configura la proyección de versículos con una plantilla JA. Los ajustes se conservan al reiniciar.</p>
+                <div class="ja-bible-fields">
+                    <label>Fuente
+                        <select value={jaDesign.fontFamily} on:change={(e) => setJAStyle("fontFamily", e.currentTarget.value)}>
+                            {#each JA_SCRIPTURE_FONTS as font}
+                                <option value={font}>{font}</option>
+                            {/each}
+                        </select>
+                    </label>
+                    <label>Tamaño de letra: {jaDesign.fontSize} px
+                        <input type="range" min="30" max="160" step="2" value={jaDesign.fontSize} on:change={(e) => setJAStyle("fontSize", Number(e.currentTarget.value))} />
+                    </label>
+                    <label>Alineación
+                        <select value={jaDesign.align} on:change={(e) => setJAStyle("align", e.currentTarget.value as JAScriptureDesign["align"])}>
+                            <option value="left">Izquierda</option><option value="center">Centro</option><option value="right">Derecha</option>
+                        </select>
+                    </label>
+                    <label>Color del texto
+                        <input type="color" value={jaDesign.color} on:change={(e) => setJAStyle("color", e.currentTarget.value)} />
+                    </label>
+                    <label>Color de fondo
+                        <input type="color" value={jaDesign.backgroundColor} on:change={(e) => setJAStyle("backgroundColor", e.currentTarget.value)} />
+                    </label>
+                </div>
+                <MaterialFilePicker
+                    label="Imagen de fondo"
+                    value={jaDesign.backgroundPath}
+                    filter={{ name: "Imágenes", extensions: ["png", "jpg", "jpeg", "webp"] }}
+                    allowEmpty
+                    on:change={(e) => setJAStyle("backgroundPath", e.detail)}
+                />
+                {#if jaDesign.backgroundPath}
+                    <button type="button" class="ja-clear-background" on:click={() => setJAStyle("backgroundPath", "")}>Quitar imagen y usar color de fondo</button>
+                {/if}
+                {#if jaStyleMessage}<p class="ja-style-message" role="status">{jaStyleMessage}</p>{/if}
+                {#if styleScriptureTemplate}
+                    <p class="ja-style-message">Hay una plantilla de salida con prioridad; utiliza Editar plantilla para ajustar esa salida.</p>
+                {/if}
+            </section>
+
             <!-- Template -->
             <InputRow style={templateBackground ? "" : "margin-bottom: 10px;"}>
                 <MaterialPopupButton id="scripture_drawer" label="info.template" disabled={!!styleScriptureTemplate} value={templateId} name={template?.name} popupId="select_template" icon="templates" on:change={(e) => update("template", e.detail)} allowEmpty={!isDefault} />
@@ -291,6 +370,30 @@
 </div>
 
 <style>
+    .ja-scripture-arrows {
+        display: flex; align-items: center; gap: 8px; padding: 9px;
+        color: #f3f7fb; background: #163953; border: 1px solid #315c79;
+        border-radius: 7px; margin-bottom: 10px; font-size: .82em;
+        white-space: normal; cursor: pointer;
+    }
+    .ja-scripture-arrows input { accent-color: #f6bf19; }
+    .ja-bible-design {
+        padding: 12px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 9px;
+        border-radius: 9px; background: #0e2d49; border: 1px solid #37607a;
+    }
+    .ja-bible-design h3 { font-size: 1em; color: #f6bf19; margin: 0; }
+    .ja-bible-design p { color: #c2d9e8; font-size: .82em; margin: 0; white-space: normal; }
+    .ja-bible-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .ja-bible-fields label { display: flex; flex-direction: column; gap: 5px; font-size: .82em; }
+    .ja-bible-fields select, .ja-bible-fields input[type=color] {
+        min-height: 30px; padding: 4px; border: 1px solid #466c85;
+        color: #fff; background: #153c5c; border-radius: 6px; font: inherit;
+    }
+    .ja-bible-fields input[type=range] { width: 100%; accent-color: #f6bf19; }
+    .ja-clear-background { padding: 7px 9px; background: #194666; color: #fff;
+        border: 1px solid #497994; border-radius: 7px; cursor: pointer; }
+    .ja-style-message { border-left: 3px solid #f6bf19; padding-left: 8px; }
+    @media (max-width: 600px) { .ja-bible-fields { grid-template-columns: 1fr; } }
     .scroll {
         display: flex;
         flex-direction: column;
