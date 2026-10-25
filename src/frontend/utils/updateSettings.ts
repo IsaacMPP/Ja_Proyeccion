@@ -99,6 +99,7 @@ import {
     version,
     videoMarkers
 } from "./../stores"
+import { registerJARV1909 } from "../components/drawer/bible/jaBundledBible"
 import { checkForUpdates } from "./checkForUpdates"
 import { isMainWindow, startAutosave } from "./common"
 import { setLanguage } from "./language"
@@ -201,6 +202,9 @@ export function updateSettings(data: any) {
 
     loaded.set(true)
 
+    // La Biblia offline viene integrada; registrar después de cargar el perfil,
+    // para no sobrescribir las biblias ni ajustes que el usuario tenía guardados.
+    void registerJARV1909()
     window.api.send("LOADED")
 }
 

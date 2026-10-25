@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/electron/main"
 import type { BrowserWindow, DesktopCapturerSource } from "electron"
 import { app, desktopCapturer, screen, shell, systemPreferences } from "electron"
 import os from "os"
+import { readFileSync } from "fs"
 import path from "path"
 import { getMainWindow, isProd, mainWindow, maximizeMain, setGlobalMenu } from ".."
 import type { MainResponses } from "../../types/IPC/Main"
@@ -316,6 +317,22 @@ function importFiles(data: { id: string; paths: string[] }) {
 
 // BIBLE
 export function loadScripture(msg: { id: string; name: string }) {
+    // Biblia RV1909 instalada con JA Proyección: disponible sin Internet,
+    // sin depender de la carpeta personal de Biblias ni modificarla.
+    if (msg.id === "ja-rv1909") {
+        try {
+            const bundledFile = path.join(app.getAppPath(), "public", "ja-bibles", "rv1909.fsb")
+            const content = JSON.parse(readFileSync(bundledFile, "utf8"))
+            if (!Array.isArray(content) || content[0] !== "ja-rv1909" || content[1]?.books?.length !== 66) {
+                throw new Error("RV1909 integrada está incompleta")
+            }
+            return { id: msg.id, content }
+        } catch (error) {
+            console.error("JA: no se encontró Biblia RV1909 empaquetada", error)
+            return { id: msg.id, error: "not_found" }
+        }
+    }
+
     const bibleFolder: string = getDataFolderPath("scriptures")
     let filePath: string = path.join(bibleFolder, msg.name + ".fsb")
 

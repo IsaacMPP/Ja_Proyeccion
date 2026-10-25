@@ -3,7 +3,7 @@
 > **DOCUMENTO CANÓNICO / FUENTE ÚNICA DE VERDAD.**
 > Antes de continuar el desarrollo, abrir este archivo **directamente desde `main` en GitHub**, consultar el último commit y revisar las ejecuciones de GitHub Actions. No confiar en respuestas anteriores del chat ni en una copia antigua de este documento.
 >
-> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.5. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
+> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.6. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
 
 **Enlace directo:** https://github.com/IsaacMPP/Ja_Proyeccion/blob/main/docs/JA_MASTER.md
 
@@ -145,6 +145,16 @@
 - Guía `docs/JA_BIBLIA_ESPANOL.md` y pruebas `scripts/ja/spanish-bible.test.mjs`.
 - **Estado al crear:** el primer intento de CI, run `40216920921`, **falló al compilar Svelte**: `ScriptureInfo.svelte` línea 293 tenía una aserción de tipo `as JAScriptureDesign["align"]` dentro del markup, no aceptada por el compilador. Las 38 pruebas anteriores sí habían pasado porque ninguna compilaba los componentes Svelte. Se corrigió moviendo el estrechamiento del tipo a `changeJAAlignment` dentro del script, se corrigió la detección de plantillas `scripture_2/3/4` y se añadió un test de compilación real `scripts/ja/scripture-svelte-compile.test.mjs`. **CI corregida y verificada exitosa:** run `40218691694`, commit `7d66e1ecdec121867a6b8d201855260c6328cebd`; pasó pruebas automatizadas, compilación, empaquetado NSIS y publicó artefacto `JA-Proyeccion-Windows-pruebas` (no expirado al revisar). Pendiente prueba con Biblia real en Windows. No afirmar que RVR60/95/NVI estén listas para proyectarse offline antes de licencia y datos correspondientes.
 
+### 3.8 Reina-Valera 1909 empaquetada y disponible sin conexión — implementación nueva
+
+- Autorización: usuario pidió explícitamente una Biblia completa **en español ya instalada**, sin el contenido inglés predeterminado, tras revisar repositorios con RVR1960/NVI protegidas.
+- Se integra la edición **Reina-Valera 1909 de dominio público**, fuente oficial eBible.org (`spaRV1909_vpl.zip`) con SHA-256 fijado. **No se descargan RVR1960/RVR1995/NVI protegidas**.
+- `scripts/ja/build_rv1909.py`: el workflow descarga exclusivamente durante la compilación, verifica integridad de ZIP, 66 libros, 1.189 capítulos y aproximadamente 31 mil versículos, y genera `public/ja-bibles/rv1909.fsb` (no se incorpora la Biblia como texto de código).
+- `config/building/electron-builder.yaml` ya incluye `public/**`; el instalador lleva el texto para funcionar **sin Internet**. La lectura integrada por `Main.BIBLE` usa `app.getAppPath()` y `fs.readFileSync`.
+- `registerJARV1909` en frontend registra la versión únicamente si el recurso dentro del instalador es válido; en primera incorporación la selecciona si no había selección o estaba una Biblia inglesa de ejemplo. Conserva otros libros y configuraciones.
+- Se añadió prueba integral de empaquetado `scripts/ja/bundled-rv1909.test.mjs` y guía `docs/JA_BIBLIA_RV1909_INTEGRADA.md`.
+- **Estado:** código pendiente de CI; no declarar listo hasta compilar, validar texto generado y generar EXE; posteriormente prueba real del usuario.
+
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
 > Esta tabla **reemplaza las fases antiguas** descritas en `JA_RUTA_DESARROLLO.md`, que es un documento histórico y aún contiene el orden inicial ya superado.
@@ -154,7 +164,7 @@
 | 0 | Base, videoteca, marca y pantalla secundaria | **Integradas; validadas parcialmente en Windows** | Mantener como línea base; corregir regresiones, no rehacer módulos estables. |
 | 1 — VALIDADA | Miniaturas/portadas personalizadas por video | **CI exitosa y el usuario confirmó «quedó súper bien»** | Escoger JPG/PNG, asociarla a cada archivo sin tocar original, conservarla al reiniciar, restaurar miniatura automática, mostrarla en biblioteca/búsqueda. |
 | 2 — VALIDADA | Audio/pistas musicales | **CI exitosa y el usuario confirmó «ya funciona el audio»** (audición por audífonos aún requiere prueba específica) | Carpetas MP3/WAV, búsqueda, escucha previa, controles de volumen, pausa y avance; probar aislamiento de audio antes de declarar monitoreo privado. |
-| **3 — EN DESARROLLO** | Biblia en español | **Compilación y pruebas CI exitosas (`40218691694`); prueba real pendiente. No se distribuyen textos protegidos.** | Importar traducción autorizada, buscar libro/capítulo/versículo, navegar con flechas, controlar cantidad de versículos y fondos. |
+| **3 — EN DESARROLLO** | Biblia en español | **RV1909 completa y offline añadida al proceso de build; esperando nueva CI y prueba real. No se distribuyen textos protegidos.** | Importar traducción autorizada, buscar libro/capítulo/versículo, navegar con flechas, controlar cantidad de versículos y fondos. |
 | 4 | Organización de un culto | **Propuesta aprobada como ruta, no implementada** | Preparar orden de videos, especiales, versículos y anuncios reutilizando proyectos de FreeShow. |
 | 5 | Temporizadores y mejoras de operación | **Hay componentes heredados; falta adaptar/probar** | Cronómetro/reloj, cuentas regresivas, avisos y controles rápidos comprobados en salida real. |
 | 6 | Auditoría de funciones avanzadas heredadas | **Dejar para el final (instrucción del usuario)** | NDI, control por celular, StageShow, OBS, OMT, cámaras y demás: inventario, configuración y pruebas independientes. |
@@ -206,7 +216,7 @@
 | Salida Windows/Electron | `src/electron/output/helpers/{OutputVisibility.ts,displayRouting.ts}` |
 | IPC monitores | `src/electron/IPC/responsesMain.ts` |
 | Audio y audición | `src/frontend/components/drawer/audio/`, `src/frontend/audio/routing/`, `docs/JA_BIBLIOTECA_AUDIO.md` |
-| Biblia (heredada) | `src/frontend/components/drawer/bible/`, `src/frontend/converters/` |
+| Biblia española offline | `scripts/ja/build_rv1909.py`, `src/frontend/components/drawer/bible/jaBundledBible.ts`, `src/electron/IPC/responsesMain.ts`, `docs/JA_BIBLIA_RV1909_INTEGRADA.md` |
 | Pruebas propias | `scripts/ja/` |
 | CI | `.github/workflows/compilar-windows.yml` |
 | Packaging Windows | `config/building/electron-builder.yaml` |
@@ -239,6 +249,7 @@
 | 2026-10-25 | Audio general validado por usuario («ya funciona»), CI exitosa; audífonos por separado pendientes de ensayo | `a03635c`, Actions `40213108136` |
 | 2026-10-25 | Biblia española: catálogo, estilo JA, navegación con flechas implementados; pendiente CI/licencias | `docs/JA_BIBLIA_ESPANOL.md` |
 | 2026-10-25 | Falló CI Biblia `40216920921` en Svelte (TS aserción dentro de markup); corregido en `7d66e1e`. Nueva CI `40218691694` **exitosa**, instalador Windows publicado; prueba real de Biblia pendiente | `ScriptureInfo.svelte`, `scripts/ja/scripture-svelte-compile.test.mjs` |
+| 2026-10-25 | Integración de RV1909 de dominio público dentro del instalador, 66 libros, sin conexión; pendiente CI y prueba física | `scripts/ja/build_rv1909.py`, `docs/JA_BIBLIA_RV1909_INTEGRADA.md` |
 
 ## 9. Texto para comenzar una conversación nueva
 
