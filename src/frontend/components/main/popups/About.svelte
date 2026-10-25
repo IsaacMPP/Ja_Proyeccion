@@ -24,8 +24,8 @@
 
 <div style="text-align: center;">
     <div class="logo">
-        <img style="height: 35px;" src="./import-logos/freeshow.webp" alt="FreeShow-logo" draggable={false} />
-        <h1 style="color: var(--text);font-size: 1.7em;">FreeShow</h1>
+        <img style="height: 35px;" src="./ja-logo.svg" alt="Emblema JA" draggable={false} />
+        <h1 style="color: var(--text);font-size: 1.7em;">JA <span style="color: var(--secondary);">Proyección</span></h1>
     </div>
 
     <p style="font-size: 0.8em;margin-top: 2px;">
@@ -35,9 +35,11 @@
         </MaterialButton>
     </p>
 
-    <!-- <p>
-        <Link url="https://churchapps.org/">ChurchApps</Link>
-    </p> -->
+    <p style="opacity: 0.75; margin-top: 10px; white-space: normal; font-size: 0.85em;">
+        Aplicación desarrollada a partir de FreeShow 1.6.7 de ChurchApps.
+        Se conservan los créditos y la licencia GPL-3.0.
+    </p>
+    <p style="margin-top: 5px;"><Link url="https://github.com/IsaacMPP/Ja_Proyeccion">Código fuente de JA Proyección</Link></p>
 </div>
 
 <hr />

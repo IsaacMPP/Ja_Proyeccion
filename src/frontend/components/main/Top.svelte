@@ -99,12 +99,10 @@
         {#if !$saved && $os.platform !== "win32"}
             <div class="unsaved" />
         {/if}
-        <!-- logo -->
-        <h1 style="align-self: center;width: 100%;padding: 0px 10px;text-align: center;font-size: 1.8em;">FreeShow</h1>
-        <!-- <div class="logo">
-            <img style="height: 35px;" src="./import-logos/freeshow.webp" alt="FreeShow-logo" draggable={false} />
-            <h1 style="color: var(--text);font-size: 1.7em;">FreeShow</h1>
-        </div> -->
+        <div class="ja-brand" aria-label="JA Proyección">
+            <img src="./ja-logo.svg" alt="Emblema JA" draggable={false} />
+            <div class="ja-name">JA <strong>Proyección</strong></div>
+        </div>
     </span>
     <span>
         <TopButton id="show" />
@@ -158,6 +156,32 @@
 </div>
 
 <style>
+    .ja-brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        height: 40px;
+        padding: 2px 10px;
+        white-space: nowrap;
+    }
+    .ja-brand img {
+        height: 34px;
+        width: 55px;
+        object-fit: contain;
+        flex: 0 0 auto;
+    }
+    .ja-name {
+        color: var(--text);
+        font-size: 1.22em;
+        font-weight: 750;
+        letter-spacing: -0.035em;
+    }
+    .ja-name strong {
+        color: var(--secondary);
+        font-weight: 780;
+    }
     .top {
         position: relative;
         display: flex;
@@ -166,7 +190,7 @@
         min-height: 40px;
         height: 40px;
 
-        box-shadow: 0 0 4px rgb(0 0 0 / 0.4);
+        box-shadow: 0 1px 0 var(--primary-lighter), 0 2px 12px rgb(0 0 0 / 0.18);
 
         /* disabled because it's causing unexpected behaviour in Windows 11 */
         /* -webkit-app-region: drag; */

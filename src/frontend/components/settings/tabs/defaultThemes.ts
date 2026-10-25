@@ -9,17 +9,17 @@ export const defaultThemes: { [key: string]: Themes } = {
             size: "1em"
         },
         colors: {
-            primary: "#242832",
-            "primary-lighter": "#2f3542",
-            "primary-darker": "#191923",
-            "primary-darkest": "#12121c",
-            text: "#f0f0ff",
-            textInvert: "#131313",
-            "secondary-text": "#f0f0ff",
-            secondary: "#F0008C",
-            "secondary-opacity": "rgba(240, 0, 140, 0.5)",
-            hover: "rgb(255 255 255 / 0.05)",
-            focus: "rgb(255 255 255 / 0.1)"
+            primary: "#102940",
+            "primary-lighter": "#244562",
+            "primary-darker": "#0c2237",
+            "primary-darkest": "#071a2c",
+            text: "#f4f8ff",
+            textInvert: "#0b1725",
+            "secondary-text": "#0a1d30",
+            secondary: "#f6bf19",
+            "secondary-opacity": "rgba(246, 191, 25, 0.34)",
+            hover: "rgba(57, 138, 197, 0.10)",
+            focus: "rgba(57, 138, 197, 0.19)"
         }
     },
     dark: {

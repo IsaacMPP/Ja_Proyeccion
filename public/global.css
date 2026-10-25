@@ -33,31 +33,25 @@
 }
 
 :root {
-    --primary: #242832;
-    --primary-lighter: #2f3542;
-    --primary-darker: #191923;
-    --primary-darkest: #12121c;
-    --text: #f0f0ff;
-    --textInvert: #131313;
-    --secondary: #f0008c;
-    --secondary-opacity: rgba(240, 0, 140, 0.5);
-    --secondary-text: #f0f0ff;
-    --transparent: #232530;
-
-    --accent: #90caf9;
-
+    /* JA Proyección — valores iniciales; el sistema de temas puede personalizarlos. */
+    --primary: #102940;
+    --primary-lighter: #244562;
+    --primary-darker: #0c2237;
+    --primary-darkest: #071a2c;
+    --text: #f4f8ff;
+    --textInvert: #0b1725;
+    --secondary: #f6bf19;
+    --secondary-opacity: rgba(246, 191, 25, 0.34);
+    --secondary-text: #0a1d30;
+    --transparent: #0c2237;
+    --accent: #4da3de;
     --connected: #27a827;
     --disconnected: #a82727;
-
     --red: rgb(255 0 0 / 0.25);
-
-    --hover: rgb(255 255 255 / 0.05);
-    --focus: rgb(255 255 255 / 0.1);
-
-    /* https://css-tricks.com/snippets/css/system-font-stack/ */
-    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    --hover: rgba(57, 138, 197, 0.10);
+    --focus: rgba(57, 138, 197, 0.19);
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     --font-size: 1em;
-
     --navigation-width: 290px;
 }
 

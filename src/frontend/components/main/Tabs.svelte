@@ -87,6 +87,7 @@
         flex-wrap: wrap;
         background-color: var(--primary-darker);
         z-index: 1;
+        box-shadow: inset 0 -1px 0 var(--primary-lighter);
     }
 
     .tabs :global(button) {
@@ -94,5 +95,12 @@
 
         padding: 0.3em 0.5em;
         border-radius: 0;
+        transition: background-color 0.15s ease;
+    }
+    .tabs :global(button:hover) {
+        background-color: var(--primary-lighter);
+    }
+    .tabs :global(button.isActive) {
+        background-color: var(--primary);
     }
 </style>

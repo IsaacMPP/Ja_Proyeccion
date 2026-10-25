@@ -39,3 +39,13 @@ escáner, convertidor, controles, pruebas y cualquier documentación que la reco
 - No reinstalar dependencias en equipos de iglesia: empaquetar desde GitHub Actions.
 - No subir node_modules, CMD, instaladores, cachés, logs, multimedia personal o datos de usuarios.
 - Conservar licencia GPL-3.0 y atribución a ChurchApps / FreeShow.
+
+## Fase 3 — primera identidad visual JA (2026-10-25)
+
+- Preservada la distribución original: barra superior, proyectos, panel de vista previa, multimedia y salidas.
+- Tema predeterminado azul oscuro y dorado, inspirado en el emblema JA.
+- La migración solo reemplaza el **tema predeterminado original** de FreeShow; los temas personales permanecen intactos.
+- Cabecera, pantalla de bienvenida, pestañas y «Acerca de» muestran JA Proyección.
+- Se añade un emblema vectorial estilizado de referencia (public/ja-logo.svg); se recomienda sustituirlo por un recurso oficial de alta resolución con autorización de uso cuando esté disponible.
+- No se alteraron la reproducción, las salidas ni los archivos multimedia del usuario.
+- Por validar: compilación, renderizado visual real, icono nativo del instalador de Windows y pruebas de regresión.

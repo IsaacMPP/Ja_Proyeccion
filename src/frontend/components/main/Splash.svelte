@@ -47,8 +47,12 @@
 </script>
 
 <Center class="context #splash">
-    <h1>FreeShow</h1>
-    <p style="opacity: 0.7;">v{$version}</p>
+    <div class="ja-welcome">
+        <img src="./ja-logo.svg" alt="Emblema JA" draggable={false} />
+        <h1>JA <span>Proyección</span></h1>
+        <p class="ja-subtitle">Multimedia y presentaciones para tu iglesia</p>
+        <p class="ja-version">Versión {$version}</p>
+    </div>
     {#if $special.splashText}
         <p style="padding-top: 30px">
             {@html extractLinksAndCleanText($special.splashText)}
@@ -64,7 +68,7 @@
     {:else if Object.keys($shows).length < 20}
         <!-- shows up for new users (can be found in "About" menu) -->
         <p style="padding-top: 30px">
-            <Link url="https://freeshow.app/docs">
+            <Link url="https://github.com/IsaacMPP/Ja_Proyeccion">
                 <T id="main.docs" />
                 <Icon id="launch" white />
             </Link>
@@ -99,10 +103,42 @@
 </Center>
 
 <style>
-    h1 {
-        font-size: 4em;
-        overflow: initial;
+    .ja-welcome {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin: 0 auto;
+        padding: 18px 22px 4px;
+        text-align: center;
+        max-width: min(95%, 680px);
     }
+    .ja-welcome img {
+        width: min(200px, 30vw);
+        max-height: 122px;
+        object-fit: contain;
+        filter: drop-shadow(0 8px 16px rgba(1, 9, 19, 0.3));
+    }
+    .ja-welcome h1 {
+        font-size: clamp(2em, 4vw, 3.65em);
+        color: var(--text);
+        line-height: 1.08;
+        letter-spacing: -0.05em;
+        overflow: visible;
+    }
+    .ja-welcome h1 span {
+        color: var(--secondary);
+    }
+    .ja-welcome .ja-subtitle {
+        font-size: 0.98em;
+        opacity: 0.82;
+        white-space: normal;
+    }
+    .ja-welcome .ja-version {
+        font-size: 0.78em;
+        opacity: 0.55;
+    }
+
 
     p {
         overflow: initial;
@@ -111,12 +147,25 @@
     .buttons {
         display: flex;
         flex-direction: column;
-        gap: 5px;
+        gap: 7px;
+        min-width: min(290px, 80vw);
+    }
+    .buttons :global(button:first-child) {
+        border-color: var(--secondary);
     }
 
     .buttons :global(button) {
         justify-content: start;
-        padding: 8px 12px;
+        padding: 9px 14px;
+        border-radius: 9px;
+        min-height: 37px;
+        background: var(--primary-darker);
+        border: 1px solid var(--primary-lighter);
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+    .buttons :global(button:hover) {
+        background: var(--primary-lighter);
+        border-color: var(--secondary);
     }
 
     .votd {
