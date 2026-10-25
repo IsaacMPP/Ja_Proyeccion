@@ -12,7 +12,22 @@ function textValue(v: any): string {
     if (v && typeof v === "object") return textValue(v.text ?? v.value ?? v.content ?? "")
     return ""
 }
+function parseSnapshotItems(items: any[]) {
+    const grouped=new Map<number,string[]>()
+    for (const item of items) {
+        if(item?.type!=="verse" || !Array.isArray(item.verse_numbers)) continue
+        const text=Array.isArray(item.lines) ? item.lines.filter((line:any)=>typeof line==="string").join(" ").trim() : ""
+        if (!text) continue
+        for(const candidate of item.verse_numbers) {
+            const number=Number(candidate)
+            if(!Number.isInteger(number)||number<1) continue
+            grouped.set(number,[...(grouped.get(number)||[]),text])
+        }
+    }
+    return Array.from(grouped,([number,parts])=>({number,text:parts.join(" ")})).sort((a,b)=>a.number-b.number)
+}
 function parseVerses(raw: any) {
+    if(Array.isArray(raw?.items)) return parseSnapshotItems(raw.items)
     const data=raw?.verses ?? raw?.versiculos ?? raw
     if (!data || typeof data !== "object") return []
     return Object.entries(data).map(([k,v],i) => ({number:Number((v as any)?.number ?? (v as any)?.verse ?? (Array.isArray(data)?i+1:k)),text:textValue(v)})).filter(v=>Number.isInteger(v.number)&&v.number>0&&v.text).sort((a,b)=>a.number-b.number)
@@ -20,10 +35,10 @@ function parseVerses(raw: any) {
 function parseChapters(raw: any) {
     const data=raw?.chapters ?? raw?.capitulos ?? raw
     if (!data || typeof data !== "object") return []
-    return Object.entries(data).map(([k,v],i)=>({number:Number((v as any)?.number ?? (v as any)?.chapter ?? (Array.isArray(data)?i+1:k)),verses:parseVerses(v)})).filter(c=>Number.isInteger(c.number)&&c.number>0&&c.verses.length).sort((a,b)=>a.number-b.number)
+    return Object.entries(data).map(([k,v],i)=>({number:Number((v as any)?.number ?? (v as any)?.chapter ?? (v as any)?.human ?? (Array.isArray(data)?i+1:k)),verses:parseVerses(v)})).filter(c=>Number.isInteger(c.number)&&c.number>0&&c.verses.length).sort((a,b)=>a.number-b.number)
 }
 function parseBookIndex(book: any, fallback: string): number | undefined {
-    for (const candidate of [book?.usfm,book?.abbreviation,book?.abbr,book?.code,book?.name,book?.book,book?.title,fallback]) {
+    for (const candidate of [book?.usfm,book?.abbreviation,book?.abbr,book?.code,book?.name,book?.human,book?.book,book?.title,fallback]) {
         const idx=codeIndex.get(key(String(candidate ?? "")))
         if (idx!==undefined) return idx
     }
@@ -95,7 +110,7 @@ export async function convertLocalBibleFiles(files:File[]):Promise<Bible> {
     if(files.length===1&&files[0].name.toLowerCase().endsWith(".json")){
         const parsed=JSON.parse(await files[0].text())
         const books=parseSnapshot(parsed)
-        const name=String(parsed?.name ?? parsed?.translation?.name ?? files[0].name.replace(/\.json$/i,""))
+        const name=String(parsed?.local_title ?? parsed?.name ?? parsed?.translation?.name ?? files[0].name.replace(/\.json$/i,""))
         return makeBible(name,books)
     }
     const books=new Map<number,any[]>()
