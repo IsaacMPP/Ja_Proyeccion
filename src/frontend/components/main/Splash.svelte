@@ -46,7 +46,7 @@
     })
 </script>
 
-<Center class="context #splash ja-splash">
+<Center class="context #splash ja-splash" style="background: radial-gradient(ellipse at 52% 1%, rgba(40,144,222,.42), transparent 46%), linear-gradient(180deg, rgba(3,23,46,.08), rgba(3,17,36,.72)), url('./ja-hero.jpg') center / cover no-repeat, #061e37;">
     <div class="ja-welcome">
         <img src="./ja-logo.webp" alt="Emblema JA" draggable={false} />
         <h1>JA <span>Proyección</span></h1>
@@ -98,11 +98,6 @@
     :global(.ja-splash) {
         position: relative;
         padding: 16px;
-        background:
-            radial-gradient(ellipse at 52% 1%, rgba(40, 144, 222, 0.42), transparent 46%),
-            linear-gradient(180deg, rgba(3, 23, 46, 0.08) 0%, rgba(3, 19, 40, 0.26) 72%, rgba(3, 17, 36, 0.72) 100%),
-            url("/ja-hero.jpg") center center / cover no-repeat,
-            #061e37;
         isolation: isolate;
         overflow-y: auto;
     }
