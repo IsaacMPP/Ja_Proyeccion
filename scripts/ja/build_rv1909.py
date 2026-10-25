@@ -71,6 +71,12 @@ ALIASES.update({"MT":"MAT","MK":"MRK","LK":"LUK","JN":"JHN","AC":"ACT","GE":"GEN
 "EZ":"EZK","DA":"DAN","HO":"HOS","JL":"JOL","AM":"AMO","OB":"OBA",
 "JON":"JON","MI":"MIC","NA":"NAM","HAB":"HAB","ZEP":"ZEP","HAG":"HAG",
 "ZEC":"ZEC","MAL":"MAL","ROM":"ROM","RE":"REV"})
+# Abreviaturas reales identificadas por el validador de la edición VPL de eBible.org.
+ALIASES.update({
+    "EZE": "EZK", "JOH": "JHN", "MAR": "MRK", "JAM": "JAS",
+    "1JO": "1JN", "2JO": "2JN", "3JO": "3JN",
+    "PHI": "PHP", "JOE": "JOL", "NAH": "NAM"
+})
 # GEN 1:1 En el principio... / GEN.1.1<TAB>... / GEN 1 1<TAB>...
 REFERENCE_PATTERNS = [
 re.compile(r"^\s*(.+?)\s+(\d+):(\d+)(?:[.-]\d+)?\s+(.+)$"),
