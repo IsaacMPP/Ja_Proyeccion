@@ -3,7 +3,7 @@
 > **DOCUMENTO CANÓNICO / FUENTE ÚNICA DE VERDAD.**
 > Antes de continuar el desarrollo, abrir este archivo **directamente desde `main` en GitHub**, consultar el último commit y revisar las ejecuciones de GitHub Actions. No confiar en respuestas anteriores del chat ni en una copia antigua de este documento.
 >
-> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.1. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
+> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.2. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
 
 **Enlace directo:** https://github.com/IsaacMPP/Ja_Proyeccion/blob/main/docs/JA_MASTER.md
 
@@ -119,8 +119,20 @@
 - Conserva vista previa y proyección reales del video, sin sustituir su flujo de reproducción.
 - Implementación: `src/electron/data/jaVideoCovers.ts`, `src/frontend/components/drawer/media/MediaCard.svelte`, `src/types/{Main,IPC/Main}.ts`, IPC `responsesMain.ts`.
 - Nueva documentación: [JA_PORTADAS_PERSONALIZADAS.md](JA_PORTADAS_PERSONALIZADAS.md); pruebas: `scripts/ja/video-covers.test.mjs`.
-- **Estado al escribir:** código pendiente de validar con compilación/instalación y ensayos reales. Confirmar último HEAD y CI antes de afirmar éxito.
+- **Estado:** código de portadas aprobado por GitHub Actions (run `40169389141`, éxito) y **validado por el usuario** el 25-oct-2026. Mantener cobertura de regresión.
 - **Limitación:** asociación por ruta de video; mover o renombrar el archivo requiere reasignar portada. No se implementó editor de recorte ni sincronización entre dispositivos.
+
+### 3.6 Biblioteca de audio y audición (implementación nueva — por validar)
+
+- El usuario confirmó portadas y autorizó seguir el 25-oct-2026.
+- Se conserva el reproductor, las listas y el mezclador de audio de FreeShow.
+- Búsqueda de pistas por carpeta actual o **Todas las carpetas**, profundidad de hasta 5 niveles, coincidencia sin tildes, palabras no contiguas y numeración `001 = 1`.
+- Resultados globales indican la biblioteca de origen cuando la ruta coincide.
+- Cada pista cuenta con botón **Preescuchar** que abre un reproductor local independiente. El operador debe seleccionar explícitamente una salida física de sonido y `setSinkId` debe funcionar antes de reproducir; **no** se reproduce automáticamente en la salida predeterminada.
+- No se conoce automáticamente si el dispositivo seleccionado es el mismo amplificador de la congregación. Debe **probarse con audífonos separados** para evitar que la audición se escuche en el culto.
+- Código: `src/frontend/components/drawer/audio/{Audio.svelte,AudioFile.svelte,AudioAudition.svelte,jaAudioLibrary.ts}`.
+- Pruebas `scripts/ja/audio-library.test.mjs`; guía `docs/JA_BIBLIOTECA_AUDIO.md`.
+- **Estado inicial de esta entrega:** integrado en código; pendiente verificar compilación e instalación y prueba de audio real. NDI y control desde celular continúan para el final.
 
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
@@ -129,20 +141,20 @@
 | Prioridad | Trabajo | Estado real | Criterio mínimo para cerrar |
 | --- | --- | --- | --- |
 | 0 | Base, videoteca, marca y pantalla secundaria | **Integradas; validadas parcialmente en Windows** | Mantener como línea base; corregir regresiones, no rehacer módulos estables. |
-| **1 — EN DESARROLLO** | **Miniaturas/portadas personalizadas por video** | **Código integrado en este cambio; esperando CI y prueba de usuario** | Escoger JPG/PNG, asociarla a cada archivo sin tocar original, conservarla al reiniciar, restaurar miniatura automática, mostrarla en biblioteca/búsqueda. |
-| **2 — SIGUIENTE DESPUÉS DE VALIDAR PORTADAS** | Audio/pistas musicales | **Por ampliar** | Carpetas MP3/WAV, búsqueda, escucha previa, controles de volumen, pausa y avance; probar aislamiento de audio antes de declarar monitoreo privado. |
+| 1 — VALIDADA | Miniaturas/portadas personalizadas por video | **CI exitosa y el usuario confirmó «quedó súper bien»** | Escoger JPG/PNG, asociarla a cada archivo sin tocar original, conservarla al reiniciar, restaurar miniatura automática, mostrarla en biblioteca/búsqueda. |
+| **2 — EN DESARROLLO** | Audio/pistas musicales | **Código integrado en esta fase; pendiente CI y prueba real** | Carpetas MP3/WAV, búsqueda, escucha previa, controles de volumen, pausa y avance; probar aislamiento de audio antes de declarar monitoreo privado. |
 | 3 | Biblia en español | **Por implementar / validar licencia** | Importar traducción autorizada, buscar libro/capítulo/versículo, navegar con flechas, controlar cantidad de versículos y fondos. |
 | 4 | Organización de un culto | **Propuesta aprobada como ruta, no implementada** | Preparar orden de videos, especiales, versículos y anuncios reutilizando proyectos de FreeShow. |
 | 5 | Temporizadores y mejoras de operación | **Hay componentes heredados; falta adaptar/probar** | Cronómetro/reloj, cuentas regresivas, avisos y controles rápidos comprobados en salida real. |
 | 6 | Auditoría de funciones avanzadas heredadas | **Dejar para el final (instrucción del usuario)** | NDI, control por celular, StageShow, OBS, OMT, cámaras y demás: inventario, configuración y pruebas independientes. |
 | 7 | Estabilización/versión de distribución | **Pendiente** | Pruebas con distintos Windows/monitores/códecs, rendimiento, respaldos de datos y documentación GPL. |
 
-**Próxima acción planificada:** validar la nueva función de **portadas personalizadas por video** mediante CI y prueba real en Windows. Luego, según autorización del usuario, pasar a biblioteca de audio/pistas musicales.
+**Próxima acción planificada:** validar la **biblioteca de audio y audición separada** con CI y pruebas reales de Windows. Tras confirmación del usuario, continuar con la Biblia en español.
 
 ### Aspectos que NO deben contarse como terminados
 
-- Portadas personalizadas **integradas en código** en el nuevo cambio; CI/pruebas reales pendientes, no declararlas terminadas todavía.
-- Biblioteca de audio específicamente adaptada a pistas musicales y monitoreo separado.
+- Portadas personalizadas **validadas por el usuario** en Windows; conservar como función estable.
+- Biblioteca de audio y audición por dispositivo independiente **integradas en código**; falta validar la separación física de sonido y la compatibilidad de `setSinkId` con equipos reales.
 - Traducción bíblica en español empaquetada o importada con permiso.
 - Control remoto por celular y NDI funcionando; existen bases heredadas pero faltan ensayos reales.
 - Prueba de cada formato/códec, monitores 3+, reconexión HDMI, escalados de Windows.
@@ -182,7 +194,7 @@
 | Selector de pantalla | `src/frontend/components/settings/{Screens.svelte,displayGuide.ts}` |
 | Salida Windows/Electron | `src/electron/output/helpers/{OutputVisibility.ts,displayRouting.ts}` |
 | IPC monitores | `src/electron/IPC/responsesMain.ts` |
-| Audio | `src/frontend/components/drawer/audio/`, `src/frontend/audio/routing/` |
+| Audio y audición | `src/frontend/components/drawer/audio/`, `src/frontend/audio/routing/`, `docs/JA_BIBLIOTECA_AUDIO.md` |
 | Biblia (heredada) | `src/frontend/components/drawer/bible/`, `src/frontend/converters/` |
 | Pruebas propias | `scripts/ja/` |
 | CI | `.github/workflows/compilar-windows.yml` |
@@ -212,7 +224,8 @@
 | 2026-10-25 | Asistente de pantallas y protección del monitor operador | `d909f78c` |
 | 2026-10-25 | Corrección final de ruta de salida; usuario confirma proyector secundario | `74709e0`; CI `40167451587` **exitosa** |
 | 2026-10-25 | Creación del documento maestro y establecimiento de protocolo de continuidad | **Este documento** |
-| 2026-10-25 | Implementación de portadas personalizadas, selector JPG/PNG y restauración; validación Windows pendiente | `src/electron/data/jaVideoCovers.ts`, `docs/JA_PORTADAS_PERSONALIZADAS.md`; revisar CI nueva |
+| 2026-10-25 | Portadas personalizadas validadas en Windows por usuario («súper bien») | `6078eb9`, CI `40169389141` exitosa |
+| 2026-10-25 | Biblioteca de audio, búsqueda global y audición segura por dispositivo separada incorporadas; CI y prueba real pendientes | `src/frontend/components/drawer/audio/`, `docs/JA_BIBLIOTECA_AUDIO.md` |
 
 ## 9. Texto para comenzar una conversación nueva
 

@@ -24,6 +24,8 @@
     import Folder from "../media/Folder.svelte"
     import AudioEffect from "./AudioEffect.svelte"
     import AudioFile from "./AudioFile.svelte"
+    import AudioAudition from "./AudioAudition.svelte"
+    import { getJAAudioLibraryName, matchesJAAudioName, uniqueJAAudioRoots } from "./jaAudioLibrary"
     import Metronome from "./Metronome.svelte"
 
     export let active: string | null
@@ -35,6 +37,15 @@
     let scrollElem: HTMLElement | undefined
 
     let playlistSettings = false
+    // Control seguro: búsqueda local/global sin alterar carpetas ni listas del usuario.
+    let jaSearchScope: "folder" | "all" = "folder"
+    let jaSearchKey = ""
+    let jaSearchBusy = false
+    let jaSearchDirty = false
+    let auditionFile: { path: string; name: string } | null = null
+    $: isLocalAudioFolder = !!(active && $audioFolders[active])
+    $: jaSearchEverywhere = active === "all" || (isLocalAudioFolder && jaSearchScope === "all")
+
 
     $: playlist = active && $audioPlaylists[active]
 
@@ -69,12 +80,12 @@
             if (active === prevActive) return
             prevActive = active
 
-            requestFiles(Object.values($audioFolders).map((a) => a.path!))
+            void requestFiles(uniqueJAAudioRoots($audioFolders))
         } else if (path.length) {
             if (path === prevActive) return
             prevActive = path
 
-            requestFiles(path)
+            void requestFiles(path)
         } else {
             // inputs & metronome
             prevActive = active
@@ -88,7 +99,14 @@
     let requesting = 0
     let currentDepth = 0
     async function requestFiles(path: string | string[], depth: number = 0) {
-        if (!path) return
+        if (!path || (Array.isArray(path) && !path.length)) {
+            allRelevantFiles = []
+            foldersList = []
+            filesList = []
+            filteredFiles = []
+            searchedFiles = []
+            return
+        }
 
         currentDepth = depth
 
@@ -97,11 +115,14 @@
         const data = await requestMain(Main.READ_FOLDER, { path, depth })
         if (!data || requesting !== currentRequest) return
 
+        const seen = new Set<string>()
         allRelevantFiles = Object.values(data).filter((a) => {
-            // remove folders with no content
             if (a.isFolder) return a.files.length > 0
-            // only audio files
-            return getMediaType(getExtension(a.name)) === "audio"
+            if (getMediaType(getExtension(a.name)) !== "audio") return false
+            const key = a.path.replace(/\\/g, "/").toLocaleLowerCase()
+            if (seen.has(key)) return false
+            seen.add(key)
+            return true
         })
 
         openFolder(active === "all" ? "all" : (path as string))
@@ -116,8 +137,8 @@
             return
         }
 
-        if (searchValue.length > 1) {
-            foldersList = allRelevantFiles.filter((a) => a.isFolder)
+        if (searchValue.trim()) {
+            foldersList = []
             filesList = allRelevantFiles.filter((a) => !a.isFolder)
 
             filterFiles()
@@ -134,8 +155,6 @@
     }
 
     // $: if ($sorted) filterFiles()
-    $: if (searchValue !== undefined) filterSearch()
-
     let filteredFiles: FileFolder[] = []
     function filterFiles() {
         if (active === "inputs" || active === "metronome") return
@@ -160,36 +179,48 @@
         scrollElem?.scrollTo(0, 0)
     }
 
-    // search
-    $: if (searchValue !== undefined) filterSearch()
-    const filter = (s: string) => s.toLowerCase().replace(/[.,\/#!?$%\^&\*;:{}=\-_`~()]/g, "")
-    let searchFilterActive = false
+    // Búsqueda rápida y resistente a acentos, numeración 001/1 y cambios de ámbito.
+    $: if (searchValue !== undefined || jaSearchScope || active || rootPath) void filterSearch()
     let searchedFiles: FileFolder[] = []
     async function filterSearch() {
-        if (searchFilterActive) return
-        searchFilterActive = true
-
-        if (searchValue.length === 1) {
-            searchFilterActive = false
+        if (jaSearchBusy) {
+            jaSearchDirty = true
             return
         }
-        if (searchValue.length < 2) {
-            if (active !== "all" && active !== "favourites" && active !== "effects_library") requestFiles(path)
-            else searchedFiles = clone(filteredFiles)
-            searchFilterActive = false
-            return
+        jaSearchBusy = true
+        try {
+            if (active === "inputs" || active === "metronome" || !!playlist || active === "effects_library" || active === "favourites") {
+                searchedFiles = clone(filteredFiles).filter(file => !searchValue.trim() || matchesJAAudioName(file.name, searchValue))
+                return
+            }
+
+            const term = searchValue.trim()
+            if (!term) {
+                if (jaSearchKey) {
+                    jaSearchKey = ""
+                    if (active === "all") await requestFiles(uniqueJAAudioRoots($audioFolders), 0)
+                    else if (rootPath) await requestFiles(path, 0)
+                }
+                searchedFiles = clone(filteredFiles)
+                return
+            }
+            if (active === "all" || isLocalAudioFolder) {
+                const source: string | string[] = jaSearchEverywhere ? uniqueJAAudioRoots($audioFolders) : path
+                const key = JSON.stringify([source, 5])
+                if (jaSearchKey !== key || currentDepth < 5) {
+                    jaSearchKey = key
+                    await requestFiles(source, 5)
+                }
+            }
+            searchedFiles = clone(filteredFiles).filter(file => !file.isFolder && matchesJAAudioName(file.name, term))
+            scrollElem?.scrollTo(0, 0)
+        } finally {
+            jaSearchBusy = false
+            if (jaSearchDirty) {
+                jaSearchDirty = false
+                void filterSearch()
+            }
         }
-
-        if (active !== "all" && active !== "favourites" && active !== "effects_library" && currentDepth < 5) {
-            await requestFiles(path, 5)
-        }
-
-        searchedFiles = clone(filteredFiles).filter((a) => filter(a.name).includes(filter(searchValue)))
-
-        // scroll to top
-        document.querySelector("svelte-virtual-list-viewport")?.scrollTo(0, 0)
-
-        searchFilterActive = false
     }
 
     function keydown(e: KeyboardEvent) {
@@ -329,6 +360,28 @@
     </div>
 {/if}
 
+<!-- JA: carpetas de audio y búsqueda rápida, sin duplicar el reproductor original. -->
+{#if active === "all" || (isLocalAudioFolder && !playlist)}
+    <div class="ja-audio-toolbar">
+        <strong>Pistas de audio</strong>
+        <span>Buscar en:</span>
+        {#if isLocalAudioFolder}
+            <button type="button" class:chosen={jaSearchScope === "folder"} aria-pressed={jaSearchScope === "folder"} on:click={() => (jaSearchScope = "folder")}>Esta carpeta</button>
+            <button type="button" class:chosen={jaSearchScope === "all"} aria-pressed={jaSearchScope === "all"} on:click={() => (jaSearchScope = "all")}>Todas las carpetas</button>
+        {:else}
+            <span>Todas las carpetas</span>
+        {/if}
+        {#if searchValue.trim()}
+            <small>{searchedFiles.filter(file => !file.isFolder).length} resultados</small>
+        {/if}
+    </div>
+{/if}
+{#if auditionFile}
+    {#key auditionFile.path}
+        <AudioAudition file={auditionFile} on:close={() => (auditionFile = null)} />
+    {/key}
+{/if}
+
 <div class="scroll" style="flex: 1;overflow-y: auto;" class:full={active === "inputs" || active === "effects_library"} bind:this={scrollElem}>
     <div class="grid" style={active !== "inputs" && active !== "effects_library" && !playlist && searchedFiles.length ? "" : "height: 100%;"}>
         {#if active === "inputs"}
@@ -348,7 +401,7 @@
             <DropArea id="audio_playlist" selectChildren let:fileOver file>
                 {#if playlist.songs.length}
                     {#each playlist.songs as song, index}
-                        <AudioFile path={song} name={getFileName(song)} {active} playlist {index} {fileOver} />
+                        <AudioFile path={song} name={getFileName(song)} {active} playlist {index} {fileOver} on:audition={(e) => (auditionFile = e.detail)} />
                     {/each}
                 {:else}
                     <Center faded>
@@ -377,7 +430,7 @@
                         {#if file.isFolder}
                             <Folder name={file.name} path={file.path} mode="list" on:open={(e) => (path = e.detail)} />
                         {:else}
-                            <AudioFile path={file.path} name={file.name} {active} />
+                            <AudioFile path={file.path} name={file.name} {active} libraryName={jaSearchEverywhere && searchValue.trim() ? getJAAudioLibraryName(file.path, $audioFolders) : ""} on:audition={(e) => (auditionFile = e.detail)} />
                         {/if}
                     {/each}
                 {/key}
@@ -503,6 +556,19 @@
 {/if}
 
 <style>
+    .ja-audio-toolbar {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 7px; padding: 8px 10px;
+        border-bottom: 1px solid #2a5678; background: #0b2b47; color: #d8e7f2; font-size: .8em;
+    }
+    .ja-audio-toolbar strong { margin-right: 7px; color: #f6bf19; }
+    .ja-audio-toolbar button {
+        border-radius: 6px; border: 1px solid #436b88; background: #143956;
+        color: #eaf4fa; padding: 5px 9px; font: inherit; cursor: pointer;
+    }
+    .ja-audio-toolbar button.chosen {
+        background: #f6bf19; color: #092034; border-color: #f6bf19; font-weight: 700;
+    }
+    .ja-audio-toolbar small { margin-left: auto; color: #adcadc; }
     .tabs {
         display: flex;
         position: relative;

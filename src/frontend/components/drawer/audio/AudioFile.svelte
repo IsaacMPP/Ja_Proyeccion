@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { createEventDispatcher } from "svelte"
     import { AudioPlayer } from "../../../audio/audioPlayer"
     import { AudioPlaylist } from "../../../audio/audioPlaylist"
     import { addProjectItem } from "../../../converters/project"
@@ -15,12 +16,17 @@
     export let playlist = false
     export let index = -1
     export let fileOver = false
+    export let libraryName = ""
+
+    const dispatch = createEventDispatcher<{ audition: { path: string; name: string } }>()
 
     $: audioKey = playlist && index > -1 ? AudioPlayer.getKey(path, index) : path
     $: outline = !!$playingAudio[audioKey] && (!$activePlaylist || $activePlaylist?.index === index)
 </script>
 
 <SelectElem id="audio" data={{ path, name, index }} {fileOver} borders={playlist ? "edges" : "all"} trigger={playlist ? "column" : null} draggable>
+    <div class="ja-audio-row">
+    <div class="ja-audio-play">
     <Button
         class="context #audio_button{playlist ? '_playlist' : ''}"
         {outline}
@@ -49,6 +55,9 @@
             <p>{name.slice(0, name.lastIndexOf("."))}</p>
         </span>
         <span style="opacity: 0.8;">
+            {#if libraryName}
+                <small class="ja-audio-library" title={libraryName}>{libraryName}</small>
+            {/if}
             {#await AudioPlayer.getDuration(path)}
                 <p>00:00</p>
             {:then duration}
@@ -56,9 +65,31 @@
             {/await}
         </span>
     </Button>
+    </div>
+    <button
+        type="button"
+        class="ja-audition-action"
+        title="Escucha previa: requiere elegir audífonos u otra salida de audio"
+        on:click|stopPropagation={() => dispatch("audition", { path, name })}
+    >Preescuchar</button>
+    </div>
 </SelectElem>
 
 <style>
+    .ja-audio-row { display: flex; align-items: stretch; width: 100%; gap: 5px; }
+    .ja-audio-play { flex: 1; min-width: 0; }
+    .ja-audio-play :global(button) { min-width: 0; }
+    .ja-audition-action {
+        flex: none; margin: 3px 7px 3px 0; padding: 5px 10px; cursor: pointer;
+        font: inherit; font-size: .75em; border: 1px solid #456f8d;
+        border-radius: 6px; color: #f5d568; background: #143956;
+    }
+    .ja-audition-action:hover { border-color: #f6bf19; background: #205275; }
+    .ja-audio-library {
+        display: inline-block; max-width: 150px; overflow: hidden;
+        text-overflow: ellipsis; white-space: nowrap; color: #b9d5e5;
+        padding: 2px 6px; border: 1px solid #375c75; border-radius: 5px;
+    }
     span {
         display: flex;
         align-items: center;
