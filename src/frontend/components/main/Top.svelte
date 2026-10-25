@@ -1,6 +1,6 @@
 <script lang="ts">
     import { slide } from "svelte/transition"
-    import { activeEdit, activePage, activeProfile, activeProject, activeShow, cloudUsers, dictionary, drawSettings, drawTool, os, outputDisplay, outputs, paintCache, profiles, saved, settingsTab, shows } from "../../stores"
+    import { activeEdit, activePage, activePopup, activeProfile, activeProject, activeShow, cloudUsers, dictionary, drawSettings, drawTool, os, outputDisplay, outputs, paintCache, profiles, saved, settingsTab, shows } from "../../stores"
     import { getCloudUsers } from "../../utils/cloudSync"
     import { translateText } from "../../utils/language"
     import Icon from "../helpers/Icon.svelte"
@@ -114,6 +114,10 @@
         {#if !settingsDisabled}
             <TopButton id="settings" hideLabel />
         {/if}
+        <Button title="Configurar pantallas y proyector" class="ja-display-assistant" on:click={() => activePopup.set("choose_screen")}>
+            <Icon id="screen" size={1.1} white />
+            <span class="ja-display-label">Pantallas</span>
+        </Button>
 
         <!-- <MaterialButton id="output_window_button" class="context #output display {$outputDisplay ? 'on' : 'off'}" title="menu.{$outputDisplay ? (confirm ? 'again_confirm' : '_title_display_stop') : '_title_display'} [Ctrl+O]" style={$outputDisplay || disableClick ? "" : "border-bottom: 2px solid var(--secondary);"} on:click={toggleOutput} disabled={(!$outputDisplay && !physicalOutputWindows.length) || disableClick} red={$outputDisplay}>
             {#if $outputDisplay}
@@ -156,6 +160,25 @@
 </div>
 
 <style>
+    .top :global(button.ja-display-assistant) {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 9px;
+        margin-inline: 3px;
+        border: 1px solid #396a91;
+        border-radius: 7px;
+        background: rgba(32, 96, 146, .2);
+        color: #f7fbff;
+        white-space: nowrap;
+    }
+    .top :global(button.ja-display-assistant:hover) {
+        border-color: var(--secondary);
+        background: rgba(32, 96, 146, .4);
+    }
+    @media (max-width: 1180px) {
+        .top :global(.ja-display-label) { display: none; }
+    }
     .ja-brand {
         display: flex;
         align-items: center;

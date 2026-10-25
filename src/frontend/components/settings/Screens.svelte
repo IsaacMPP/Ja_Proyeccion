@@ -8,7 +8,8 @@
     import { send } from "../../utils/request"
     import { clone, keysToID, sortByName } from "../helpers/array"
     import Icon from "../helpers/Icon.svelte"
-    import { toggleOutputs } from "../helpers/output"
+    import { addOutput, toggleOutputs } from "../helpers/output"
+    import { getPhysicalOutputId, isExternalDisplay } from "./displayGuide"
     import T from "../helpers/T.svelte"
     import InputRow from "../input/InputRow.svelte"
     import MaterialButton from "../inputs/MaterialButton.svelte"
@@ -46,38 +47,92 @@
     let totalScreensWidth = 0
     let totalScreensHeight = 0
 
-    onMount(async () => {
-        const displays = (await requestMain(Main.GET_DISPLAYS)) || []
-        let sortedScreens = displays.sort(sortScreensByPosition)
-        screens = sortedScreens.sort(internalFirst)
+    let loadingScreens = false
+    let screenError = ""
+    let guideMessage = ""
+    let applyingGuide = false
+    let showAdvancedScreens = false
 
-        // get min/max bounds
-        minPosX = null
-        minPosY = null
-        let maxPosX: null | number = null
-        let maxPosY: null | number = null
-        clone(screens).forEach(({ bounds }) => {
-            if (minPosX === null || bounds.x < minPosX) minPosX = bounds.x
-            if (minPosY === null || bounds.y < minPosY) minPosY = bounds.y
-            if (maxPosX === null || bounds.x + bounds.width > maxPosX) maxPosX = bounds.x + bounds.width
-            if (maxPosY === null || bounds.y + bounds.height > maxPosY) maxPosY = bounds.y + bounds.height
-        })
+    // Se detectan al abrir y también se pueden volver a consultar tras conectar HDMI.
+    async function refreshScreens() {
+        loadingScreens = true
+        screenError = ""
+        guideMessage = ""
+        try {
+            const displays = await requestMain(Main.GET_DISPLAYS)
+            if (!Array.isArray(displays)) throw new Error("GET_DISPLAYS did not return an array")
+            screens = [...displays].sort(sortScreensByPosition).sort(internalFirst)
 
-        totalScreensWidth = maxPosX !== null && minPosX !== null ? (maxPosX - minPosX) / 2 : 0
-        totalScreensHeight = maxPosY !== null && minPosY !== null ? (maxPosY - minPosY) / 2 : 0
-
-        // don't overlap buttons (& allow scroll bars to work)
-        totalScreensWidth = Math.min(totalScreensWidth, 4800)
-        totalScreensHeight = Math.min(totalScreensHeight, 1000)
-
-        // make all values start at 0
-        screens.forEach((a, i) => {
-            screens[i].previewBounds = {
-                x: a.bounds.x - (minPosX || 0),
-                y: a.bounds.y - (minPosY || 0)
-            }
-        })
+            minPosX = null
+            minPosY = null
+            let maxPosX: number | null = null
+            let maxPosY: number | null = null
+            clone(screens).forEach(({ bounds }) => {
+                if (minPosX === null || bounds.x < minPosX) minPosX = bounds.x
+                if (minPosY === null || bounds.y < minPosY) minPosY = bounds.y
+                if (maxPosX === null || bounds.x + bounds.width > maxPosX) maxPosX = bounds.x + bounds.width
+                if (maxPosY === null || bounds.y + bounds.height > maxPosY) maxPosY = bounds.y + bounds.height
+            })
+            totalScreensWidth = maxPosX !== null && minPosX !== null ? (maxPosX - minPosX) / 2 : 0
+            totalScreensHeight = maxPosY !== null && minPosY !== null ? (maxPosY - minPosY) / 2 : 0
+            totalScreensWidth = Math.min(totalScreensWidth, 4800)
+            totalScreensHeight = Math.min(totalScreensHeight, 1000)
+            screens.forEach((display) => {
+                display.previewBounds = { x: display.bounds.x - (minPosX || 0), y: display.bounds.y - (minPosY || 0) }
+            })
+        } catch (error) {
+            console.error("No se pudieron detectar las pantallas:", error)
+            screenError = "No pudimos consultar las pantallas. Comprueba la conexión e inténtalo de nuevo."
+            screens = []
+        } finally {
+            loadingScreens = false
+        }
+    }
+    onMount(() => {
+        void refreshScreens()
     })
+
+    // Acción segura y explícita para operadores: solo permite pantallas no principales.
+    function useAsProjector(display: any, displayIndex: number) {
+        if (applyingGuide || !isExternalDisplay(display, screens)) return
+
+        // Si aún no existe una salida física, crear una con los ajustes predeterminados.
+        const selectedId = getPhysicalOutputId($outputs, $currentOutputSettings) || addOutput(false, "", false, "Proyector")
+        if (!selectedId) {
+            guideMessage = "No se pudo preparar una salida de proyección. Revisa Configuración → Salidas."
+            return
+        }
+        const chosen = $outputs[selectedId]
+        if (chosen?.boundsLocked || chosen?.forcedResolution?.width) {
+            guideMessage = "Esta salida tiene posición o resolución bloqueada. Desbloquéala en las opciones avanzadas antes de cambiarla de pantalla."
+            return
+        }
+        applyingGuide = true
+        guideMessage = ""
+        const newBounds = { ...display.bounds }
+        const needsCreate = !chosen.enabled
+
+        // Ajustar la salida existente sin crear nuevas salidas ni tocar NDI o pantallas de escenario.
+        outputs.update((all) => {
+            const output = all[selectedId]
+            if (!output) return all
+            output.bounds = newBounds
+            output.screen = String(display.id)
+            output.active = true
+            output.enabled = true
+            return all
+        })
+        currentOutputSettings.set(selectedId)
+
+        if (needsCreate) send(OUTPUT, ["CREATE"], { id: selectedId, ...$outputs[selectedId] })
+        // Mostrar explícitamente en la pantalla elegida, incluso si antes estaba apagada.
+        setTimeout(() => {
+            toggleOutputs([selectedId], { state: true })
+            send(OUTPUT, ["UPDATE_BOUNDS"], { id: selectedId, bounds: newBounds })
+            guideMessage = `Pantalla ${displayIndex + 1} configurada. Comprueba el contenido en el proyector.`
+            applyingGuide = false
+        }, 180)
+    }
 
     // const fakeScreen0 = {
     //     bounds: { x: -864 - 1536, y: -452, width: 1536, height: 1536 },
@@ -249,8 +304,60 @@
         </div>
     </div>
 {:else}
-    {#if !activateOutput}
-        <MaterialButton class="popup-options {showMore ? 'active' : ''}" icon="options" iconSize={1.3} title={showMore ? "actions.close" : "create_show.more_options"} on:click={() => (showMore = !showMore)} white />
+    <section class="ja-display-guide" aria-label="Asistente de pantallas">
+        <div class="ja-guide-heading">
+            <div>
+                <h3>Pantallas detectadas</h3>
+                <p>Elige en qué monitor o proyector se verá el contenido. Los controles permanecerán en tu computadora.</p>
+            </div>
+            <button type="button" on:click={refreshScreens} disabled={loadingScreens || applyingGuide}>Actualizar</button>
+        </div>
+
+        {#if loadingScreens}
+            <p class="ja-guide-notice">Buscando pantallas conectadas…</p>
+        {:else if screenError}
+            <p class="ja-guide-warning" role="alert">{screenError}</p>
+        {:else if screens.length === 0}
+            <p class="ja-guide-warning">No se detectó ninguna pantalla. Revisa la conexión.</p>
+        {:else}
+            <div class="ja-guide-cards">
+                {#each screens as display, index (display.id)}
+                    {@const external = isExternalDisplay(display, screens)}
+                    {@const assigned = Object.values($outputs).some((output) => output.screen === String(display.id) && output.enabled)}
+                    <div class="ja-guide-card" class:ja-assigned={external && assigned}>
+                        <div class="ja-guide-number">{index + 1}</div>
+                        <div class="ja-guide-info">
+                            <strong>Pantalla {index + 1}</strong>
+                            <span>{display.isPrimary ? "Principal · controles" : external ? "Externa · proyector o TV" : "Pantalla detectada"}</span>
+                            <small>{display.bounds.width} × {display.bounds.height} px {external && assigned ? "· Asignada" : ""}</small>
+                        </div>
+                        {#if external}
+                            <button type="button" class="ja-project" disabled={applyingGuide} on:click={() => useAsProjector(display, index)}>
+                                {assigned ? "Usar aquí" : "Usar como proyector"}
+                            </button>
+                        {:else}
+                            <span class="ja-main-screen">No proyectar aquí</span>
+                        {/if}
+                    </div>
+                {/each}
+            </div>
+            {#if screens.length === 1}
+                <p class="ja-guide-warning">Solo se detecta una pantalla. Conecta el proyector por HDMI o DisplayPort y en Windows pulsa Win + P → Extender. Después selecciona «Actualizar».</p>
+            {:else}
+                <p class="ja-guide-note">¿No sabes cuál es cuál? Pulsa «Identificar pantallas» y verás un número durante unos segundos en cada monitor.</p>
+            {/if}
+            <button type="button" class="ja-identify" disabled={loadingScreens} on:click={identifyScreens}>Identificar pantallas</button>
+        {/if}
+        {#if guideMessage}
+            <p class="ja-guide-result" role="status">{guideMessage}</p>
+        {/if}
+    </section>
+    <button type="button" class="ja-advanced-toggle" on:click={() => (showAdvancedScreens = !showAdvancedScreens)}>
+        {showAdvancedScreens ? "Ocultar opciones avanzadas" : "Opciones avanzadas de pantalla"}
+    </button>
+    {#if showAdvancedScreens}
+        {#if !activateOutput}
+            <MaterialButton class="popup-options {showMore ? 'active' : ''}" icon="options" iconSize={1.3} title={showMore ? "actions.close" : "create_show.more_options"} on:click={() => (showMore = !showMore)} white />
     {/if}
 
     {#key currentScreen.boundsLocked}
@@ -325,9 +432,58 @@
             </MaterialButton>
         </div>
     {/if}
+    {/if}
 {/if}
 
 <style>
+    .ja-display-guide {
+        margin: 3px 0 16px;
+        padding: 14px;
+        background: #102c48;
+        border: 1px solid #2a5d81;
+        border-radius: 11px;
+        color: #f6faff;
+    }
+    .ja-guide-heading { display: flex; justify-content: space-between; gap: 14px; align-items: center; }
+    .ja-guide-heading h3 { font-size: 1.1em; margin: 0 0 4px; }
+    .ja-guide-heading p, .ja-guide-note { font-size: .86em; color: #c4d5e5; white-space: normal; }
+    .ja-guide-heading button, .ja-identify {
+        flex: none; padding: 8px 12px; border: 1px solid #467aa0; border-radius: 7px;
+        color: #fff; background: #19446b; cursor: pointer; font: inherit;
+    }
+    .ja-guide-cards { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+    .ja-guide-card {
+        display: flex; align-items: center; gap: 12px; min-width: 0;
+        padding: 10px; background: #081e33; border: 1px solid #285171; border-radius: 8px;
+    }
+    .ja-guide-card.ja-assigned { border-color: #f6bf19; }
+    .ja-guide-number {
+        display: flex; align-items: center; justify-content: center; flex: none;
+        width: 45px; height: 38px; background: #1b547f; border-radius: 6px;
+        font-weight: 800; font-size: 1.15em; color: #fff;
+    }
+    .ja-guide-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+    .ja-guide-info strong { font-size: .95em; }
+    .ja-guide-info span, .ja-guide-info small { font-size: .78em; color: #bbcfdd; white-space: normal; }
+    .ja-project { flex: none; padding: 9px 11px; color: #06182d; background: #f6bf19;
+        border-radius: 7px; border: 0; font-weight: 750; cursor: pointer; }
+    .ja-main-screen { font-size: .77em; color: #c8d5e2; text-align: end; }
+    .ja-guide-warning, .ja-guide-result { margin-top: 12px; padding: 10px;
+        border-radius: 7px; background: #29445b; white-space: normal; font-size: .86em; }
+    .ja-guide-result { border-inline-start: 3px solid #f6bf19; }
+    .ja-identify { margin-top: 8px; }
+    .ja-display-guide button:disabled { cursor: not-allowed; opacity: .5; }
+    .ja-advanced-toggle {
+        display: block; width: 100%; padding: 7px 12px; margin: 4px 0 8px;
+        background: transparent; border: 1px solid #31546d; border-radius: 6px;
+        color: #ccdae6; cursor: pointer; font: inherit; text-align: start;
+    }
+    .ja-advanced-toggle:hover { border-color: #f6bf19; }
+    @media (max-width: 720px) {
+        .ja-guide-heading { flex-direction: column; align-items: flex-start; }
+        .ja-guide-card { flex-wrap: wrap; }
+        .ja-project { margin-inline-start: auto; }
+    }
     .content {
         width: 100%;
         display: flex;

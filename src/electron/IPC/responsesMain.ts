@@ -116,7 +116,12 @@ export const mainResponses: MainResponses = {
     // OUTPUT
     [Main.GET_SCREENS]: () => getScreens(),
     [Main.GET_WINDOWS]: () => getScreens("window"),
-    [Main.GET_DISPLAYS]: () => screen.getAllDisplays(),
+    // Etiquetar la pantalla principal explícitamente para el asistente JA;
+    // no inferirla de la posición, porque un monitor externo puede estar a la izquierda.
+    [Main.GET_DISPLAYS]: () => {
+        const primaryId = screen.getPrimaryDisplay().id
+        return screen.getAllDisplays().map((display) => ({ ...display, isPrimary: display.id === primaryId }))
+    },
     [Main.GET_GRAPHICS_DEVICES]: async () => await listGraphicsDevices(),
     [Main.OUTPUT]: (_, e) => (e.sender.id === getMainWindow()?.webContents.id ? "false" : "true"),
     // MEDIA

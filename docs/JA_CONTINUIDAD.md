@@ -64,3 +64,10 @@ Referencia visual facilitada por el usuario el 2026-10-25, 1672×941.
 - Los cantos mostrados en la ilustración no se incluyen como contenido. El programa únicamente enseña los archivos reales de las carpetas del usuario.
 - Se conserva la estructura de FreeShow y se mantienen sus créditos/licencia.
 - Falta validar en Windows que la compilación de este commit pase y el diseño funcione en resoluciones distintas.
+
+## Pantallas fáciles — detección y configuración guiada (2026-10-25)
+- El usuario mostró que Windows detecta dos pantallas extendidas y pidió una configuración adecuada para novatos.
+- Guía **Pantallas** accesible desde la cabecera, con detección explícita de principal mediante Electron y selección segura de pantalla externa.
+- Opción de identificar pantallas con números, actualizar tras HDMI, instrucciones Win+P y desplegable de opciones avanzadas originales.
+- No tocamos NDI ni el resto de integraciones; quedan para una fase posterior.
+- Pendiente verificar CI y probar físicamente con 1, 2 y 3 pantallas. Más detalles en `docs/JA_PANTALLAS_FACILES.md`.
