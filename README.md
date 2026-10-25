@@ -3,9 +3,10 @@
 Programa de proyección para iglesias adventistas, derivado de FreeShow 1.6.7, bajo licencia GPL-3.0.
 
 - [Compilación Windows en GitHub Actions](https://github.com/IsaacMPP/Ja_Proyeccion/actions/workflows/compilar-windows.yml): genera un instalador de prueba en Artifacts solo si finaliza correctamente.
-- [Ruta de desarrollo](docs/JA_RUTA_DESARROLLO.md) y [estado de continuidad](docs/JA_CONTINUIDAD.md).
-- [Fase 2: Biblioteca de videos, por carpeta y búsqueda global](docs/JA_BIBLIOTECA_FASE2.md) (pendiente de validación de esta fase).
-- **Interfaz JA Proyección (fase 3 inicial)**: mismos paneles y accesos; tema azul/dorado, marca y bienvenida propias. El icono del instalador y el emblema final de alta resolución requieren validación posterior.
+- **[ARCHIVO MAESTRO — LEER ANTES DE SEGUIR EL PROYECTO](docs/JA_MASTER.md): estado real, cambios, pendientes, prioridades y guía para continuar en un nuevo chat.**
+- [Bitácora histórica](docs/JA_CONTINUIDAD.md) y [ruta original (histórica)](docs/JA_RUTA_DESARROLLO.md).
+- [Videoteca por carpetas y búsqueda](docs/JA_BIBLIOTECA_FASE2.md): implementada, con reproducción y salidas básicas comprobadas por el usuario; faltan pruebas exhaustivas de formatos/códecs.
+- **Interfaz JA Proyección**: conserva los paneles y accesos originales con identidad azul/dorado, emblema JA sin AOP y ventana de carga personalizada.
 - No es necesario ejecutar archivos CMD locales para compilar en GitHub.
 - La base se ha compilado, instalado y abierto correctamente en Windows; cada función nueva debe validarse por separado.
 

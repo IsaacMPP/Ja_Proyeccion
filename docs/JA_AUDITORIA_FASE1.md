@@ -1,5 +1,8 @@
 # Auditoría técnica — Fase 1
 
+> **ARCHIVO HISTÓRICO / CONTEXTO ANTERIOR.** El estado vigente, decisiones confirmadas, próximos pasos y protocolo de continuidad se encuentran en **[JA_MASTER.md](JA_MASTER.md)**. Este documento puede contener estados antiguos y no debe usarse como fuente principal.
+
+
 **Fecha de revisión:** 24 de octubre de 2026.  
 **Fuente:** ZIP `FreeShow-main.zip` aportado para este proyecto.  
 **Versión declarada:** `freeshow@1.6.7`, `package.json`, sin repositorio `.git` en el ZIP.  

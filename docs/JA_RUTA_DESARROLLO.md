@@ -1,5 +1,8 @@
 # Ruta de desarrollo — Proyección para iglesias adventistas
 
+> **ARCHIVO HISTÓRICO / CONTEXTO ANTERIOR.** El estado vigente, decisiones confirmadas, próximos pasos y protocolo de continuidad se encuentran en **[JA_MASTER.md](JA_MASTER.md)**. Este documento puede contener estados antiguos y no debe usarse como fuente principal.
+
+
 ## Objetivo
 
 Un **solo programa de proyección**, sencillo de usar en cultos generales, cultos jóvenes, Escuela Sabática y clubes. Se aprovecha el motor de FreeShow, con una experiencia pensada para operadores voluntarios. La etiqueta **JA Proyección** es provisional; no hay nombre comercial final aprobado.

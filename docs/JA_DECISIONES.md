@@ -1,5 +1,8 @@
 # Decisiones del proyecto
 
+> **ARCHIVO HISTÓRICO / CONTEXTO ANTERIOR.** El estado vigente, decisiones confirmadas, próximos pasos y protocolo de continuidad se encuentran en **[JA_MASTER.md](JA_MASTER.md)**. Este documento puede contener estados antiguos y no debe usarse como fuente principal.
+
+
 ## Confirmado por el usuario
 
 - Un programa de proyección integrado, **sencillo y fácil de usar**.

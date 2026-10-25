@@ -1,5 +1,8 @@
 # JA Proyección — Estado y continuidad
 
+> **ARCHIVO HISTÓRICO / CONTEXTO ANTERIOR.** El estado vigente, decisiones confirmadas, próximos pasos y protocolo de continuidad se encuentran en **[JA_MASTER.md](JA_MASTER.md)**. Este documento puede contener estados antiguos y no debe usarse como fuente principal.
+
+
 Repositorio: https://github.com/IsaacMPP/Ja_Proyeccion
 Rama: main
 Base: FreeShow 1.6.7, GPL-3.0.
