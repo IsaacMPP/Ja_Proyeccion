@@ -208,6 +208,11 @@
 - Alcance deliberado: no se crea copia de medios, no se instala material con derechos, no se altera `Archivos de programa`; aún no crea carpetas físicas, no incorpora biblias a esta estructura ni clasifica automáticamente videos por contenido. El himnario especializado con búsqueda por número/título y miniaturas se hará en Fase 4.2. El organizador y los espacios aislados corresponden a 4.3 y 4.4.
 - **Aceptación pendiente:** CI Windows de rama, vincular carpetas separadas, comprobar persistencia tras reiniciar y proyección de video externo. No marcar terminado sin prueba real.
 
+### Incidente rendimiento Himnario (25-oct-2026)
+- Usuario observó con 613 MP4 que las miniaturas tardan en aparecer y la interfaz se congela al hacer scroll; se ve panel vacío. No cerrar Fase 4.2 sin ensayo real.
+- Investigación en `MediaGrid.svelte`: la animación `lazyLoader` por cada tarjeta dependía de frames y podía quedar atrás al desplazar rápidamente; reemplazada por ventana directa de tarjetas visibles + margen. `Media.svelte` recalculaba `mediaFilesOnly.map(...)` para cada tarjeta y remontaba toda la cuadrícula con `{#key searchedFiles}`; ahora memoriza la lista derivada y mantiene instancias. Test estático `media-grid-performance.test.mjs`.
+- PENDIENTE: verificar compilación Windows y desplazamiento con 613 himnos; revisar caché/thumbnails fallidos si persiste. No se declara resuelto sólo con CI.
+
 ### Fase 4.2 — Himnario Adventista, primera integración (25-oct-2026)
 
 - El usuario confirmó la creación física de las carpetas de biblioteca en Windows («ya está») y autorizó continuar.
