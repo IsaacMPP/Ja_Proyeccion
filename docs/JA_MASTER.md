@@ -3,7 +3,7 @@
 > **DOCUMENTO CANÓNICO / FUENTE ÚNICA DE VERDAD.**
 > Antes de continuar el desarrollo, abrir este archivo **directamente desde `main` en GitHub**, consultar el último commit y revisar las ejecuciones de GitHub Actions. No confiar en respuestas anteriores del chat ni en una copia antigua de este documento.
 >
-> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.4. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
+> **Última actualización de contenido:** 25 de octubre de 2026. **Versión del registro:** 1.5. **Responsable del alcance:** el usuario. **Estado global:** aplicación funcional en Windows y desarrollo activo, NO versión final.
 
 **Enlace directo:** https://github.com/IsaacMPP/Ja_Proyeccion/blob/main/docs/JA_MASTER.md
 
@@ -134,7 +134,7 @@
 - Pruebas `scripts/ja/audio-library.test.mjs`; guía `docs/JA_BIBLIOTECA_AUDIO.md`.
 - **Estado confirmado:** GitHub Actions `40213108136` exitosa; el usuario confirmó «ya funciona el audio». **Precaución:** no hay confirmación específica de aislamiento por audífonos; verificar antes de usar en el culto. NDI y control desde celular continúan para el final.
 
-### 3.7 Biblia en español: traducciones, diseño y flechas (implementación — CI pendiente)
+### 3.7 Biblia en español: traducciones, diseño y flechas (CI correcta — prueba en Windows pendiente)
 
 - Solicitud explícita del usuario después de confirmar que el audio funciona: **RVR1960, RVR1995, NVI y otras traducciones populares**, cambio rápido de versión, fondo de color o imagen, fuente, tamaño, alineación y navegación con flechas.
 - **Catálogo** de RVR60, RVR95, NVI, NTV, NBLA, DHH, RV1909 en `jaSpanishBibles.ts`. Muestra qué ediciones están realmente instaladas, permite elegirlas y abre el importador existente para las ausentes.
@@ -143,7 +143,7 @@
 - **Flechas** normales izquierda/derecha dentro del módulo Biblia; no interceptar búsquedas, selects, botones, edición ni atajos con modificadores. Opción visible para activar/desactivar; conserva navegación previa Ctrl+flechas.
 - Código: `src/frontend/components/drawer/bible/{Scripture.svelte,jaScriptureDesign.ts,jaSpanishBibles.ts}`, `src/frontend/components/drawer/info/ScriptureInfo.svelte`, `src/frontend/components/drawer/navigation/ScriptureTabs.svelte`.
 - Guía `docs/JA_BIBLIA_ESPANOL.md` y pruebas `scripts/ja/spanish-bible.test.mjs`.
-- **Estado al crear:** el primer intento de CI, run `40216920921`, **falló al compilar Svelte**: `ScriptureInfo.svelte` línea 293 tenía una aserción de tipo `as JAScriptureDesign["align"]` dentro del markup, no aceptada por el compilador. Las 38 pruebas anteriores sí habían pasado porque ninguna compilaba los componentes Svelte. Se corrigió moviendo el estrechamiento del tipo a `changeJAAlignment` dentro del script, se corrigió la detección de plantillas `scripture_2/3/4` y se añadió un test de compilación real `scripts/ja/scripture-svelte-compile.test.mjs`. **Pendiente confirmar resultado de la siguiente CI y pruebas con Biblia real en Windows**. No afirmar que RVR60/95/NVI estén listas para proyectarse offline antes de licencia y datos correspondientes.
+- **Estado al crear:** el primer intento de CI, run `40216920921`, **falló al compilar Svelte**: `ScriptureInfo.svelte` línea 293 tenía una aserción de tipo `as JAScriptureDesign["align"]` dentro del markup, no aceptada por el compilador. Las 38 pruebas anteriores sí habían pasado porque ninguna compilaba los componentes Svelte. Se corrigió moviendo el estrechamiento del tipo a `changeJAAlignment` dentro del script, se corrigió la detección de plantillas `scripture_2/3/4` y se añadió un test de compilación real `scripts/ja/scripture-svelte-compile.test.mjs`. **CI corregida y verificada exitosa:** run `40218691694`, commit `7d66e1ecdec121867a6b8d201855260c6328cebd`; pasó pruebas automatizadas, compilación, empaquetado NSIS y publicó artefacto `JA-Proyeccion-Windows-pruebas` (no expirado al revisar). Pendiente prueba con Biblia real en Windows. No afirmar que RVR60/95/NVI estén listas para proyectarse offline antes de licencia y datos correspondientes.
 
 ## 4. Próximas fases y prioridades ACTUALIZADAS
 
@@ -154,7 +154,7 @@
 | 0 | Base, videoteca, marca y pantalla secundaria | **Integradas; validadas parcialmente en Windows** | Mantener como línea base; corregir regresiones, no rehacer módulos estables. |
 | 1 — VALIDADA | Miniaturas/portadas personalizadas por video | **CI exitosa y el usuario confirmó «quedó súper bien»** | Escoger JPG/PNG, asociarla a cada archivo sin tocar original, conservarla al reiniciar, restaurar miniatura automática, mostrarla en biblioteca/búsqueda. |
 | 2 — VALIDADA | Audio/pistas musicales | **CI exitosa y el usuario confirmó «ya funciona el audio»** (audición por audífonos aún requiere prueba específica) | Carpetas MP3/WAV, búsqueda, escucha previa, controles de volumen, pausa y avance; probar aislamiento de audio antes de declarar monitoreo privado. |
-| **3 — EN DESARROLLO** | Biblia en español | **Controles y catálogo integrados; pendiente CI y prueba real. No se distribuyen textos protegidos.** | Importar traducción autorizada, buscar libro/capítulo/versículo, navegar con flechas, controlar cantidad de versículos y fondos. |
+| **3 — EN DESARROLLO** | Biblia en español | **Compilación y pruebas CI exitosas (`40218691694`); prueba real pendiente. No se distribuyen textos protegidos.** | Importar traducción autorizada, buscar libro/capítulo/versículo, navegar con flechas, controlar cantidad de versículos y fondos. |
 | 4 | Organización de un culto | **Propuesta aprobada como ruta, no implementada** | Preparar orden de videos, especiales, versículos y anuncios reutilizando proyectos de FreeShow. |
 | 5 | Temporizadores y mejoras de operación | **Hay componentes heredados; falta adaptar/probar** | Cronómetro/reloj, cuentas regresivas, avisos y controles rápidos comprobados en salida real. |
 | 6 | Auditoría de funciones avanzadas heredadas | **Dejar para el final (instrucción del usuario)** | NDI, control por celular, StageShow, OBS, OMT, cámaras y demás: inventario, configuración y pruebas independientes. |
@@ -238,7 +238,7 @@
 | 2026-10-25 | Portadas personalizadas validadas en Windows por usuario («súper bien») | `6078eb9`, CI `40169389141` exitosa |
 | 2026-10-25 | Audio general validado por usuario («ya funciona»), CI exitosa; audífonos por separado pendientes de ensayo | `a03635c`, Actions `40213108136` |
 | 2026-10-25 | Biblia española: catálogo, estilo JA, navegación con flechas implementados; pendiente CI/licencias | `docs/JA_BIBLIA_ESPANOL.md` |
-| 2026-10-25 | Falló CI Biblia `40216920921` en Svelte: TS aserción dentro de atributo; corrección estructural y prueba de compilador integradas, nueva CI por verificar | `ScriptureInfo.svelte`, `scripts/ja/scripture-svelte-compile.test.mjs` |
+| 2026-10-25 | Falló CI Biblia `40216920921` en Svelte (TS aserción dentro de markup); corregido en `7d66e1e`. Nueva CI `40218691694` **exitosa**, instalador Windows publicado; prueba real de Biblia pendiente | `ScriptureInfo.svelte`, `scripts/ja/scripture-svelte-compile.test.mjs` |
 
 ## 9. Texto para comenzar una conversación nueva
 
