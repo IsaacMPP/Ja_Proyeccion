@@ -48,7 +48,7 @@
 
 <Center class="context #splash ja-splash" style="background: radial-gradient(ellipse at 52% 1%, rgba(40,144,222,.42), transparent 46%), linear-gradient(180deg, rgba(3,23,46,.08), rgba(3,17,36,.72)), url('./ja-hero.jpg') center / cover no-repeat, #061e37;">
     <div class="ja-welcome">
-        <img src="./ja-logo.webp" alt="Emblema JA" draggable={false} />
+        <img src="./ja-logo.png" alt="Emblema JA" draggable={false} />
         <h1>JA <span>Proyección</span></h1>
         <p class="ja-subtitle">Presentaciones que inspiran, para una generación que sirve.</p>
         <p class="ja-version">v{$version}</p>
@@ -112,10 +112,11 @@
         text-align: center;
     }
     .ja-welcome img {
-        height: clamp(102px, 21vh, 142px);
-        width: auto;
-        max-width: 40vw;
-        object-fit: contain;
+        height: clamp(150px, 27vh, 205px);
+        width: min(275px, 40vw);
+        max-width: 80%;
+        object-fit: cover;
+        object-position: center;
         filter: drop-shadow(0 7px 15px rgba(1, 9, 19, 0.28));
     }
     .ja-welcome h1 {
@@ -193,13 +194,13 @@
     }
     .votd :global(a) { text-decoration: none; }
     @media (max-height: 650px) {
-        .ja-welcome img { height: clamp(70px, 16vh, 112px); }
+        .ja-welcome img { height: clamp(96px, 20vh, 150px); width: min(210px, 40vw); }
         .ja-welcome h1 { font-size: clamp(2em, 3.8vw, 3.3em); }
         .buttons { margin-top: 8px; gap: 6px; }
         .buttons :global(button) { min-height: 35px; padding: 7px 12px; }
     }
     @media (max-width: 680px) {
         .ja-welcome h1 { font-size: 2.1em; }
-        .ja-welcome img { height: 92px; max-width: 50vw; }
+        .ja-welcome img { height: 112px; width: 160px; max-width: 60vw; }
     }
 </style>

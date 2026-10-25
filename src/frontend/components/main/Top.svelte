@@ -100,7 +100,7 @@
             <div class="unsaved" />
         {/if}
         <div class="ja-brand" aria-label="JA Proyección">
-            <img src="./ja-logo.webp" alt="Emblema JA" draggable={false} />
+            <img src="./ja-logo.png" alt="Emblema JA" draggable={false} />
             <div class="ja-name">JA <strong>Proyección</strong></div>
         </div>
     </span>
@@ -168,8 +168,9 @@
     }
     .ja-brand img {
         height: 51px;
-        width: 63px;
-        object-fit: contain;
+        width: 70px;
+        object-fit: cover;
+        object-position: center;
         flex: 0 0 auto;
     }
     .ja-name {
@@ -215,7 +216,7 @@
     }
     @media screen and (max-width: 940px) {
         .ja-name { font-size: 1.08em; }
-        .ja-brand img { height: 42px; width: 54px; }
+        .ja-brand img { height: 42px; width: 57px; }
         .top > span:nth-child(2) :global(button) { padding-inline: 6px; }
     }
 

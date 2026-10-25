@@ -47,7 +47,7 @@ test("La vista JA corresponde a la maqueta sin imágenes de cantos ficticios", a
         readFile("src/frontend/stores.ts", "utf8"),
         readFile("src/frontend/utils/common.ts", "utf8"),
         readFile("public/ja-hero.jpg"),
-        readFile("public/ja-logo.webp")
+        readFile("public/ja-logo.png")
     ])
     assert.match(splash, /ja-hero\.jpg/)
     assert.match(splash, /Presentaciones que inspiran/)
@@ -60,4 +60,17 @@ test("La vista JA corresponde a la maqueta sin imágenes de cantos ficticios", a
     assert.ok(hero.length > 2000, "El fondo de culto debe estar empaquetado")
     assert.ok(logo.length > 2000, "El emblema real debe estar empaquetado")
     assert.doesNotMatch(splash, /01 - Firmes y Adelante\.mp4/)
+})
+
+test("El icono de Windows y el logotipo JA coinciden y no usan AOP", async () => {
+    const [logo, icon, loading] = await Promise.all([
+        readFile("public/ja-logo.png"),
+        readFile("public/icon.png"),
+        readFile("public/loading.html", "utf8")
+    ])
+    assert.ok(logo.equals(icon), "El icono y el logo usan el mismo emblema JA")
+    assert.match(loading, /object-fit: cover/)
+    assert.doesNotMatch(loading, /AOP/)
+    assert.match(loading, /justify-content: center/)
+    assert.match(loading, /white-space: nowrap/)
 })
