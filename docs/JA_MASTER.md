@@ -213,6 +213,13 @@
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
 
+### Implementación de pestaña independiente Himnario — 25-oct-2026
+- Autorización del usuario: «procede», para continuar en orden con la estructura definitiva del Himnario, antes del centro universal.
+- En la misma rama del buscador (PR #6) se agregó pestaña visible **Himnario** a la navegación inferior; se abre la biblioteca asociada al rol `hymnal` reutilizando `Media.svelte`, `jaHymnal.ts`, el caché global, el buscador y los controles de proyección existentes. Se añade orientación cuando la biblioteca aún no está vinculada.
+- Acceso a administración mediante Multimedia; se reutilizan las autorizaciones de Media y el panel informativo existente. **No** se reescribe el reproductor ni el motor multipantalla de FreeShow; no se modifica `main`.
+- Test estructural `scripts/ja/hymnal-dedicated-tab.test.mjs`. **Pendiente:** CI Windows, probar clic en pestaña Himnario, 613 MP4, búsqueda por número/título, miniaturas tras cambio de pestaña, reproducción y proyección en distintas salidas, y manejo de biblioteca sin vincular.
+- El futuro centro universal y las listas se mantienen fuera de esta entrega; la prioridad es estabilizar y validar Fase 4.2 antes de avanzar.
+
 ### Decisión de secuencia tras revisión de UX (25-oct-2026)
 - El usuario validó el caché persistente y pidió **cerrar pendientes en orden** antes de rediseñar el centro. No iniciar aún el centro universal.
 - Estado comprobado: CI del buscador #6, ejecuciones `40247531557` y `40247553565`, **success**. Compilación exitosa no equivale a prueba funcional en Windows.
