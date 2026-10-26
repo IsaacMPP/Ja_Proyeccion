@@ -1,3 +1,9 @@
+### Corrección de carrera al pasar de video a Solo audio — 25-oct-2026
+- Nuevo reporte Windows: al cambiar del mismo video a Solo audio la pantalla queda negra y no suena; Solo audio funciona si es el primer modo elegido.
+- Causa probable inspeccionada en FreeShow: `VideoPlayer.stop` aplica transición/fade-out asíncrona (predeterminado cercano a 800 ms) antes de liberar `playingVideos`; `muteAudioWhenVideoPlays` puede atenuar el reproductor independiente durante ese intervalo.
+- Cambio contenido en `MediaCard.svelte`: tras `clearBackground` selectivo, esperar hasta que `VideoPlayer.audioExists(path)` sea falso (tope 3.5 s), después llamar `AudioPlayer.start`; restaurar el fondo si falla. Actualizar volumen de la pista al iniciar. Test estructural correspondiente actualizado. No modifica motor ni implementa sincronización temporal.
+- **Pendiente CI y prueba Windows repetida.** Si persiste, registrar estados de `playingVideos`, `playingAudio` y `muteAudioWhenVideoPlays`; no afirmar solución definitiva sin medición.
+
 ### Fallo repetido Solo audio al regresar desde modos de video — 25-oct-2026
 - Windows: «Solo audio» funciona si se elige primero en otro archivo, pero falla al alternar en el mismo MP4 tras Video con audio/Solo video.
 - Se inspeccionó `AudioPlayer.start()`: puede devolver `true` cuando `currentlyLoading`, `outLocked` o `clearing` bloquean la operación, sin confirmar reproducción; el flujo previo iniciaba la pista antes de quitar la proyección que podía mantener reglas de atenuación de audio.
