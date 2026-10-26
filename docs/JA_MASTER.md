@@ -1,3 +1,10 @@
+### P1 — Detección real de Windows y asignación de pantallas (26-oct-2026)
+- Inventario compartido `settings/jaDetectedDisplays.ts` consulta `Main.GET_DISPLAYS`. El asistente `Screens.svelte` publica las pantallas detectadas y al abrir el menú contextual multimedia se renueva el inventario; se evitan destinos ficticios.
+- «Enviar a pantalla» diferencia la pantalla principal de Windows (control, no proyectable), pantallas externas sin asignar, y salidas FreeShow activas vinculadas mediante `output.screen`. La opción «Configurar pantallas…» abre ajustes de salidas. Antes de enviar un medio se comprueba que la salida sigue asociada a un monitor detectado y no principal.
+- `displayGuide.ts` y `Screens.svelte` reservan cada salida física para un monitor distinto: no reasignar silenciosamente una salida ocupada por otra pantalla. Solo al pulsar explícitamente «Usar como proyector» se configura una salida (si es necesario se crea otra).
+- Alcance: monitores reportados por Windows/Electron (pantallas físicas) y Multimedia/Himnario. No autodisparo a la laptop ni autodestino para contenidos de Biblia/Presentaciones; detección refrescada al abrir menú y ajustes, no vigilancia continua en segundo plano. Pendientes: validación real con 2/3 monitores, hotplug y destinos virtuales diferenciados.
+- Pruebas `scripts/ja/media-output-target.test.mjs`; **CI y prueba física obligatorias antes de cerrar P1**. Sin cambios al reproductor ya estabilizado; PR #6 permanece draft, `main` intacta.
+
 ### Inicio de P1 — Selección multipantalla desde Multimedia e Himnario (25-oct-2026)
 - Se aprovechó el menú contextual nativo de FreeShow: `contextMenus.ts`, `loadItems.ts`, `ContextItem.svelte`, `menuClick.ts`. Nueva opción «Enviar a pantalla» para tarjetas `media_card`, con submenú dinámico exclusivamente de salidas lógicas `enabled && active && !stageOutput`. No inventa salidas, ni muestra salidas inactivas, y reutiliza `setOutput("background", ..., outputId)` para afectar un solo destino.
 - La configuración física existente en `settings/Screens.svelte` ya muestra monitores detectados, refresca, identifica y permite asignar proyectores; no se duplicó.
