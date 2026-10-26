@@ -569,7 +569,9 @@
         align-items: center;
         justify-content: space-between;
         gap: 10px;
-        padding: 6px 16px;
+        padding: 9px 12px;
+        border-radius: 6px;
+        line-height: 1.3;
         cursor: pointer;
     }
     div:hover:not(.disabled) {
