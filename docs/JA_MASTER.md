@@ -213,6 +213,13 @@
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
 
+### Decisión de secuencia tras revisión de UX (25-oct-2026)
+- El usuario validó el caché persistente y pidió **cerrar pendientes en orden** antes de rediseñar el centro. No iniciar aún el centro universal.
+- Estado comprobado: CI del buscador #6, ejecuciones `40247531557` y `40247553565`, **success**. Compilación exitosa no equivale a prueba funcional en Windows.
+- **Orden obligado Fase 4.2**: (1) estructura/pestaña definitiva del Himnario; (2) reutilizar y adaptar el buscador ya escrito en #6 a esa ubicación, sin duplicar controles; (3) verificar navegación, selección, vídeo/audio y el caché; (4) pruebas Windows y cierre de PR encadenados, sin fusionar prematuramente.
+- **Pendiente posterior**: centro de trabajo universal con previsualización privada de videos, Biblia, diapositivas, imágenes y audio, controles contextuales, programas y listas; conservar las salidas independientes de FreeShow, pantallas de confianza y contenido simultáneo. Diseñar contra el motor existente, no imponer un editor nuevo ni romper el sistema multipantalla.
+- No añadir funciones al centro hasta cerrar pendientes y revisar el alcance real de las demás fases.
+
 ### Mejorar visibilidad del buscador del Himnario — 25-oct-2026
 - Tras prueba positiva del caché, se inició rama aislada `feature/fase4-2-buscador-himnario` basada en caché persistente.
 - `Media.svelte`: campo de búsqueda por número/nombre claramente visible arriba del catálogo, con etiqueta, texto más legible, enfoque accesible y botón Limpiar; permanece visible durante el desplazamiento. Usa `searchValue` ya existente, sin introducir indexación ni filtrado nuevo, y no modifica la interfaz de otros medios.
