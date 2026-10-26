@@ -5,6 +5,7 @@ export const settingsTabs: SettingsTabs[] = ["general", "display_settings", "sty
 export const drawerTabs = {
     shows: { name: "tabs.shows", icon: "shows", title: "tabs.shows_info" },
     media: { name: "tabs.media", icon: "media", title: "" },
+    hymnal: { name: "Himnario", icon: "audio", title: "Himnario Adventista" },
     audio: { name: "tabs.audio", icon: "audio", title: "" },
     overlays: { name: "tabs.overlays", icon: "overlays", title: "" },
     templates: { name: "tabs.templates", icon: "templates", title: "" },
