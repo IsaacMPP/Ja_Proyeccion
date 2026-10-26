@@ -24,7 +24,7 @@
 <div class="main {id !== 'shows' || $activeShow !== null ? 'context #drawer_info' : ''}">
     {#if !$forceClock && id === "shows"}
         <ShowInfo {optionsOpen} />
-    {:else if !$forceClock && id === "media"}
+    {:else if !$forceClock && (id === "media" || id === "hymnal")}
         <MediaInfo {optionsOpen} />
     {:else if !$forceClock && id === "audio"}
         <AudioInfo />
