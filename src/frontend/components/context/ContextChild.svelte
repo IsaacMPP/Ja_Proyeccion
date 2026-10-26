@@ -1,5 +1,6 @@
 <script lang="ts">
     import { localeDirection } from "../../stores"
+    import { jaDetectedDisplays } from "../settings/jaDetectedDisplays"
     import Icon from "../helpers/Icon.svelte"
     import T from "../helpers/T.svelte"
     import ContextItem from "./ContextItem.svelte"
@@ -90,7 +91,7 @@
 
     {#if open}
         <div class="submenu" style="{side}: 0; transform: translate({transform}, {translate ? `calc(-${translate}% + 32px)` : '-14px'});">
-            {#if menu?.items?.length}
+            {#if $jaDetectedDisplays || menu?.items?.length}
                 {#each menu.items as itemId}
                     {#if itemId === "SEPARATOR"}
                         <hr />
