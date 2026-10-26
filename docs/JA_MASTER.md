@@ -1,3 +1,9 @@
+### Decisión de alcance — 25-oct-2026: NO cambiar de audio a video en caliente
+- El usuario descartó expresamente sincronizar el cambio de modo de video ↔ solo audio sin reiniciar. Motivo: evitar riesgos sobre la reproducción, la sincronización y las múltiples salidas.
+- **No implementar** sincronización en caliente, handoff entre reproductores ni modificación del motor FreeShow para este fin; conservar los modos existentes, ya probados por el usuario.
+- Priorizar ahora: (1) revisar y unificar los controles visibles del audio global sin duplicar reproductores; (2) modo «solo video» mediante las opciones de silencio existentes y de forma segura por salida; (3) regresión de rendimiento y multipantalla; (4) cierre documentado de 4.2 y organización de PR. Cambios funcionales posteriores deben probarse antes de fusionar.
+- CI último commit funcional `1e0cb2ed`, ejecución `40258486305` exitosa. Usuario confirmó que funciona «solo audio» y solicitó no arriesgar la función con transiciones instantáneas.
+
 # JA PROYECCIÓN — ARCHIVO MAESTRO DE CONTINUIDAD
 
 > **DOCUMENTO CANÓNICO / FUENTE ÚNICA DE VERDAD.**
