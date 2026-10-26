@@ -48,6 +48,13 @@
             .map(([outputId, output]) => ({ outputId, background: output.out!.background }))
         try {
             matchingOutputs.forEach(({ outputId }) => clearBackground(outputId))
+            // FreeShow may fade out the old video asynchronously. Do not start the
+            // audio-only track while the video still triggers automatic audio ducking.
+            const stopDeadline = Date.now() + 3500
+            while (VideoPlayer.audioExists(path) && Date.now() < stopDeadline) {
+                await new Promise<void>((resolve) => setTimeout(resolve, 60))
+            }
+            if (VideoPlayer.audioExists(path)) throw new Error("La salida del video no finalizó")
             const played = await AudioPlayer.start(path, { name }, { pauseIfPlaying: false })
             // FreeShow may return true for a locked/loading request without starting it.
             if (!played || !AudioPlayer.audioExists(path)) {
@@ -59,6 +66,7 @@
                 return
             }
             if (AudioPlayer.isPaused(path)) AudioPlayer.play(path)
+            AudioPlayer.updateVolume(path)
         } catch (error) {
             matchingOutputs.forEach(({ outputId, background }) => {
                 if (!$outputs[outputId]?.out?.background) setOutput("background", background, false, outputId)
