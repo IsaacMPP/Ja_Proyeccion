@@ -213,6 +213,12 @@
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
 
+### Orden de pestañas aprobado — 25-oct-2026
+- El usuario autorizó aplicar de inmediato la organización funcional: **Proyectos → Himnario → Biblia → Multimedia → Audio → Superposiciones → Plantillas → Calendario → Funciones**.
+- Se modificó únicamente el orden de `drawerTabs` en `src/frontend/values/tabs.ts`; se mantienen los mismos identificadores, componentes y permisos, sin cambios en el motor de salidas.
+- Se añadió aserción de orden en `scripts/ja/hymnal-dedicated-tab.test.mjs`. Validar CI y después confirmar distribución visual en Windows.
+- **Pendientes restantes 4.2:** prueba real de pestaña/buscador/caché/navegación, diseño e implementación por separado de audio-only de MP4 sin interferir con proyección multipantalla, regresión, orden de integración y cierre de PR. No comenzar rediseño del centro.
+
 ### Implementación de pestaña independiente Himnario — 25-oct-2026
 - Autorización del usuario: «procede», para continuar en orden con la estructura definitiva del Himnario, antes del centro universal.
 - En la misma rama del buscador (PR #6) se agregó pestaña visible **Himnario** a la navegación inferior; se abre la biblioteca asociada al rol `hymnal` reutilizando `Media.svelte`, `jaHymnal.ts`, el caché global, el buscador y los controles de proyección existentes. Se añade orientación cuando la biblioteca aún no está vinculada.
