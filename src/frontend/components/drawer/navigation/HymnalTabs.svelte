@@ -1,28 +1,15 @@
 <script lang="ts">
     import { onDestroy } from "svelte"
-    import { AudioPlayer } from "../../../audio/audioPlayer"
     import { uid } from "uid"
     import { Main } from "../../../../types/IPC/Main"
     import { ToMain } from "../../../../types/IPC/ToMain"
     import { destroyMain, receiveToMain, sendMain } from "../../../IPC/main"
-    import { dataPath, mediaFolders, playingAudio } from "../../../stores"
+    import { dataPath, mediaFolders } from "../../../stores"
     import { getAccess } from "../../../utils/profile"
     import { history } from "../../helpers/history"
     import { getPrimaryJALibraryId, defaultJALibraryPath } from "../media/jaDefaultLibraries"
 
     $: folders = Object.entries($mediaFolders).filter(([, folder]) => folder.jaLibraryRole === "hymnal")
-    $: hymnAudio = Object.entries($playingAudio).find(([, item]) => !!item.path && Object.values($mediaFolders).some((folder) => folder.jaLibraryRole === "hymnal" && item.path?.replace(/\\/g, "/").startsWith((folder.path || "").replace(/\\/g, "/") + "/")))
-    $: hymnAudioId = hymnAudio?.[0] || ""
-    $: hymnAudioItem = hymnAudio?.[1]
-    function toggleAudio() {
-        if (!hymnAudioId) return
-        if (hymnAudioItem?.paused) AudioPlayer.play(hymnAudioId)
-        else AudioPlayer.pause(hymnAudioId)
-    }
-    function stopHymnAudio() {
-        if (hymnAudioId) AudioPlayer.stop(hymnAudioId)
-    }
-
     $: primaryId = getPrimaryJALibraryId($mediaFolders, $dataPath, "hymnal")
     $: readOnly = getAccess("media").global === "read" || getAccess("media").global === "none"
     const channel = uid()
@@ -56,16 +43,6 @@
         <p>No se encontró la biblioteca principal del Himnario.</p>
         <p>Carpeta esperada: {defaultJALibraryPath($dataPath, "Himnario Adventista")}</p>
     {/if}
-    {#if hymnAudioId}
-        <div class="hymnAudioStatus">
-            <div class="linked">Audio en reproducción</div>
-            <div>{hymnAudioItem?.name || "Himno"}</div>
-            <div class="audioActions">
-                <button type="button" on:click={toggleAudio}>{hymnAudioItem?.paused ? "Reanudar" : "Pausar"}</button>
-                <button type="button" on:click={stopHymnAudio}>Detener</button>
-            </div>
-        </div>
-    {/if}
     <button type="button" disabled={readOnly} on:click={linkExternalHymnal}>Vincular carpeta externa</button>
 </div>
 
@@ -76,7 +53,5 @@
     .folder { background: var(--primary-dark); padding: 10px 8px; overflow-wrap: anywhere; }
     .primary { border-left: 3px solid var(--primary); }
     button { padding: 9px; border: 1px solid var(--secondary); background: transparent; color: var(--text); cursor: pointer; border-radius: 5px; }
-    .hymnAudioStatus { padding: 10px; border: 1px solid var(--secondary); border-radius: 5px; overflow-wrap: anywhere; }
-    .audioActions { display: flex; gap: 5px; margin-top: 8px; }
     button:disabled { opacity: 0.4; cursor: default; }
 </style>
