@@ -1,3 +1,9 @@
+### Corrección de «Solo audio» con video aún proyectado — 25-oct-2026
+- Reporte de prueba en Windows: al reproducir video (con audio o silenciado) y elegir «Solo audio», permanecía el video anterior en pantalla. Causa: `AudioPlayer.start()` no interactuaba con las salidas de `VideoPlayer`.
+- En `MediaCard.svelte`, después de confirmar que `AudioPlayer.start()` se ejecutó, se retira únicamente el fondo de salidas cuyo `out.background.path/id` coincide con el archivo elegido, mediante `clearBackground(outputId)`. Si el audio falla, se preserva la proyección. Otras pantallas y contenidos diferentes no se cambian.
+- Esto NO crea transición sincronizada, ni garantiza continuidad temporal: «Solo audio» sigue siendo una nueva reproducción. Pendiente de probar en Windows con videos como fondo y varias pantallas, así como videos incrustados dentro de diapositivas (otro caso) y cambio inverso.
+- Prueba estructural en `scripts/ja/hymnal-audio-only.test.mjs`. Esperar CI verde y validación del usuario antes de fusionar.
+
 ### Auditoría integral y nueva priorización — 25-oct-2026
 - Auditoría estática completada: `docs/AUDITORIA_INTEGRAL_JA_FREESHOW_2026-10-25.md`. Revisar ese documento antes de iniciar nuevas funciones. Se mantiene `JA_MASTER.md` como fuente de continuidad.
 - Prioridades nuevas: **P0 CI y estabilidad** → **P1 pantallas, salidas, selección de destino en menú** → **P2 matriz de configuraciones reales** → **P3 coherencia de experiencia** → **P4 organizador de culto**. No duplicar funciones nativas de FreeShow; no comenzar centro universal aún.
