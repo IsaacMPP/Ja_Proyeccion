@@ -197,8 +197,8 @@
     }
 
     let wait = false
-    function click(e: any, forceMuted = false) {
-        if (e.ctrlKey || e.metaKey || e.shiftKey || $outLocked || wait || iconClicked) return
+    function click(e: any, forceMuted = false, explicitMode = false) {
+        if (e.ctrlKey || e.metaKey || e.shiftKey || $outLocked || (!explicitMode && (wait || iconClicked))) return
 
         // don't hide again when double clicking
         wait = true
@@ -235,7 +235,7 @@
         activeOutputs.forEach((output) => {
             const currentOutputStyle = $styles[output.style || ""]
             const currentMediaStyle = getMediaStyle($media[path], currentOutputStyle)
-            setOutput("background", { path, type, loop, muted, startAt: 0, ...currentMediaStyle, ...(forceMuted ? { muted: true } : {}), ignoreLayer: videoType === "foreground" }, false, output.id)
+            setOutput("background", { path, type, loop, muted, startAt: 0, ...currentMediaStyle, ...(explicitMode ? { muted: forceMuted } : forceMuted ? { muted: true } : {}), ignoreLayer: videoType === "foreground" }, false, output.id)
         })
 
         // unsplash requires the download to be triggered when using their images
@@ -247,10 +247,17 @@
         }
     }
 
+    function projectVideoWithAudio(event: MouseEvent) {
+        event.stopPropagation()
+        if (type !== "video" || contentProvider) return
+        click(event, false, true)
+        iconClicked = setTimeout(() => (iconClicked = null), 100)
+    }
+
     function projectVideoMuted(event: MouseEvent) {
         event.stopPropagation()
         if (type !== "video" || contentProvider) return
-        click(event, true)
+        click(event, true, true)
         iconClicked = setTimeout(() => (iconClicked = null), 100)
     }
 
@@ -339,6 +346,7 @@
         <!-- icons -->
         <div class="icons">
             {#if supportsAudioOnly}
+                <div class="button"><Button style="padding: 3px;" title="Video con audio: proyectar imagen y sonido" on:click={projectVideoWithAudio}><Icon id="volume" size={0.9} white /></Button></div>
                 <div class="button"><Button style="padding: 3px;" title="Solo video: proyectar sin sonido" on:click={projectVideoMuted}><Icon id="volume_off" size={0.9} white /></Button></div>
                 <div class="button"><Button style="padding: 3px;" title="Solo audio: escuchar el video sin cambiar las pantallas" on:click={playHymnAudio} disabled={startingAudio}><Icon id="audio" size={0.9} white /></Button></div>
             {/if}
