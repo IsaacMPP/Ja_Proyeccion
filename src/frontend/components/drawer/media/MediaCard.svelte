@@ -1,6 +1,7 @@
 <script lang="ts">
     import { derived } from "svelte/store"
     import { AudioPlayer } from "../../../audio/audioPlayer"
+    import { VideoPlayer } from "../../media/video/videoPlayer"
     import type { ContentFile, ContentProviderId } from "../../../../electron/contentProviders/base/types"
     import type { MediaStyle } from "../../../../types/Main"
     import { Main } from "../../../../types/IPC/Main"
@@ -41,7 +42,7 @@
         if (startingAudio || !supportsAudioOnly) return
         startingAudio = true
         try {
-            const played = await AudioPlayer.start(path, { name })
+            const played = await AudioPlayer.start(path, { name }, { pauseIfPlaying: false })
             if (!played) {
                 newToast("No se pudo reproducir el audio de este MP4")
                 return
@@ -208,7 +209,19 @@
         const activeOutputs = getAllActiveOutputs()
 
         const isActive = activeOutputs.some((a) => (a.out?.background?.path || a.out?.background?.id) === path)
-        if (isActive) {
+        if (type === "video" && !contentProvider) {
+            // Modes are mutually exclusive for this file, without a timed handoff.
+            // Do not stop unrelated audio or change another output's background.
+            AudioPlayer.stop(path)
+            if (isActive) {
+                activeOutputs.forEach((output) => {
+                    if ((output.out?.background?.path || output.out?.background?.id) !== path) return
+                    const videoAudio = VideoPlayer.getAudio(path, output.id)
+                    if (videoAudio && !!videoAudio.muted !== forceMuted) VideoPlayer.toggleMute(path, output.id)
+                })
+                return
+            }
+        } else if (isActive) {
             clearBackground()
             return
         }
