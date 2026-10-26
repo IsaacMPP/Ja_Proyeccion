@@ -1,6 +1,8 @@
 <script lang="ts">
     import { derived } from "svelte/store"
     import { AudioPlayer } from "../../../audio/audioPlayer"
+    import { jaDetectedDisplays } from "../../settings/jaDetectedDisplays"
+    import { getJAPrimaryOutputId } from "../../settings/jaPrimaryOutput"
     import { VideoPlayer } from "../../media/video/videoPlayer"
     import type { ContentFile, ContentProviderId } from "../../../../electron/contentProviders/base/types"
     import type { MediaStyle } from "../../../../types/Main"
@@ -221,7 +223,12 @@
             wait = false
         }, 800)
 
-        const activeOutputs = getAllActiveOutputs()
+        const primaryId = getJAPrimaryOutputId($outputs, $jaDetectedDisplays)
+        if (!primaryId) {
+            newToast("Selecciona un proyector principal en Configuración → Pantallas")
+            return
+        }
+        const activeOutputs = getAllActiveOutputs().filter((output) => output.id === primaryId)
 
         const isActive = activeOutputs.some((a) => (a.out?.background?.path || a.out?.background?.id) === path)
         if (type === "video" && !contentProvider) {
@@ -237,20 +244,20 @@
                 return
             }
         } else if (isActive) {
-            clearBackground()
+            activeOutputs.forEach((output) => clearBackground(output.id))
             return
         }
 
         let videoType = getMediaLayerType(path, mediaStyle)
         let loop = contentProvider || videoType === "foreground" ? false : true
         let muted = videoType === "background" ? true : false
-        if (videoType === "foreground") clearSlide()
+        // Never clear slides on unrelated auxiliary outputs.
 
         // get style per output
         activeOutputs.forEach((output) => {
             const currentOutputStyle = $styles[output.style || ""]
             const currentMediaStyle = getMediaStyle($media[path], currentOutputStyle)
-            setOutput("background", { path, type, loop, muted, startAt: 0, ...currentMediaStyle, ...(explicitMode ? { muted: forceMuted } : forceMuted ? { muted: true } : {}), ignoreLayer: videoType === "foreground" }, false, output.id)
+            setOutput("background", { path, type, loop, muted, startAt: 0, ...currentMediaStyle, ...(type === "video" ? { muted: forceMuted } : {}), ignoreLayer: videoType === "foreground" }, false, output.id)
         })
 
         // unsplash requires the download to be triggered when using their images
