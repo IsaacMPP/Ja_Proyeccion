@@ -10,6 +10,7 @@
     import Icon from "../helpers/Icon.svelte"
     import { addOutput, toggleOutputs } from "../helpers/output"
     import { getPhysicalOutputId, isExternalDisplay } from "./displayGuide"
+    import { jaDetectedDisplays } from "./jaDetectedDisplays"
     import T from "../helpers/T.svelte"
     import InputRow from "../input/InputRow.svelte"
     import MaterialButton from "../inputs/MaterialButton.svelte"
@@ -62,6 +63,7 @@
             const displays = await requestMain(Main.GET_DISPLAYS)
             if (!Array.isArray(displays)) throw new Error("GET_DISPLAYS did not return an array")
             screens = [...displays].sort(sortScreensByPosition).sort(internalFirst)
+            jaDetectedDisplays.set([...displays])
 
             minPosX = null
             minPosY = null
@@ -84,6 +86,7 @@
             console.error("No se pudieron detectar las pantallas:", error)
             screenError = "No pudimos consultar las pantallas. Comprueba la conexión e inténtalo de nuevo."
             screens = []
+            jaDetectedDisplays.set([])
         } finally {
             loadingScreens = false
         }
