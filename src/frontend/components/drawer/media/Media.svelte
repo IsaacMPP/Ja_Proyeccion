@@ -69,6 +69,7 @@
     $: notFolders = ["all", ...specialTabs, ...contentProviders.map((p) => p.providerId)]
     $: isLocalFolder = !!(active && $mediaFolders[active])
     $: isJAHymnal = !!(active && $mediaFolders[active]?.jaLibraryRole === "hymnal")
+    $: multimediaFolderPaths = Object.values($mediaFolders).filter((folder) => folder.jaLibraryRole !== "hymnal").map((folder) => folder.path || "").filter(Boolean)
     $: jaSearchEverywhere = active === "all" || (isLocalFolder && !isJAHymnal && jaSearchScope === "all")
     $: rootPath = isLocalFolder ? $mediaFolders[active!]?.path || "" : ""
 
@@ -183,7 +184,7 @@
             if (active === prevActive) return
             prevActive = active
 
-            requestFiles(Object.values($mediaFolders).map((a) => a.path!))
+            requestFiles(multimediaFolderPaths)
         } else if (path?.length) {
             if (path === prevActive) return
             prevActive = path
@@ -379,7 +380,7 @@
             if (!term) {
                 if (jaSearchKey) {
                     jaSearchKey = ""
-                    if (active === "all") await requestFiles(Object.values($mediaFolders).map((folder) => folder.path || "").filter(Boolean), 0)
+                    if (active === "all") await requestFiles(multimediaFolderPaths, 0)
                     else if (isLocalFolder) await requestFiles(path, 0, true)
                 }
                 searchedFiles = clone(filteredFiles)
@@ -387,7 +388,7 @@
             }
 
             if (active === "all" || isLocalFolder) {
-                const source: string | string[] = jaSearchEverywhere ? Object.values($mediaFolders).map((folder) => folder.path || "").filter(Boolean) : path
+                const source: string | string[] = jaSearchEverywhere ? multimediaFolderPaths : path
                 const key = JSON.stringify([source, 5])
                 if (jaSearchKey !== key || currentDepth < 5) {
                     jaSearchKey = key
