@@ -213,6 +213,11 @@
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
 
+### Validación del usuario — caché global de miniaturas (25-oct-2026)
+- GitHub Actions `40246293775` (commit `5c0728bc`) terminó **success**.
+- El usuario confirmó que instaló/probó la versión y dijo **«ya quedó, quedó bastante bien»**. Se considera validado el funcionamiento observado del caché en su equipo; no se generaliza todavía a todos los equipos de gama media.
+- Se puede continuar con la mejora del buscador y la navegación del Himnario en una rama separada. No fusionar PR #5 y PR #4 sin revisión de la cadena de PRs.
+
 ### Fase 4.2 — caché persistente global de miniaturas (25-oct-2026)
 
 - Usuario pidió miniaturas persistentes para **todos los videos**, no únicamente himnos, y autorizó implementarlas después de verificar el trabajo en curso.
