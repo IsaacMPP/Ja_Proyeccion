@@ -13,6 +13,7 @@ export type JAOutput = {
     active?: boolean
     invisible?: boolean
     stageOutput?: string
+    screen?: string
     boundsLocked?: boolean
     forcedResolution?: { width?: number; height?: number }
     blackmagic?: boolean
@@ -27,10 +28,16 @@ export function isExternalDisplay(display: JADisplay, screens: JADisplay[]): boo
     return screens.length > 1 && display.isPrimary === false
 }
 
-export function getPhysicalOutputId(outputs: Record<string, JAOutput>, preferredId: string | null): string {
+export function getPhysicalOutputId(outputs: Record<string, JAOutput>, preferredId: string | null, targetDisplayId?: string): string {
     const allowed = (output: JAOutput | undefined) =>
         !!output && !output.stageOutput && !output.invisible && !output.blackmagic && !output.ndi && !output.omt && !output.rtmp && !output.webrtc
-    if (preferredId && allowed(outputs[preferredId])) return preferredId
-    const entry = Object.entries(outputs).find(([, output]) => allowed(output))
+    // Never steal the output assigned to a different physical display.
+    const available = (output: JAOutput | undefined) => allowed(output) && (!targetDisplayId || !output?.screen || output.screen === targetDisplayId)
+    if (targetDisplayId) {
+        const exact = Object.entries(outputs).find(([, output]) => available(output) && output.screen === targetDisplayId)
+        if (exact) return exact[0]
+    }
+    if (preferredId && available(outputs[preferredId])) return preferredId
+    const entry = Object.entries(outputs).find(([, output]) => available(output))
     return entry?.[0] || ""
 }
