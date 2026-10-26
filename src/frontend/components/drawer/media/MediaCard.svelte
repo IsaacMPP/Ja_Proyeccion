@@ -42,7 +42,18 @@
         startingAudio = true
         try {
             const played = await AudioPlayer.start(path, { name })
-            if (!played) newToast("No se pudo reproducir el audio de este MP4")
+            if (!played) {
+                newToast("No se pudo reproducir el audio de este MP4")
+                return
+            }
+            // Solo audio es una acción nueva, no una transición sincronizada:
+            // liberar únicamente las salidas que muestran este mismo video.
+            // No tocar fondos diferentes, versículos ni otras pantallas.
+            Object.entries($outputs).forEach(([outputId, output]) => {
+                if ((output.out?.background?.path || output.out?.background?.id) === path) {
+                    clearBackground(outputId)
+                }
+            })
         } catch (error) {
             console.error("JA: error al reproducir audio del himno", error)
             newToast("El archivo no contiene audio compatible o no se puede abrir")
