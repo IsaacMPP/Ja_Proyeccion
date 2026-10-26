@@ -97,7 +97,7 @@
         if (applyingGuide || !isExternalDisplay(display, screens)) return
 
         // Si aún no existe una salida física, crear una con los ajustes predeterminados.
-        const selectedId = getPhysicalOutputId($outputs, $currentOutputSettings) || addOutput(false, "", false, "Proyector")
+        const selectedId = getPhysicalOutputId($outputs, $currentOutputSettings, String(display.id)) || addOutput(false, "", false, `Proyector ${displayIndex + 1}`)
         if (!selectedId) {
             guideMessage = "No se pudo preparar una salida de proyección. Revisa Configuración → Salidas."
             return
