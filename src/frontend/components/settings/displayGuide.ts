@@ -5,6 +5,7 @@
 export type JADisplay = {
     id: number
     bounds: { x: number; y: number; width: number; height: number }
+    label?: string
     internal?: boolean
     isPrimary?: boolean
 }
@@ -14,6 +15,7 @@ export type JAOutput = {
     invisible?: boolean
     stageOutput?: string
     screen?: string
+    bounds?: { x: number; y: number; width: number; height: number }
     boundsLocked?: boolean
     forcedResolution?: { width?: number; height?: number }
     blackmagic?: boolean
@@ -40,4 +42,19 @@ export function getPhysicalOutputId(outputs: Record<string, JAOutput>, preferred
     if (preferredId && available(outputs[preferredId])) return preferredId
     const entry = Object.entries(outputs).find(([, output]) => available(output))
     return entry?.[0] || ""
+}
+
+/** Prefer Windows/Electron's device label; virtual displays can have no model name. */
+export function getDisplayLabel(display: JADisplay, index: number): string {
+    const name = display.label?.trim()
+    return name && !/^unknown$/i.test(name) ? name : `Pantalla ${index + 1} (modelo no disponible)`
+}
+
+export function isOutputOnDisplay(output: JAOutput, display: JADisplay): boolean {
+    return String(output.screen || "") === String(display.id) &&
+        !!output.enabled && !!output.active && !output.stageOutput &&
+        // Never trust a stale screen ID when Windows has rearranged a monitor.
+        (!("bounds" in output) || !output.bounds ||
+            (output.bounds.x === display.bounds.x && output.bounds.y === display.bounds.y &&
+             output.bounds.width === display.bounds.width && output.bounds.height === display.bounds.height))
 }
