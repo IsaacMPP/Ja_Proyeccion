@@ -117,6 +117,10 @@
                 <Icon id={paused ? "play" : "pause"} white={paused} size={1.2} />
             </Button>
 
+            <Button style="flex: 0" disabled={$outLocked} center title="Detener audio" on:click={() => { if (!$outLocked) AudioPlayer.stop(key) }}>
+                <Icon id="stop" size={1.2} />
+            </Button>
+
             {#if sliderValue !== null}
                 <span>
                     {joinTime(secondsToTime(sliderValue))}
