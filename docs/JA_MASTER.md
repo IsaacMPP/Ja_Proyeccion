@@ -1,3 +1,8 @@
+### Consolidación de controles y modo «Solo video» — 25-oct-2026
+- Tras la decisión del usuario de no arriesgar transiciones instantáneas audio↔video, se revisó `src/frontend/components/output/tools/Audio.svelte`: FreeShow ya tiene reproductor global (pausa, posición, selector de pistas). Se añadió solamente el botón «Detener» mediante `AudioPlayer.stop(key)` y se retiraron controles redundantes de `HymnalTabs.svelte`. Conserva vinculación externa del Himnario.
+- `MediaCard.svelte`: todos los videos locales tienen botón «Solo video: proyectar sin sonido» que reutiliza la proyección normal mediante `setOutput("background",...)` y fuerza `muted: true` por encima del estilo de salida; el video con audio se conserva. El botón «Solo audio» continúa disponible globalmente. No se implementó cambio en caliente.
+- Nuevo test `scripts/ja/global-media-controls.test.mjs`. **Pendiente** CI Windows y prueba en equipo real de los tres modos y salidas independientes. No fusionar todavía.
+ 
 ### Decisión de alcance — 25-oct-2026: NO cambiar de audio a video en caliente
 - El usuario descartó expresamente sincronizar el cambio de modo de video ↔ solo audio sin reiniciar. Motivo: evitar riesgos sobre la reproducción, la sincronización y las múltiples salidas.
 - **No implementar** sincronización en caliente, handoff entre reproductores ni modificación del motor FreeShow para este fin; conservar los modos existentes, ya probados por el usuario.
