@@ -24,7 +24,7 @@ const loadActions = {
         const displays = get(jaDetectedDisplays)
         const assigned = sortByName(keysToID(get(outputs)).filter((output) => output.enabled && output.active && !output.stageOutput && output.screen))
         const entries: ContextMenuItem[] = displays.map((display, index) => {
-            const output = assigned.find((entry) => String(entry.screen) === String(display.id))
+            const output = assigned.find((entry) => isOutputOnDisplay(entry, display))
             if (display.isPrimary) return { id: "ja_control_display", label: `Pantalla ${index + 1} · Laptop (control)`, translate: false, disabled: true }
             if (!output) return { id: "ja_unassigned_display", label: `Pantalla ${index + 1} · Sin asignar`, translate: false, disabled: true }
             return { id: `ja_media_output:${output.id}`, label: `${output.name || `Pantalla ${index + 1}`} · Pantalla ${index + 1}`, translate: false }
