@@ -11,6 +11,7 @@
     import { addOutput, toggleOutputs } from "../helpers/output"
     import { getPhysicalOutputId, isExternalDisplay } from "./displayGuide"
     import { jaDetectedDisplays } from "./jaDetectedDisplays"
+    import { jaPrimaryOutputId, setJAPrimaryOutput, getJAPrimaryOutputId } from "./jaPrimaryOutput"
     import T from "../helpers/T.svelte"
     import InputRow from "../input/InputRow.svelte"
     import MaterialButton from "../inputs/MaterialButton.svelte"
@@ -326,18 +327,25 @@
             <div class="ja-guide-cards">
                 {#each screens as display, index (display.id)}
                     {@const external = isExternalDisplay(display, screens)}
-                    {@const assigned = Object.values($outputs).some((output) => output.screen === String(display.id) && output.enabled)}
+                    {@const outputEntry = Object.entries($outputs).find(([, output]) => output.screen === String(display.id) && output.enabled && output.active)}
+                    {@const assigned = !!outputEntry}
+                    {@const isMainProjector = outputEntry && outputEntry[0] === getJAPrimaryOutputId($outputs, screens)}
                     <div class="ja-guide-card" class:ja-assigned={external && assigned}>
                         <div class="ja-guide-number">{index + 1}</div>
                         <div class="ja-guide-info">
                             <strong>Pantalla {index + 1}</strong>
                             <span>{display.isPrimary ? "Principal · controles" : external ? "Externa · proyector o TV" : "Pantalla detectada"}</span>
-                            <small>{display.bounds.width} × {display.bounds.height} px {external && assigned ? "· Asignada" : ""}</small>
+                            <small>{display.bounds.width} × {display.bounds.height} px {external && assigned ? "· Asignada" : ""}{isMainProjector ? " · Proyector principal (audio)" : ""}</small>
                         </div>
                         {#if external}
                             <button type="button" class="ja-project" disabled={applyingGuide} on:click={() => useAsProjector(display, index)}>
                                 {assigned ? "Usar aquí" : "Usar como proyector"}
                             </button>
+                            {#if outputEntry}
+                                <button type="button" class="ja-project" disabled={!!isMainProjector} on:click={() => setJAPrimaryOutput(outputEntry[0])}>
+                                    {isMainProjector ? "Principal · Audio" : "Establecer como principal"}
+                                </button>
+                            {/if}
                         {:else}
                             <span class="ja-main-screen">No proyectar aquí</span>
                         {/if}
