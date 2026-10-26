@@ -1,3 +1,10 @@
+### Inicio de P1 — Selección multipantalla desde Multimedia e Himnario (25-oct-2026)
+- Se aprovechó el menú contextual nativo de FreeShow: `contextMenus.ts`, `loadItems.ts`, `ContextItem.svelte`, `menuClick.ts`. Nueva opción «Enviar a pantalla» para tarjetas `media_card`, con submenú dinámico exclusivamente de salidas lógicas `enabled && active && !stageOutput`. No inventa salidas, ni muestra salidas inactivas, y reutiliza `setOutput("background", ..., outputId)` para afectar un solo destino.
+- La configuración física existente en `settings/Screens.svelte` ya muestra monitores detectados, refresca, identifica y permite asignar proyectores; no se duplicó.
+- Alcance de esta primera implementación: medios del navegador nativo (imágenes/videos, incluidos los usados en Himnario), **no** aún diapositivas/Biblia/proyectos. El selector filtra salidas lógicas, no confirma por sí mismo la conexión física; esa parte requiere trabajo adicional en P1.
+- Prueba estructural `scripts/ja/media-output-target.test.mjs`. **Pendiente CI y Windows con 2/3 pantallas**, observar permisos/bloqueos, salidas desconectadas y que no se sobreescriban otras proyecciones. Motor multimedia previamente validado no modificado.
+- PR #6 conserva condición draft; no fusionar a main sin autorización.
+
 ### Corrección de carrera al pasar de video a Solo audio — 25-oct-2026
 - Nuevo reporte Windows: al cambiar del mismo video a Solo audio la pantalla queda negra y no suena; Solo audio funciona si es el primer modo elegido.
 - Causa probable inspeccionada en FreeShow: `VideoPlayer.stop` aplica transición/fade-out asíncrona (predeterminado cercano a 800 ms) antes de liberar `playingVideos`; `muteAudioWhenVideoPlays` puede atenuar el reproductor independiente durante ese intervalo.
