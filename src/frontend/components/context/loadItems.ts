@@ -12,13 +12,24 @@ import { chordTypes, keys } from "../edit/values/chords"
 import { clone, keysToID, sortByName } from "../helpers/array"
 import { removeExtension } from "../helpers/media"
 import { isOutputBound } from "../helpers/output"
+import { jaDetectedDisplays } from "../settings/jaDetectedDisplays"
 import { getLayoutRef } from "../helpers/show"
 import { _show } from "../helpers/shows"
 import { createTagItems, getSelectedTagIds } from "../helpers/tags"
 import { type ContextMenuItem } from "./contextMenus"
 
 const loadActions = {
-    ja_media_outputs: () => sortByName(keysToID(get(outputs)).filter((output) => output.enabled && output.active && !output.stageOutput)).map((output) => ({ id: `ja_media_output:${output.id}`, label: output.name || `Pantalla ${output.id}`, translate: false })),
+    ja_media_outputs: () => {
+        const displays = get(jaDetectedDisplays)
+        const assigned = sortByName(keysToID(get(outputs)).filter((output) => output.enabled && output.active && !output.stageOutput && output.screen))
+        const entries: ContextMenuItem[] = displays.map((display, index) => {
+            const output = assigned.find((entry) => String(entry.screen) === String(display.id))
+            if (display.isPrimary) return { id: "ja_control_display", label: `Pantalla ${index + 1} · Laptop (control)`, translate: false, disabled: true }
+            if (!output) return { id: "ja_unassigned_display", label: `Pantalla ${index + 1} · Sin asignar`, translate: false, disabled: true }
+            return { id: `ja_media_output:${output.id}`, label: `${output.name || `Pantalla ${index + 1}`} · Pantalla ${index + 1}`, translate: false }
+        })
+        return [...entries, "SEPARATOR", { id: "ja_configure_screens", label: "Configurar pantallas…", translate: false }]
+    },
     enabled_drawer_tabs: (items: ContextMenuItem[]) => {
         const tabsToRemove = 2
         const tabs = keysToID(clone(drawerTabs)).slice(tabsToRemove)
