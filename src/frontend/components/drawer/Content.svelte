@@ -6,6 +6,7 @@
     import Scripture from "./bible/Scripture.svelte"
     import Calendar from "./calendar/Calendar.svelte"
     import Media from "./media/Media.svelte"
+    import HymnalContent from "./media/HymnalContent.svelte"
     import Actions from "./pages/Actions.svelte"
     import Interactions from "./pages/Interactions.svelte"
     import OBS from "./pages/OBS.svelte"
@@ -55,6 +56,8 @@
         <Shows {active} {searchValue} bind:firstMatch />
     {:else if id === "media"}
         <Media {active} {searchValue} bind:streams />
+    {:else if id === "hymnal"}
+        <HymnalContent {searchValue} />
     {:else if id === "audio"}
         <Audio {active} {searchValue} />
     {:else if id === "overlays"}
