@@ -4,6 +4,7 @@ export interface Categories {
     [key: string]: Category
 }
 export interface Category {
+    jaLibraryRole?: "hymnal" | "songs" | "backgrounds" | "specials"
     name: string
     icon?: null | string
     path?: string
