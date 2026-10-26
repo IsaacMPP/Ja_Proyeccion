@@ -91,7 +91,7 @@
 
     {#if open}
         <div class="submenu" style="{side}: 0; transform: translate({transform}, {translate ? `calc(-${translate}% + 32px)` : '-14px'});">
-            {#if $jaDetectedDisplays || menu?.items?.length}
+            {#if menu?.items?.length && $jaDetectedDisplays.length >= 0}
                 {#each menu.items as itemId}
                     {#if itemId === "SEPARATOR"}
                         <hr />
