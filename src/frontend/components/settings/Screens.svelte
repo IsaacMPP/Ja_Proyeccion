@@ -327,7 +327,7 @@
             <div class="ja-guide-cards">
                 {#each screens as display, index (display.id)}
                     {@const external = isExternalDisplay(display, screens)}
-                    {@const outputEntry = Object.entries($outputs).find(([, output]) => output.screen === String(display.id) && output.enabled && output.active)}
+                    {@const outputEntry = Object.entries($outputs).find(([, output]) => isOutputOnDisplay(output, display))}
                     {@const assigned = !!outputEntry}
                     {@const isMainProjector = outputEntry && outputEntry[0] === getJAPrimaryOutputId($outputs, screens)}
                     <div class="ja-guide-card" class:ja-assigned={external && assigned}>
