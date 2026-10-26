@@ -13,7 +13,7 @@ test("all local videos support video-only via existing muted output flag", () =>
  const card = fs.readFileSync("src/frontend/components/drawer/media/MediaCard.svelte","utf8")
  assert.match(card,/Solo video: proyectar sin sonido/)
  assert.match(card,/click\(event, true, true\)/)
- assert.ok(card.includes("explicitMode ? { muted: forceMuted }"), "explicit mode must override background style")
+ assert.ok(card.includes('type === "video" ? { muted: forceMuted }'), "video mode must specify requested mute state")
  assert.match(card,/setOutput\("background"/)
 })
 
