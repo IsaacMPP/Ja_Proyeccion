@@ -9,7 +9,7 @@
     import { clone, keysToID, sortByName } from "../helpers/array"
     import Icon from "../helpers/Icon.svelte"
     import { addOutput, toggleOutputs } from "../helpers/output"
-    import { getPhysicalOutputId, isExternalDisplay } from "./displayGuide"
+    import { getPhysicalOutputId, isExternalDisplay, getDisplayLabel, isOutputOnDisplay } from "./displayGuide"
     import { jaDetectedDisplays } from "./jaDetectedDisplays"
     import { setJAPrimaryOutput, getJAPrimaryOutputId } from "./jaPrimaryOutput"
     import T from "../helpers/T.svelte"
