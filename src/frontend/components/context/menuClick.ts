@@ -117,6 +117,7 @@ import { sendMidi } from "../helpers/showActions"
 import { _show } from "../helpers/shows"
 import { getMenuTagId, openTagManager, toggleSelectionTags, toggleTagFilter } from "../helpers/tags"
 import { clearSlide } from "../output/clear"
+import { jaDetectedDisplays } from "../settings/jaDetectedDisplays"
 import { defaultThemes } from "../settings/tabs/defaultThemes"
 import { activeProject } from "./../../stores"
 import type { ContextMenuItem } from "./contextMenus"
@@ -130,11 +131,18 @@ interface ObjData {
 }
 
 export function menuClick(id: string, enabled = true, menu: ContextMenuItem | null = null, contextElem: HTMLElement | null = null, actionItem: HTMLElement | null = null, sel: Selected | null = null) {
+    if (id === "ja_configure_screens") {
+        settingsTab.set("display_settings")
+        activePage.set("settings")
+        return
+    }
     if (id.startsWith("ja_media_output:")) {
         if (get(outLocked) || !sel?.data?.[0]) return
         const outputId = id.slice("ja_media_output:".length)
         const target = get(outputs)[outputId]
-        if (!target?.enabled || !target.active || target.stageOutput) return
+        if (!target?.enabled || !target.active || target.stageOutput || !target.screen) return
+        const display = get(jaDetectedDisplays).find((screen) => String(screen.id) === String(target.screen))
+        if (!display || display.isPrimary) return
         const item = sel.data[0]
         const path = item?.path || item?.id
         if (typeof path !== "string" || !path || sel.id !== "media") return
