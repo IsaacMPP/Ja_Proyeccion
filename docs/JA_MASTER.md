@@ -213,6 +213,12 @@
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
 
+### Evitar duplicación visual del Himnario — 25-oct-2026
+- Usuario mostró captura donde Himnario aparecía como pestaña propia y también en «Bibliotecas JA» de Multimedia. Solicita evitar funciones y carpetas redundantes.
+- `MediaTabs.svelte`: la navegación de Multimedia omite carpetas con rol `hymnal` de la sección «Bibliotecas JA». El registro, los MP4, el caché y la pestaña Himnario se conservan; no se borran ni duplican carpetas.
+- Se mantiene la opción de gestión/vinculación de bibliotecas y «Todo» general para no romper búsqueda ni acceso técnico; revisar después, con pruebas reales, si «Todo» debe excluir también Himnario y cómo centralizar la vinculación en su pestaña sin duplicar controles.
+- Prueba estructural de no duplicación añadida al test del Himnario. Pendiente CI Windows y validación del usuario. No fusionar hasta validar.
+
 ### Corrección de autovinculación de bibliotecas JA — 25-oct-2026
 - Prueba del usuario: 613 MP4 ya están en `Documentos/JA Proyección/Himnario Adventista`, pero la nueva pestaña indicaba erróneamente «No hay una carpeta del Himnario vinculada». Causa: `ensureJALibraryDirectories()` creaba las carpetas físicas, pero la lista persistente `mediaFolders` nunca registraba esas rutas.
 - Se añadió `jaDefaultLibraries.ts` con rutas correspondientes a `Himnario Adventista`, `Cantos Juveniles`, `Fondos Personalizados` y `Especiales`. Al disponer del directorio de datos, `Drawer.svelte` registra estas bibliotecas predeterminadas en `mediaFolders` sin copiar archivos, sin crear duplicados y sin borrar bibliotecas externas.
