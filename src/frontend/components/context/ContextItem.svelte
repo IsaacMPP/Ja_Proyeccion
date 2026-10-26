@@ -575,7 +575,7 @@
         cursor: pointer;
     }
     div:hover:not(.disabled) {
-        background-color: rgb(0 0 0 / 0.2);
+        background-color: var(--primary-lighter);
     }
 
     div.disabled {
