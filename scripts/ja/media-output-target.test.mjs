@@ -16,6 +16,7 @@ test("target action uses the selected output only, with native FreeShow dispatch
  const actions=fs.readFileSync("src/frontend/components/context/menuClick.ts","utf8")
  const item=fs.readFileSync("src/frontend/components/context/ContextItem.svelte","utf8")
  assert.ok(item.includes('menu?.id?.startsWith("ja_media_output:")'))
+ assert.ok(item.includes('menu?.id === "ja_configure_screens"'))
  assert.ok(actions.includes('id.startsWith("ja_media_output:")'))
  assert.ok(actions.includes("!target?.enabled || !target.active || target.stageOutput"))
  assert.ok(actions.includes('sel.id !== "media"'))
