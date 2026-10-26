@@ -14,3 +14,11 @@ test("Himnario has its own tab and reuses the native Media browser", () => {
     assert.match(library, /activeDrawerTab\.set\("media"\)/)
     assert.match(read("src/frontend/components/drawer/Drawer.svelte"), /tab\.id === "hymnal" \? "media"/)
 })
+
+test("worship tabs stay together and related media tabs stay adjacent", () => {
+    const tabs = fs.readFileSync("src/frontend/values/tabs.ts", "utf8")
+    const order = ["shows:", "hymnal:", "scripture:", "media:", "audio:", "overlays:", "templates:", "calendar:", "functions:"]
+    const positions = order.map((name) => tabs.indexOf("\n    " + name))
+    assert.ok(positions.every((pos) => pos >= 0), "all tabs exist")
+    assert.ok(positions.every((pos, i) => i === 0 || pos > positions[i - 1]), "tab ordering must match the agreed workflow")
+})
