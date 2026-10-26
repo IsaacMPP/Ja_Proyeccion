@@ -1,3 +1,13 @@
+### Inicio de P1.1 — Proyector principal, clic normal y menú contextual (26-oct-2026)
+- Acordado con el usuario: solo UNA salida física es la principal (audio de videos habilitado por defecto); las auxiliares mostrarán contenido sin audio; clic normal en Himnario/Multimedia manda al principal, jamás a todas las salidas. «Solo video» es excepción manual.
+- Nuevo `settings/jaPrimaryOutput.ts`: guarda localmente el identificador explícito del proyector principal. Si no hay selección previa, usa como predeterminada la primera salida externa asignada; una selección guardada desconectada NO cambia silenciosamente a otro proyector.
+- Asistente `settings/Screens.svelte`: botón «Establecer como principal» visible en pantallas externas ya asignadas. La laptop principal de Windows sigue fuera de los destinos de proyección.
+- `drawer/media/MediaCard.svelte`: clic normal y botones de modo video dirigidos solo al principal con `getJAPrimaryOutputId`; video normal con audio y solo video silenciado, sin limpiar fondos auxiliares. Las otras categorías del programa todavía requieren enrutamiento equivalente.
+- `context/contextMenus.ts`, `menuClick.ts`, `ContextItem.svelte`, CSS de menú: prioridad a «Proyectar en principal (con audio)» y «Enviar a otra pantalla…». Envíos a auxiliares con `muted: true`; principal `muted: false`; acciones anteriores de menú que podían enviar a todas las pantallas retiradas de `media_card`. Más espaciado, agrupación y legibilidad, sin segundo menú.
+- Prueba `scripts/ja/primary-output-routing.test.mjs` y actualización de `global-media-controls.test.mjs` y `display-guide-integration.test.mjs`.
+- **Límite y validación pendiente:** CI verde y prueba física con HDMI inalámbrico + spacedesk; confirmar persistencia, desconexiones, sonido del principal y silencio auxiliar. Aún NO hay mezclador de audio por pantalla ni centro estilo VirtualDJ: FreeShow puede compartir instancia de audio si mismo video se envía a varias salidas. No presentar esos aspectos como terminados.
+- Mantener PR #6 en borrador; no fusionar a main ni cambiar motor multimedia.
+
 ### P1 — Detección real de Windows y asignación de pantallas (26-oct-2026)
 - Inventario compartido `settings/jaDetectedDisplays.ts` consulta `Main.GET_DISPLAYS`. El asistente `Screens.svelte` publica las pantallas detectadas y al abrir el menú contextual multimedia se renueva el inventario; se evitan destinos ficticios.
 - «Enviar a pantalla» diferencia la pantalla principal de Windows (control, no proyectable), pantallas externas sin asignar, y salidas FreeShow activas vinculadas mediante `output.screen`. La opción «Configurar pantallas…» abre ajustes de salidas. Antes de enviar un medio se comprueba que la salida sigue asociada a un monitor detectado y no principal.
