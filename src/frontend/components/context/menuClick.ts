@@ -130,6 +130,23 @@ interface ObjData {
 }
 
 export function menuClick(id: string, enabled = true, menu: ContextMenuItem | null = null, contextElem: HTMLElement | null = null, actionItem: HTMLElement | null = null, sel: Selected | null = null) {
+    if (id.startsWith("ja_media_output:")) {
+        if (get(outLocked) || !sel?.data?.[0]) return
+        const outputId = id.slice("ja_media_output:".length)
+        const target = get(outputs)[outputId]
+        if (!target?.enabled || !target.active || target.stageOutput) return
+        const item = sel.data[0]
+        const path = item?.path || item?.id
+        if (typeof path !== "string" || !path || sel.id !== "media") return
+        const currentStyle = getCurrentStyle(get(styles), target.style)
+        const mediaStyle: MediaStyle = getMediaStyle(get(media)[path], currentStyle)
+        const videoType = getMediaLayerType(path, mediaStyle)
+        const type = getMediaType(getExtension(path))
+        const loop = videoType !== "foreground"
+        const muted = videoType !== "foreground"
+        setOutput("background", { path, ...mediaStyle, type, loop, muted }, false, outputId)
+        return
+    }
     if (!clickActions[id]) return console.error("MISSING CONTEXT: ", id)
 
     if (sel?.id) sel.id = sel.id.split("___")[0] as SelectIds // different selection ID, same action (currently used to seperate scripture navigation buttons)
