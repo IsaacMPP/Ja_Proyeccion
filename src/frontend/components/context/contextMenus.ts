@@ -183,6 +183,8 @@ export const contextMenuItems: { [key: string]: ContextMenuItem } = {
     // MEDIA
     preview: { label: "main.open", icon: "eye", iconColor: "#ffc3d3" },
     play: { label: "media.play", icon: "play", iconColor: "#7d81ff" },
+    ja_play_main: { label: "Proyectar en principal (con audio)", translate: false, icon: "play", iconColor: "#86d7a2" },
+    ja_send_to_output: { label: "Enviar a otra pantalla…", translate: false, icon: "outputs", items: ["LOAD_ja_media_outputs"] },
     play_no_audio: { label: "media.play_no_audio", icon: "play", iconColor: "#7d81ff" },
     play_no_filters: { label: "media.play_no_filters", icon: "play", iconColor: "#7d81ff" },
     favourite: { label: "media.favourite", icon: "star", iconColor: "#fff1ad" },
@@ -300,7 +302,7 @@ export const contextMenuLayouts: { [key: string]: string[] } = {
     // , "addToShow"
     // show_in_explorer!!
     media: ["manage_media_tags", "media_tag_filter", "sort_media_by", "media_view"],
-    media_card: ["GROUP_open", "createSlideshow", "play_no_audio", "play_no_filters", "SEPARATOR", "favourite", "SEPARATOR", "media_tag_set", "media_tag_filter", "sort_media_by", "SEPARATOR", "system_open"],
+    media_card: ["GROUP_open", "ja_play_main", "ja_send_to_output", "SEPARATOR", "createSlideshow", "favourite", "SEPARATOR", "media_tag_set", "media_tag_filter", "sort_media_by", "SEPARATOR", "system_open"],
     // "addToFirstSlide",
     drawer_overlays: ["reset_defaults"],
     overlay_card: ["GROUP_open", "overlay_actions", "display_duration", "export", "SEPARATOR", "lock_to_output", "place_under_slide", "SEPARATOR", "rename", "recolor", "duplicate", "delete"], // "GROUP_rename_color"

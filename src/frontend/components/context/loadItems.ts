@@ -12,12 +12,25 @@ import { chordTypes, keys } from "../edit/values/chords"
 import { clone, keysToID, sortByName } from "../helpers/array"
 import { removeExtension } from "../helpers/media"
 import { isOutputBound } from "../helpers/output"
+import { jaDetectedDisplays } from "../settings/jaDetectedDisplays"
+import { getDisplayLabel, isOutputOnDisplay } from "../settings/displayGuide"
 import { getLayoutRef } from "../helpers/show"
 import { _show } from "../helpers/shows"
 import { createTagItems, getSelectedTagIds } from "../helpers/tags"
 import { type ContextMenuItem } from "./contextMenus"
 
 const loadActions = {
+    ja_media_outputs: () => {
+        const displays = get(jaDetectedDisplays)
+        const assigned = sortByName(keysToID(get(outputs)).filter((output) => output.enabled && output.active && !output.stageOutput && output.screen))
+        const entries: ContextMenuItem[] = displays.map((display, index) => {
+            const output = assigned.find((entry) => isOutputOnDisplay(entry, display))
+            if (display.isPrimary) return { id: "ja_control_display", label: `${getDisplayLabel(display, index)} · Control`, translate: false, disabled: true }
+            if (!output) return { id: "ja_unassigned_display", label: `${getDisplayLabel(display, index)} · Sin asignar`, translate: false, disabled: true }
+            return { id: `ja_media_output:${output.id}`, label: `${getDisplayLabel(display, index)} · ${display.bounds.width} × ${display.bounds.height}${output.name ? ` · ${output.name}` : ""}`, translate: false }
+        })
+        return [...entries, "SEPARATOR", { id: "ja_configure_screens", label: "Configurar pantallas…", translate: false }]
+    },
     enabled_drawer_tabs: (items: ContextMenuItem[]) => {
         const tabsToRemove = 2
         const tabs = keysToID(clone(drawerTabs)).slice(tabsToRemove)

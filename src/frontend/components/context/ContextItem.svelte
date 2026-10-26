@@ -479,7 +479,7 @@
         let actionItem: HTMLElement | null = contextElem?.classList.contains("_" + id) ? contextElem : contextElem?.querySelector("._" + id) || null
         let sel = $selected
 
-        menuClick(id, enabled, menu, contextElem, actionItem, sel)
+        menuClick(menu?.id === "ja_configure_screens" || menu?.id?.startsWith("ja_media_output:") ? menu.id : id, enabled, menu, contextElem, actionItem, sel)
 
         // don't hide context menu
         const keepOpen = ["uppercase", "lowercase", "capitalize", "trim"] // "dynamic_values" (caret position is lost)
@@ -569,11 +569,13 @@
         align-items: center;
         justify-content: space-between;
         gap: 10px;
-        padding: 6px 16px;
+        padding: 9px 12px;
+        border-radius: 6px;
+        line-height: 1.3;
         cursor: pointer;
     }
     div:hover:not(.disabled) {
-        background-color: rgb(0 0 0 / 0.2);
+        background-color: var(--primary-lighter);
     }
 
     div.disabled {

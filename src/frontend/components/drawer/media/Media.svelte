@@ -69,6 +69,7 @@
     $: notFolders = ["all", ...specialTabs, ...contentProviders.map((p) => p.providerId)]
     $: isLocalFolder = !!(active && $mediaFolders[active])
     $: isJAHymnal = !!(active && $mediaFolders[active]?.jaLibraryRole === "hymnal")
+    $: multimediaFolderPaths = Object.values($mediaFolders).filter((folder) => folder.jaLibraryRole !== "hymnal").map((folder) => folder.path || "").filter(Boolean)
     $: jaSearchEverywhere = active === "all" || (isLocalFolder && !isJAHymnal && jaSearchScope === "all")
     $: rootPath = isLocalFolder ? $mediaFolders[active!]?.path || "" : ""
 
@@ -183,7 +184,7 @@
             if (active === prevActive) return
             prevActive = active
 
-            requestFiles(Object.values($mediaFolders).map((a) => a.path!))
+            requestFiles(multimediaFolderPaths)
         } else if (path?.length) {
             if (path === prevActive) return
             prevActive = path
@@ -379,7 +380,7 @@
             if (!term) {
                 if (jaSearchKey) {
                     jaSearchKey = ""
-                    if (active === "all") await requestFiles(Object.values($mediaFolders).map((folder) => folder.path || "").filter(Boolean), 0)
+                    if (active === "all") await requestFiles(multimediaFolderPaths, 0)
                     else if (isLocalFolder) await requestFiles(path, 0, true)
                 }
                 searchedFiles = clone(filteredFiles)
@@ -387,7 +388,7 @@
             }
 
             if (active === "all" || isLocalFolder) {
-                const source: string | string[] = jaSearchEverywhere ? Object.values($mediaFolders).map((folder) => folder.path || "").filter(Boolean) : path
+                const source: string | string[] = jaSearchEverywhere ? multimediaFolderPaths : path
                 const key = JSON.stringify([source, 5])
                 if (jaSearchKey !== key || currentDepth < 5) {
                     jaSearchKey = key
@@ -607,6 +608,24 @@
         {/if}
         {#if !isJAHymnal}<button type="button" class:chosen={jaVideosOnly} aria-pressed={jaVideosOnly} on:click={() => (jaVideosOnly = !jaVideosOnly)}>Solo videos</button>{/if}
     </div>
+    {#if isJAHymnal}
+        <div class="jaHymnalSearch" role="search">
+            <label for="jaHymnalSearchInput">Buscar himno</label>
+            <div class="jaHymnalSearchRow">
+                <input
+                    id="jaHymnalSearchInput"
+                    type="search"
+                    bind:value={searchValue}
+                    placeholder="Escribe el número o nombre del himno..."
+                    autocomplete="off"
+                    aria-label="Buscar himno por número o título"
+                />
+                {#if searchValue}
+                    <button type="button" class="jaHymnalClear" aria-label="Limpiar búsqueda" on:click={() => (searchValue = "")}>Limpiar</button>
+                {/if}
+            </div>
+        </div>
+    {/if}
 {/if}
 
 <!-- MAIN -->
@@ -783,6 +802,49 @@
 {/if}
 
 <style>
+    .jaHymnalSearch {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        padding: 10px 14px 12px;
+        flex-shrink: 0;
+        background: #102b42;
+    }
+    .jaHymnalSearch label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #f1f6fc;
+    }
+    .jaHymnalSearchRow {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .jaHymnalSearch input {
+        flex: 1;
+        min-width: 0;
+        height: 38px;
+        padding: 0 12px;
+        border-radius: 7px;
+        border: 1px solid #57768d;
+        background: #061a2a;
+        color: white;
+        font-size: 14px;
+    }
+    .jaHymnalSearch input:focus-visible {
+        outline: 2px solid #e4bb65;
+        outline-offset: 1px;
+    }
+    .jaHymnalSearch input::placeholder { color: #a3b6c7; }
+    .jaHymnalClear {
+        height: 38px;
+        padding: 0 12px;
+        border: 1px solid #57768d;
+        border-radius: 7px;
+        background: #23415a;
+        color: white;
+        cursor: pointer;
+    }
     .jaVideoToolbar {
         display: flex;
         align-items: center;

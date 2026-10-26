@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onDestroy } from "svelte"
     import type { DrawerTabIds } from "../../../types/Tabs"
-    import { activeDrawerTab, activeEdit, activePage, activePopup, activeProject, activeShow, activeTriggerFunction, dictionary, drawer, drawerOpenedInEdit, drawerTabsData, focusMode, labelsDisabled, mediaOptions, os, previousShow, projects, quickTextCache, scriptureSettings, selected, showsCache } from "../../stores"
+    import { activeDrawerTab, activeEdit, activePage, activePopup, activeProject, activeShow, activeTriggerFunction, dataPath, dictionary, drawer, drawerOpenedInEdit, drawerTabsData, focusMode, labelsDisabled, mediaFolders, mediaOptions, os, previousShow, projects, quickTextCache, scriptureSettings, selected, showsCache } from "../../stores"
     import { DEFAULT_DRAWER_HEIGHT, DEFAULT_WIDTH, MENU_BAR_HEIGHT } from "../../utils/common"
     import { startResizing, stopResizing } from "../../utils/cursor"
     import { translateText } from "../../utils/language"
@@ -24,6 +24,13 @@
     import MaterialButton from "../inputs/MaterialButton.svelte"
     import Resizeable from "../system/Resizeable.svelte"
     import Info from "./info/Info.svelte"
+    import { withDefaultJALibraries } from "../drawer/media/jaDefaultLibraries"
+
+    // Auto-register the physical JA library directories; never overwrite external links.
+    $: if ($dataPath && $mediaFolders) {
+        const merged = withDefaultJALibraries($mediaFolders, $dataPath)
+        if (merged !== $mediaFolders) mediaFolders.set(merged)
+    }
 
     const minHeight = 40
     const topHeight = 40
@@ -272,12 +279,12 @@
         tabindex="0" -->
         <span class="tabs">
             {#each tabs as tab, i}
-                {#if $drawerTabsData[tab.id]?.enabled !== false && getAccess(tab.id).global !== "none" && (!$focusMode || !hiddenInFocusMode.includes(tab.id))}
+                {#if $drawerTabsData[tab.id]?.enabled !== false && getAccess(tab.id === "hymnal" ? "media" : tab.id).global !== "none" && (!$focusMode || !hiddenInFocusMode.includes(tab.id))}
                     <!-- overflow: unset; -->
                     <MaterialButton id={tab.id} style="border-radius: 0;border-bottom: 2px solid var(--primary);padding: 0.2em 0.8em;" class="context #drawer_top" title="<b>{tab.name.split('.')[0]}.{tab.name.split('.')[1]}</b>{tab.title ? `\n${tab.title}` : ''} [Ctrl+{i + 1}]" isActive={activeTab === tab.id} on:click={() => openDrawerTab(tab)} on:dblclick={closeDrawer}>
                         <Icon id={tab.icon} size={1.3} white={activeTab === tab.id} />
                         {#if !$labelsDisabled && !$focusMode}
-                            <span><T id={tab.name} /></span>
+                            <span>{#if tab.id === "hymnal"}Himnario{:else}<T id={tab.name} />{/if}</span>
                         {/if}
                     </MaterialButton>
                 {/if}

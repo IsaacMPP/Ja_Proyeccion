@@ -1,3 +1,80 @@
+### Investigación pantallas equivocadas y audio silenciado — 26-oct-2026
+- Prueba reportada en Windows con TV HDMI inalámbrico (pantalla Windows 2) e iPad/spacedesk (pantalla Windows 3): se proyectaba en el dispositivo equivocado y el video quedaba sin audio. No declarar resuelto sin probar los dos equipos.
+- Referencias suministradas: FreeShow fuente original y OBS Studio. OBS en Windows consulta `DISPLAYCONFIG_TARGET_DEVICE_NAME.monitorFriendlyDeviceName`; Electron ya entrega `screen.Display.label` si Windows lo informa. Añadida etiqueta del dispositivo (o fallback explícito «modelo no disponible») con resolución en submenú y configuración.
+- `settings/displayGuide.ts`: `isOutputOnDisplay` exige ID real, salida activa y coincidencia de bounds antes de ofrecerla como destino. `jaPrimaryOutput.ts`, `context/loadItems.ts` y `menuClick.ts` comparten esa validación para impedir enviar al iPad usando una asociación obsoleta del televisor.
+- La regla actual sigue enviando video con audio al principal y auxiliares sin audio; el fallo auditivo de Windows NO queda plenamente diagnosticado. Revisar vídeo compartido en `VideoPlayer`, estilos/layers y salida de audio real seleccionada en Windows antes de cambiar su motor o prometer audio.
+- Pendiente indispensable: comprobar qué valor concreto devuelve `display.label` para adaptadores HDMI inalámbricos y spacedesk; si Windows no informa el modelo, investigar acceso seguro y compatible a FriendlyName/EDID para un nombre correcto, en vez de adivinarlo. Debe probarse reconexión, orden de Windows, posiciones y audio.
+
+### Inicio de P1.1 — Proyector principal, clic normal y menú contextual (26-oct-2026)
+- Acordado con el usuario: solo UNA salida física es la principal (audio de videos habilitado por defecto); las auxiliares mostrarán contenido sin audio; clic normal en Himnario/Multimedia manda al principal, jamás a todas las salidas. «Solo video» es excepción manual.
+- Nuevo `settings/jaPrimaryOutput.ts`: guarda localmente el identificador explícito del proyector principal. Si no hay selección previa, usa como predeterminada la primera salida externa asignada; una selección guardada desconectada NO cambia silenciosamente a otro proyector.
+- Asistente `settings/Screens.svelte`: botón «Establecer como principal» visible en pantallas externas ya asignadas. La laptop principal de Windows sigue fuera de los destinos de proyección.
+- `drawer/media/MediaCard.svelte`: clic normal y botones de modo video dirigidos solo al principal con `getJAPrimaryOutputId`; video normal con audio y solo video silenciado, sin limpiar fondos auxiliares. Las otras categorías del programa todavía requieren enrutamiento equivalente.
+- `context/contextMenus.ts`, `menuClick.ts`, `ContextItem.svelte`, CSS de menú: prioridad a «Proyectar en principal (con audio)» y «Enviar a otra pantalla…». Envíos a auxiliares con `muted: true`; principal `muted: false`; acciones anteriores de menú que podían enviar a todas las pantallas retiradas de `media_card`. Más espaciado, agrupación y legibilidad, sin segundo menú.
+- Prueba `scripts/ja/primary-output-routing.test.mjs` y actualización de `global-media-controls.test.mjs` y `display-guide-integration.test.mjs`.
+- **Límite y validación pendiente:** CI verde y prueba física con HDMI inalámbrico + spacedesk; confirmar persistencia, desconexiones, sonido del principal y silencio auxiliar. Aún NO hay mezclador de audio por pantalla ni centro estilo VirtualDJ: FreeShow puede compartir instancia de audio si mismo video se envía a varias salidas. No presentar esos aspectos como terminados.
+- Mantener PR #6 en borrador; no fusionar a main ni cambiar motor multimedia.
+
+### P1 — Detección real de Windows y asignación de pantallas (26-oct-2026)
+- Inventario compartido `settings/jaDetectedDisplays.ts` consulta `Main.GET_DISPLAYS`. El asistente `Screens.svelte` publica las pantallas detectadas y al abrir el menú contextual multimedia se renueva el inventario; se evitan destinos ficticios.
+- «Enviar a pantalla» diferencia la pantalla principal de Windows (control, no proyectable), pantallas externas sin asignar, y salidas FreeShow activas vinculadas mediante `output.screen`. La opción «Configurar pantallas…» abre ajustes de salidas. Antes de enviar un medio se comprueba que la salida sigue asociada a un monitor detectado y no principal.
+- `displayGuide.ts` y `Screens.svelte` reservan cada salida física para un monitor distinto: no reasignar silenciosamente una salida ocupada por otra pantalla. Solo al pulsar explícitamente «Usar como proyector» se configura una salida (si es necesario se crea otra).
+- Alcance: monitores reportados por Windows/Electron (pantallas físicas) y Multimedia/Himnario. No autodisparo a la laptop ni autodestino para contenidos de Biblia/Presentaciones; detección refrescada al abrir menú y ajustes, no vigilancia continua en segundo plano. Pendientes: validación real con 2/3 monitores, hotplug y destinos virtuales diferenciados.
+- Pruebas `scripts/ja/media-output-target.test.mjs`; **CI y prueba física obligatorias antes de cerrar P1**. Sin cambios al reproductor ya estabilizado; PR #6 permanece draft, `main` intacta.
+
+### Inicio de P1 — Selección multipantalla desde Multimedia e Himnario (25-oct-2026)
+- Se aprovechó el menú contextual nativo de FreeShow: `contextMenus.ts`, `loadItems.ts`, `ContextItem.svelte`, `menuClick.ts`. Nueva opción «Enviar a pantalla» para tarjetas `media_card`, con submenú dinámico exclusivamente de salidas lógicas `enabled && active && !stageOutput`. No inventa salidas, ni muestra salidas inactivas, y reutiliza `setOutput("background", ..., outputId)` para afectar un solo destino.
+- La configuración física existente en `settings/Screens.svelte` ya muestra monitores detectados, refresca, identifica y permite asignar proyectores; no se duplicó.
+- Alcance de esta primera implementación: medios del navegador nativo (imágenes/videos, incluidos los usados en Himnario), **no** aún diapositivas/Biblia/proyectos. El selector filtra salidas lógicas, no confirma por sí mismo la conexión física; esa parte requiere trabajo adicional en P1.
+- Prueba estructural `scripts/ja/media-output-target.test.mjs`. **Pendiente CI y Windows con 2/3 pantallas**, observar permisos/bloqueos, salidas desconectadas y que no se sobreescriban otras proyecciones. Motor multimedia previamente validado no modificado.
+- PR #6 conserva condición draft; no fusionar a main sin autorización.
+
+### Corrección de carrera al pasar de video a Solo audio — 25-oct-2026
+- Nuevo reporte Windows: al cambiar del mismo video a Solo audio la pantalla queda negra y no suena; Solo audio funciona si es el primer modo elegido.
+- Causa probable inspeccionada en FreeShow: `VideoPlayer.stop` aplica transición/fade-out asíncrona (predeterminado cercano a 800 ms) antes de liberar `playingVideos`; `muteAudioWhenVideoPlays` puede atenuar el reproductor independiente durante ese intervalo.
+- Cambio contenido en `MediaCard.svelte`: tras `clearBackground` selectivo, esperar hasta que `VideoPlayer.audioExists(path)` sea falso (tope 3.5 s), después llamar `AudioPlayer.start`; restaurar el fondo si falla. Actualizar volumen de la pista al iniciar. Test estructural correspondiente actualizado. No modifica motor ni implementa sincronización temporal.
+- **Pendiente CI y prueba Windows repetida.** Si persiste, registrar estados de `playingVideos`, `playingAudio` y `muteAudioWhenVideoPlays`; no afirmar solución definitiva sin medición.
+
+### Fallo repetido Solo audio al regresar desde modos de video — 25-oct-2026
+- Windows: «Solo audio» funciona si se elige primero en otro archivo, pero falla al alternar en el mismo MP4 tras Video con audio/Solo video.
+- Se inspeccionó `AudioPlayer.start()`: puede devolver `true` cuando `currentlyLoading`, `outLocked` o `clearing` bloquean la operación, sin confirmar reproducción; el flujo previo iniciaba la pista antes de quitar la proyección que podía mantener reglas de atenuación de audio.
+- Corrección candidata: `MediaCard.svelte` quita **solo** el video coincidente antes de iniciar el audio; exige `AudioPlayer.audioExists(path)` tras start, reanuda si quedó pausado y restaura el fondo original únicamente cuando el inicio falla y esa salida sigue vacía. No crea segundo motor, no hace transición sincronizada ni altera fondos ajenos.
+- Pruebas estructurales actualizadas. **Pendiente CI y validación real en Windows del cambio repetido sobre un mismo MP4; no dar por resuelto sin esos resultados.**
+
+### Ajuste de selección explícita de modos en el mismo video — 25-oct-2026
+- Usuario reporta que seleccionar otro modo sobre un video ya proyectado no produce el cambio.
+- En `MediaCard.svelte` se encontró que el `wait/iconClicked` usado para los clics de tarjeta también bloqueaba órdenes de modo y que un nuevo fondo podía heredar `muted` del estilo.
+- Se agregaron acciones explícitas para «Video con audio» y «Solo video» que no dependen de ese bloqueo temporal y que establecen `muted` conforme a la elección. Para un video ya proyectado se utiliza `VideoPlayer.toggleMute` sobre el mismo archivo y salida. «Solo audio» conserva la limpieza selectiva.
+- Todavía falta comprobar CI y reproducir todos los cambios de modo en Windows; no afirmar validación funcional solamente por pruebas estructurales. No se implementó cambio sincronizado en caliente.
+
+### Corrección unificada de modos de reproducción — 25-oct-2026
+- El usuario autorizó corregir de forma conjunta cinco transiciones (video con audio, solo video, solo audio) sin exigir continuidad temporal.
+- `MediaCard.svelte`: al solicitar video normal o video silenciado se detiene únicamente el audio independiente del **mismo archivo** mediante `AudioPlayer.stop(path)`. Si ese video ya está proyectándose, se modifica su estado de silencio con `VideoPlayer.getAudio/toggleMute(path,output.id)` en vez de interpretar el clic como orden de retirar el fondo. Si aún no está en pantalla, se usa el flujo de proyección nativo.
+- «Solo audio» mantiene la acción de iniciar audio y retirar exclusivamente fondos del **mismo video**, sin tocar otros videos, Biblia ni monitores no relacionados; el audio ya activo no se pausa al volver a pulsar.
+- Prueba estructural agregada a `scripts/ja/global-media-controls.test.mjs`. **Pendiente** CI y validación real 5 transiciones; no garantiza continuidad temporal. La conversión inversa puede reiniciar el video; opción acordada. No fusionar sin validar.
+ 
+### Corrección de «Solo audio» con video aún proyectado — 25-oct-2026
+- Reporte de prueba en Windows: al reproducir video (con audio o silenciado) y elegir «Solo audio», permanecía el video anterior en pantalla. Causa: `AudioPlayer.start()` no interactuaba con las salidas de `VideoPlayer`.
+- En `MediaCard.svelte`, después de confirmar que `AudioPlayer.start()` se ejecutó, se retira únicamente el fondo de salidas cuyo `out.background.path/id` coincide con el archivo elegido, mediante `clearBackground(outputId)`. Si el audio falla, se preserva la proyección. Otras pantallas y contenidos diferentes no se cambian.
+- Esto NO crea transición sincronizada, ni garantiza continuidad temporal: «Solo audio» sigue siendo una nueva reproducción. Pendiente de probar en Windows con videos como fondo y varias pantallas, así como videos incrustados dentro de diapositivas (otro caso) y cambio inverso.
+- Prueba estructural en `scripts/ja/hymnal-audio-only.test.mjs`. Esperar CI verde y validación del usuario antes de fusionar.
+
+### Auditoría integral y nueva priorización — 25-oct-2026
+- Auditoría estática completada: `docs/AUDITORIA_INTEGRAL_JA_FREESHOW_2026-10-25.md`. Revisar ese documento antes de iniciar nuevas funciones. Se mantiene `JA_MASTER.md` como fuente de continuidad.
+- Prioridades nuevas: **P0 CI y estabilidad** → **P1 pantallas, salidas, selección de destino en menú** → **P2 matriz de configuraciones reales** → **P3 coherencia de experiencia** → **P4 organizador de culto**. No duplicar funciones nativas de FreeShow; no comenzar centro universal aún.
+- Se corrigió en `760cf60e` una prueba estructural obsoleta de controles globales de audio tras retirada de controles repetidos en Himnario. HEAD de auditoría pendiente de CI.
+
+### Consolidación de controles y modo «Solo video» — 25-oct-2026
+- Tras la decisión del usuario de no arriesgar transiciones instantáneas audio↔video, se revisó `src/frontend/components/output/tools/Audio.svelte`: FreeShow ya tiene reproductor global (pausa, posición, selector de pistas). Se añadió solamente el botón «Detener» mediante `AudioPlayer.stop(key)` y se retiraron controles redundantes de `HymnalTabs.svelte`. Conserva vinculación externa del Himnario.
+- `MediaCard.svelte`: todos los videos locales tienen botón «Solo video: proyectar sin sonido» que reutiliza la proyección normal mediante `setOutput("background",...)` y fuerza `muted: true` por encima del estilo de salida; el video con audio se conserva. El botón «Solo audio» continúa disponible globalmente. No se implementó cambio en caliente.
+- Nuevo test `scripts/ja/global-media-controls.test.mjs`. **Pendiente** CI Windows y prueba en equipo real de los tres modos y salidas independientes. No fusionar todavía.
+ 
+### Decisión de alcance — 25-oct-2026: NO cambiar de audio a video en caliente
+- El usuario descartó expresamente sincronizar el cambio de modo de video ↔ solo audio sin reiniciar. Motivo: evitar riesgos sobre la reproducción, la sincronización y las múltiples salidas.
+- **No implementar** sincronización en caliente, handoff entre reproductores ni modificación del motor FreeShow para este fin; conservar los modos existentes, ya probados por el usuario.
+- Priorizar ahora: (1) revisar y unificar los controles visibles del audio global sin duplicar reproductores; (2) modo «solo video» mediante las opciones de silencio existentes y de forma segura por salida; (3) regresión de rendimiento y multipantalla; (4) cierre documentado de 4.2 y organización de PR. Cambios funcionales posteriores deben probarse antes de fusionar.
+- CI último commit funcional `1e0cb2ed`, ejecución `40258486305` exitosa. Usuario confirmó que funciona «solo audio» y solicitó no arriesgar la función con transiciones instantáneas.
+
 # JA PROYECCIÓN — ARCHIVO MAESTRO DE CONTINUIDAD
 
 > **DOCUMENTO CANÓNICO / FUENTE ÚNICA DE VERDAD.**
@@ -212,6 +289,63 @@
 - Los runs `40241776049`, `40241808241`, `40241829221` y `40241832154` fallaron en `scripts/ja/branding.test.mjs`: faltaba `border-radius: 7px` porque una sustitución de `MediaGrid.svelte` había eliminado todo el bloque `<style>`.
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
+
+### Ampliación del modo solo audio a todos los videos — 25-oct-2026
+- Aclaración del usuario: la función «Solo audio» no es exclusiva de Himnario; debe servir para **todos los videos locales** (Multimedia, Fondos, Especiales, etc.) mientras se mantienen otras proyecciones.
+- `MediaCard.svelte` ahora ofrece el botón de audio independiente a todo medio local de tipo `video`, utilizando el `AudioPlayer` de FreeShow; no llama `setOutput` ni cambia pantalla alguna. `hymnal-audio-only.test.mjs` actualizado para prevenir restringir de nuevo la función.
+- Los controles adicionales de la barra lateral del Himnario siguen siendo contextuales; el motor de audio es global. Pendiente revisar experiencia de controles globales y probar mp4 con audio, sin audio, distintas pantallas, y evitar duplicación de pistas.
+- Pendiente compilación Windows y prueba real. No fusionar sin validación.
+
+### Audio independiente de MP4 en Himnario — 25-oct-2026
+- El usuario autorizó continuar Fase 4.2. Auditoría: el motor de FreeShow `AudioPlayer` ya puede abrir medios mediante `new Audio(encodeFilePath(path))`, gestionar pausa/reanudación/detención y reproducir sin modificar `setOutput` ni las salidas multipantalla.
+- Primera entrega: tarjetas MP4 de bibliotecas `hymnal` incorporan botón **Solo audio** que usa `AudioPlayer.start`; en la navegación del Himnario aparecen estado y controles **Pausar/Reanudar/Detener** cuando hay audio activo desde una ruta de sus bibliotecas. Se reutiliza el motor de audio y sus ajustes; el video con audio conserva su comportamiento anterior.
+- No se ha implementado aún modo de proyección **video silenciado** como selector explícito; requiere revisar reglas de `muted` de las diferentes salidas. No hay listas nuevas ni reemplazo del motor de audio.
+- Advertencia: MP4 sin pista de audio compatible puede fallar, y el dispositivo de salida/ruteo debe comprobarse en Windows; **pendiente** CI y pruebas reales de sonido simultáneo con versículos, cambio de pantallas, pausa, reinicio de reproducción y archivos sin audio. No declarar completada la fase solo por CI verde.
+
+### Separación definitiva de catálogos del Himnario y Multimedia — 25-oct-2026
+- Petición del usuario: Multimedia → Todo y la búsqueda general no deben recorrer ni listar los ~613 MP4 del Himnario, que ya dispone de sección propia. La misma entrada «Vincular Himnario» debe gestionarse en Himnario, no duplicarse en Multimedia.
+- `Media.svelte` ahora construye `multimediaFolderPaths` excluyendo el rol `hymnal` y utiliza ese conjunto al abrir Todo, buscar globalmente y restablecer la búsqueda. `MediaTabs.svelte` excluye los mismos registros de su navegación y contadores, y retira «Vincular Himnario» de los botones de bibliotecas JA.
+- `HymnalTabs.svelte` mantiene la carpeta predeterminada y añade vinculación de carpetas externas mediante el flujo nativo de selector e historial. Las carpetas externas no se copian y no se registra dos veces una ruta ya vinculada; el motor y caché son compartidos.
+- Pruebas estructurales actualizadas en `hymnal-dedicated-tab.test.mjs`. **Pendiente** CI Windows y prueba real: Multimedia → Todo sin himnos, búsqueda de Multimedia sin himnos, Himnario con 613 videos, vínculos externos y estabilidad de proyección. No fusionar borradores ni iniciar rediseño del centro antes de validar.
+- Nota de diseño: los favoritos existentes se conservan globales por ahora; estudiar ámbito de favoritos por módulo separadamente, sin retirar a ciegas acceso a contenido marcado por el usuario.
+
+### Evitar duplicación visual del Himnario — 25-oct-2026
+- Usuario mostró captura donde Himnario aparecía como pestaña propia y también en «Bibliotecas JA» de Multimedia. Solicita evitar funciones y carpetas redundantes.
+- `MediaTabs.svelte`: la navegación de Multimedia omite carpetas con rol `hymnal` de la sección «Bibliotecas JA». El registro, los MP4, el caché y la pestaña Himnario se conservan; no se borran ni duplican carpetas.
+- Se mantiene la opción de gestión/vinculación de bibliotecas y «Todo» general para no romper búsqueda ni acceso técnico; revisar después, con pruebas reales, si «Todo» debe excluir también Himnario y cómo centralizar la vinculación en su pestaña sin duplicar controles.
+- Prueba estructural de no duplicación añadida al test del Himnario. Pendiente CI Windows y validación del usuario. No fusionar hasta validar.
+
+### Corrección de autovinculación de bibliotecas JA — 25-oct-2026
+- Prueba del usuario: 613 MP4 ya están en `Documentos/JA Proyección/Himnario Adventista`, pero la nueva pestaña indicaba erróneamente «No hay una carpeta del Himnario vinculada». Causa: `ensureJALibraryDirectories()` creaba las carpetas físicas, pero la lista persistente `mediaFolders` nunca registraba esas rutas.
+- Se añadió `jaDefaultLibraries.ts` con rutas correspondientes a `Himnario Adventista`, `Cantos Juveniles`, `Fondos Personalizados` y `Especiales`. Al disponer del directorio de datos, `Drawer.svelte` registra estas bibliotecas predeterminadas en `mediaFolders` sin copiar archivos, sin crear duplicados y sin borrar bibliotecas externas.
+- Si la carpeta predeterminada ya aparece vinculada con otra etiqueta, se reutiliza ese registro y se le asigna el rol apropiado. La pestaña Himnario prioriza la carpeta predeterminada, conserva las bibliotecas externas como recursos adicionales y abre Multimedia para administrarlas.
+- Prueba: `scripts/ja/default-libraries.test.mjs`; **pendiente** CI Windows y comprobar en el equipo del usuario: 613 MP4, búsquedas, miniaturas y el resto de carpetas incluso si están vacías. No modificar `main` antes de validar.
+- Importante: esto cubre las cuatro bibliotecas multimedia JA; la Biblia se gestiona por su propio módulo de versiones y no debe tratarse como una carpeta de MP4. Audio y presentaciones poseen flujos propios: evaluar sus conexiones predeterminadas en su fase, sin cambiar el motor de FreeShow a ciegas.
+
+### Orden de pestañas aprobado — 25-oct-2026
+- El usuario autorizó aplicar de inmediato la organización funcional: **Proyectos → Himnario → Biblia → Multimedia → Audio → Superposiciones → Plantillas → Calendario → Funciones**.
+- Se modificó únicamente el orden de `drawerTabs` en `src/frontend/values/tabs.ts`; se mantienen los mismos identificadores, componentes y permisos, sin cambios en el motor de salidas.
+- Se añadió aserción de orden en `scripts/ja/hymnal-dedicated-tab.test.mjs`. Validar CI y después confirmar distribución visual en Windows.
+- **Pendientes restantes 4.2:** prueba real de pestaña/buscador/caché/navegación, diseño e implementación por separado de audio-only de MP4 sin interferir con proyección multipantalla, regresión, orden de integración y cierre de PR. No comenzar rediseño del centro.
+
+### Implementación de pestaña independiente Himnario — 25-oct-2026
+- Autorización del usuario: «procede», para continuar en orden con la estructura definitiva del Himnario, antes del centro universal.
+- En la misma rama del buscador (PR #6) se agregó pestaña visible **Himnario** a la navegación inferior; se abre la biblioteca asociada al rol `hymnal` reutilizando `Media.svelte`, `jaHymnal.ts`, el caché global, el buscador y los controles de proyección existentes. Se añade orientación cuando la biblioteca aún no está vinculada.
+- Acceso a administración mediante Multimedia; se reutilizan las autorizaciones de Media y el panel informativo existente. **No** se reescribe el reproductor ni el motor multipantalla de FreeShow; no se modifica `main`.
+- Test estructural `scripts/ja/hymnal-dedicated-tab.test.mjs`. **Pendiente:** CI Windows, probar clic en pestaña Himnario, 613 MP4, búsqueda por número/título, miniaturas tras cambio de pestaña, reproducción y proyección en distintas salidas, y manejo de biblioteca sin vincular.
+- El futuro centro universal y las listas se mantienen fuera de esta entrega; la prioridad es estabilizar y validar Fase 4.2 antes de avanzar.
+
+### Decisión de secuencia tras revisión de UX (25-oct-2026)
+- El usuario validó el caché persistente y pidió **cerrar pendientes en orden** antes de rediseñar el centro. No iniciar aún el centro universal.
+- Estado comprobado: CI del buscador #6, ejecuciones `40247531557` y `40247553565`, **success**. Compilación exitosa no equivale a prueba funcional en Windows.
+- **Orden obligado Fase 4.2**: (1) estructura/pestaña definitiva del Himnario; (2) reutilizar y adaptar el buscador ya escrito en #6 a esa ubicación, sin duplicar controles; (3) verificar navegación, selección, vídeo/audio y el caché; (4) pruebas Windows y cierre de PR encadenados, sin fusionar prematuramente.
+- **Pendiente posterior**: centro de trabajo universal con previsualización privada de videos, Biblia, diapositivas, imágenes y audio, controles contextuales, programas y listas; conservar las salidas independientes de FreeShow, pantallas de confianza y contenido simultáneo. Diseñar contra el motor existente, no imponer un editor nuevo ni romper el sistema multipantalla.
+- No añadir funciones al centro hasta cerrar pendientes y revisar el alcance real de las demás fases.
+
+### Mejorar visibilidad del buscador del Himnario — 25-oct-2026
+- Tras prueba positiva del caché, se inició rama aislada `feature/fase4-2-buscador-himnario` basada en caché persistente.
+- `Media.svelte`: campo de búsqueda por número/nombre claramente visible arriba del catálogo, con etiqueta, texto más legible, enfoque accesible y botón Limpiar; permanece visible durante el desplazamiento. Usa `searchValue` ya existente, sin introducir indexación ni filtrado nuevo, y no modifica la interfaz de otros medios.
+- Validación pendiente: CI Windows y prueba real, incluida búsqueda numérica, por título, limpiar, y que la pantalla de proyección no se altere. Mantener PR en borrador.
 
 ### Validación del usuario — caché global de miniaturas (25-oct-2026)
 - GitHub Actions `40246293775` (commit `5c0728bc`) terminó **success**.

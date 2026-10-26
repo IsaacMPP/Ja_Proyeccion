@@ -1,5 +1,10 @@
 <script lang="ts">
     import { derived } from "svelte/store"
+    import { onMount } from "svelte"
+    import { AudioPlayer } from "../../../audio/audioPlayer"
+    import { jaDetectedDisplays, ensureJADetectedDisplays } from "../../settings/jaDetectedDisplays"
+    import { getJAPrimaryOutputId } from "../../settings/jaPrimaryOutput"
+    import { VideoPlayer } from "../../media/video/videoPlayer"
     import type { ContentFile, ContentProviderId } from "../../../../electron/contentProviders/base/types"
     import type { MediaStyle } from "../../../../types/Main"
     import { Main } from "../../../../types/IPC/Main"
@@ -20,6 +25,8 @@
     import Card from "../Card.svelte"
     import MediaLoader from "./MediaLoader.svelte"
 
+    onMount(() => { void ensureJADetectedDisplays() })
+
     export let name: string
     export let collectionName = ""
     export let path: string
@@ -32,6 +39,49 @@
     export let loadFullImage = false
     export let contentProvider: ContentProviderId | false = false
     export let contentFileData: ContentFile | null = null
+
+    $: supportsAudioOnly = type === "video" && !contentProvider && !!path
+    let startingAudio = false
+    async function playHymnAudio(event: MouseEvent) {
+        event.stopPropagation()
+        if (startingAudio || !supportsAudioOnly || $outLocked) return
+        startingAudio = true
+        // Preserve only backgrounds showing this video, so a failed audio start can
+        // restore them without disturbing unrelated content on other outputs.
+        const matchingOutputs = Object.entries($outputs)
+            .filter(([, output]) => (output.out?.background?.path || output.out?.background?.id) === path)
+            .map(([outputId, output]) => ({ outputId, background: output.out!.background }))
+        try {
+            matchingOutputs.forEach(({ outputId }) => clearBackground(outputId))
+            // FreeShow may fade out the old video asynchronously. Do not start the
+            // audio-only track while the video still triggers automatic audio ducking.
+            const stopDeadline = Date.now() + 3500
+            while (VideoPlayer.audioExists(path) && Date.now() < stopDeadline) {
+                await new Promise<void>((resolve) => setTimeout(resolve, 60))
+            }
+            if (VideoPlayer.audioExists(path)) throw new Error("La salida del video no finalizó")
+            const played = await AudioPlayer.start(path, { name }, { pauseIfPlaying: false })
+            // FreeShow may return true for a locked/loading request without starting it.
+            if (!played || !AudioPlayer.audioExists(path)) {
+                matchingOutputs.forEach(({ outputId, background }) => {
+                    const current = $outputs[outputId]?.out?.background
+                    if (!current) setOutput("background", background, false, outputId)
+                })
+                newToast("No se pudo iniciar el audio de este MP4")
+                return
+            }
+            if (AudioPlayer.isPaused(path)) AudioPlayer.play(path)
+            AudioPlayer.updateVolume(path)
+        } catch (error) {
+            matchingOutputs.forEach(({ outputId, background }) => {
+                if (!$outputs[outputId]?.out?.background) setOutput("background", background, false, outputId)
+            })
+            console.error("JA: error al reproducir audio del video", error)
+            newToast("El archivo no contiene audio compatible o no se puede abrir")
+        } finally {
+            startingAudio = false
+        }
+    }
 
     $: customCoverPath = !contentProvider && type === "video" ? $media[path]?.jaCoverPath || "" : ""
     $: previewCoverPath = customCoverPath || thumbnailPath
@@ -167,8 +217,8 @@
     }
 
     let wait = false
-    function click(e: any) {
-        if (e.ctrlKey || e.metaKey || e.shiftKey || $outLocked || wait || iconClicked) return
+    function click(e: any, forceMuted = false, explicitMode = false) {
+        if (e.ctrlKey || e.metaKey || e.shiftKey || $outLocked || (!explicitMode && (wait || iconClicked))) return
 
         // don't hide again when double clicking
         wait = true
@@ -176,24 +226,41 @@
             wait = false
         }, 800)
 
-        const activeOutputs = getAllActiveOutputs()
+        const primaryId = getJAPrimaryOutputId($outputs, $jaDetectedDisplays)
+        if (!primaryId) {
+            newToast("Selecciona un proyector principal en Configuración → Pantallas")
+            return
+        }
+        const activeOutputs = getAllActiveOutputs().filter((output) => output.id === primaryId)
 
         const isActive = activeOutputs.some((a) => (a.out?.background?.path || a.out?.background?.id) === path)
-        if (isActive) {
-            clearBackground()
+        if (type === "video" && !contentProvider) {
+            // Modes are mutually exclusive for this file, without a timed handoff.
+            // Do not stop unrelated audio or change another output's background.
+            AudioPlayer.stop(path)
+            if (isActive) {
+                activeOutputs.forEach((output) => {
+                    if ((output.out?.background?.path || output.out?.background?.id) !== path) return
+                    const videoAudio = VideoPlayer.getAudio(path, output.id)
+                    if (videoAudio && !!videoAudio.muted !== forceMuted) VideoPlayer.toggleMute(path, output.id)
+                })
+                return
+            }
+        } else if (isActive) {
+            activeOutputs.forEach((output) => clearBackground(output.id))
             return
         }
 
         let videoType = getMediaLayerType(path, mediaStyle)
         let loop = contentProvider || videoType === "foreground" ? false : true
         let muted = videoType === "background" ? true : false
-        if (videoType === "foreground") clearSlide()
+        // Never clear slides on unrelated auxiliary outputs.
 
         // get style per output
         activeOutputs.forEach((output) => {
             const currentOutputStyle = $styles[output.style || ""]
             const currentMediaStyle = getMediaStyle($media[path], currentOutputStyle)
-            setOutput("background", { path, type, loop, muted, startAt: 0, ...currentMediaStyle, ignoreLayer: videoType === "foreground" }, false, output.id)
+            setOutput("background", { path, type, loop, muted, startAt: 0, ...currentMediaStyle, ...(type === "video" ? { muted: forceMuted } : {}), ignoreLayer: videoType === "foreground" }, false, output.id)
         })
 
         // unsplash requires the download to be triggered when using their images
@@ -203,6 +270,20 @@
         } else {
             customMessageCredits.set("")
         }
+    }
+
+    function projectVideoWithAudio(event: MouseEvent) {
+        event.stopPropagation()
+        if (type !== "video" || contentProvider) return
+        click(event, false, true)
+        iconClicked = setTimeout(() => (iconClicked = null), 100)
+    }
+
+    function projectVideoMuted(event: MouseEvent) {
+        event.stopPropagation()
+        if (type !== "video" || contentProvider) return
+        click(event, true, true)
+        iconClicked = setTimeout(() => (iconClicked = null), 100)
     }
 
     function dblclick(e: any) {
@@ -289,6 +370,11 @@
     >
         <!-- icons -->
         <div class="icons">
+            {#if supportsAudioOnly}
+                <div class="button"><Button style="padding: 3px;" title="Video con audio: proyectar imagen y sonido" on:click={projectVideoWithAudio}><Icon id="volume" size={0.9} white /></Button></div>
+                <div class="button"><Button style="padding: 3px;" title="Solo video: proyectar sin sonido" on:click={projectVideoMuted}><Icon id="volume_off" size={0.9} white /></Button></div>
+                <div class="button"><Button style="padding: 3px;" title="Solo audio: escuchar el video sin cambiar las pantallas" on:click={playHymnAudio} disabled={startingAudio}><Icon id="audio" size={0.9} white /></Button></div>
+            {/if}
             {#if !contentProvider && type === "video" && path}
                 <div class="ja-cover-controls">
                     <div class="button">

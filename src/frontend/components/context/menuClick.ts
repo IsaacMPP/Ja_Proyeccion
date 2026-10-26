@@ -117,6 +117,9 @@ import { sendMidi } from "../helpers/showActions"
 import { _show } from "../helpers/shows"
 import { getMenuTagId, openTagManager, toggleSelectionTags, toggleTagFilter } from "../helpers/tags"
 import { clearSlide } from "../output/clear"
+import { jaDetectedDisplays } from "../settings/jaDetectedDisplays"
+import { isOutputOnDisplay } from "../settings/displayGuide"
+import { getJAPrimaryOutputId } from "../settings/jaPrimaryOutput"
 import { defaultThemes } from "../settings/tabs/defaultThemes"
 import { activeProject } from "./../../stores"
 import type { ContextMenuItem } from "./contextMenus"
@@ -130,6 +133,40 @@ interface ObjData {
 }
 
 export function menuClick(id: string, enabled = true, menu: ContextMenuItem | null = null, contextElem: HTMLElement | null = null, actionItem: HTMLElement | null = null, sel: Selected | null = null) {
+    if (id === "ja_play_main") {
+        const primary = getJAPrimaryOutputId(get(outputs), get(jaDetectedDisplays))
+        if (!primary) {
+            newToast("Configura primero el proyector principal")
+            return
+        }
+        menuClick(`ja_media_output:${primary}`, enabled, menu, contextElem, actionItem, sel)
+        return
+    }
+    if (id === "ja_configure_screens") {
+        settingsTab.set("display_settings")
+        activePage.set("settings")
+        return
+    }
+    if (id.startsWith("ja_media_output:")) {
+        if (get(outLocked) || !sel?.data?.[0]) return
+        const outputId = id.slice("ja_media_output:".length)
+        const target = get(outputs)[outputId]
+        if (!target?.enabled || !target.active || target.stageOutput || !target.screen) return
+        const display = get(jaDetectedDisplays).find((screen) => String(screen.id) === String(target.screen))
+        if (!display || display.isPrimary || !isOutputOnDisplay(target, display)) return
+        const item = sel.data[0]
+        const path = item?.path || item?.id
+        if (typeof path !== "string" || !path || sel.id !== "media") return
+        const currentStyle = getCurrentStyle(get(styles), target.style)
+        const mediaStyle: MediaStyle = getMediaStyle(get(media)[path], currentStyle)
+        const videoType = getMediaLayerType(path, mediaStyle)
+        const type = getMediaType(getExtension(path))
+        const loop = videoType !== "foreground"
+        const isPrimary = outputId === getJAPrimaryOutputId(get(outputs), get(jaDetectedDisplays))
+        const muted = !isPrimary
+        setOutput("background", { path, ...mediaStyle, type, loop, muted }, false, outputId)
+        return
+    }
     if (!clickActions[id]) return console.error("MISSING CONTEXT: ", id)
 
     if (sel?.id) sel.id = sel.id.split("___")[0] as SelectIds // different selection ID, same action (currently used to seperate scripture navigation buttons)

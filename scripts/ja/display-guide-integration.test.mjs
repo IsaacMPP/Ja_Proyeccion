@@ -26,7 +26,7 @@ test("El asistente no proyecta automáticamente en el monitor del operador", asy
 test("Guía y avanzado comparten el motor de FreeShow", async () => {
     const screens = await readFile("src/frontend/components/settings/Screens.svelte", "utf8")
     assert.match(screens, /getPhysicalOutputId/)
-    assert.match(screens, /addOutput\(false, "", false, "Proyector"\)/)
+    assert.ok(screens.includes("addOutput(false, \"\", false, `Proyector ${displayIndex + 1}`)"))
     assert.match(screens, /toggleOutputs\(\[selectedId\], \{ state: true \}\)/)
     assert.match(screens, /send\(OUTPUT, \["UPDATE_BOUNDS"\]/)
     assert.match(screens, /showAdvancedScreens/)
