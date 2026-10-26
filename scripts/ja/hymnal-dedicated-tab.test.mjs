@@ -22,3 +22,9 @@ test("worship tabs stay together and related media tabs stay adjacent", () => {
     assert.ok(positions.every((pos) => pos >= 0), "all tabs exist")
     assert.ok(positions.every((pos, i) => i === 0 || pos > positions[i - 1]), "tab ordering must match the agreed workflow")
 })
+
+test("Multimedia does not repeat the dedicated Himnario in its JA navigation", () => {
+    const navigation = fs.readFileSync("src/frontend/components/drawer/navigation/MediaTabs.svelte", "utf8")
+    assert.match(navigation, /categorizedFolders = foldersList\.filter\(\(a\) => isJALibraryRole\(a\.jaLibraryRole\) && a\.jaLibraryRole !== "hymnal"\)/)
+    assert.match(navigation, /regularFolders = foldersList\.filter\(\(a\) => !isJALibraryRole\(a\.jaLibraryRole\)\)/)
+})
