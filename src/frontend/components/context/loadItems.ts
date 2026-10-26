@@ -18,6 +18,7 @@ import { createTagItems, getSelectedTagIds } from "../helpers/tags"
 import { type ContextMenuItem } from "./contextMenus"
 
 const loadActions = {
+    ja_media_outputs: () => sortByName(keysToID(get(outputs)).filter((output) => output.enabled && output.active && !output.stageOutput)).map((output) => ({ id: `ja_media_output:${output.id}`, label: output.name || `Pantalla ${output.id}`, translate: false })),
     enabled_drawer_tabs: (items: ContextMenuItem[]) => {
         const tabsToRemove = 2
         const tabs = keysToID(clone(drawerTabs)).slice(tabsToRemove)
