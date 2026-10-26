@@ -1,12 +1,14 @@
 <script lang="ts">
-    import { activeDrawerTab, drawerTabsData, mediaFolders } from "../../../stores"
+    import { activeDrawerTab, dataPath, drawerTabsData, mediaFolders } from "../../../stores"
 
+    import { getPrimaryJALibraryId } from "../media/jaDefaultLibraries"
     $: folders = Object.entries($mediaFolders).filter(([, folder]) => folder.jaLibraryRole === "hymnal")
+    $: primaryId = getPrimaryJALibraryId($mediaFolders, $dataPath, "hymnal")
     function manageLibrary() {
         if (folders.length) {
             drawerTabsData.update((tabs) => {
-                if (!tabs.media) tabs.media = { enabled: true, activeSubTab: folders[0][0] }
-                else tabs.media.activeSubTab = folders[0][0]
+                if (!tabs.media) tabs.media = { enabled: true, activeSubTab: primaryId }
+                else tabs.media.activeSubTab = primaryId
                 return tabs
             })
         }
