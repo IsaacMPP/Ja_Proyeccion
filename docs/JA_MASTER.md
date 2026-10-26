@@ -213,6 +213,13 @@
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
 
+### Separación definitiva de catálogos del Himnario y Multimedia — 25-oct-2026
+- Petición del usuario: Multimedia → Todo y la búsqueda general no deben recorrer ni listar los ~613 MP4 del Himnario, que ya dispone de sección propia. La misma entrada «Vincular Himnario» debe gestionarse en Himnario, no duplicarse en Multimedia.
+- `Media.svelte` ahora construye `multimediaFolderPaths` excluyendo el rol `hymnal` y utiliza ese conjunto al abrir Todo, buscar globalmente y restablecer la búsqueda. `MediaTabs.svelte` excluye los mismos registros de su navegación y contadores, y retira «Vincular Himnario» de los botones de bibliotecas JA.
+- `HymnalTabs.svelte` mantiene la carpeta predeterminada y añade vinculación de carpetas externas mediante el flujo nativo de selector e historial. Las carpetas externas no se copian y no se registra dos veces una ruta ya vinculada; el motor y caché son compartidos.
+- Pruebas estructurales actualizadas en `hymnal-dedicated-tab.test.mjs`. **Pendiente** CI Windows y prueba real: Multimedia → Todo sin himnos, búsqueda de Multimedia sin himnos, Himnario con 613 videos, vínculos externos y estabilidad de proyección. No fusionar borradores ni iniciar rediseño del centro antes de validar.
+- Nota de diseño: los favoritos existentes se conservan globales por ahora; estudiar ámbito de favoritos por módulo separadamente, sin retirar a ciegas acceso a contenido marcado por el usuario.
+
 ### Evitar duplicación visual del Himnario — 25-oct-2026
 - Usuario mostró captura donde Himnario aparecía como pestaña propia y también en «Bibliotecas JA» de Multimedia. Solicita evitar funciones y carpetas redundantes.
 - `MediaTabs.svelte`: la navegación de Multimedia omite carpetas con rol `hymnal` de la sección «Bibliotecas JA». El registro, los MP4, el caché y la pestaña Himnario se conservan; no se borran ni duplican carpetas.
