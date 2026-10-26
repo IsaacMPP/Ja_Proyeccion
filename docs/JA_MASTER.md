@@ -213,6 +213,13 @@
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
 
+### Corrección de autovinculación de bibliotecas JA — 25-oct-2026
+- Prueba del usuario: 613 MP4 ya están en `Documentos/JA Proyección/Himnario Adventista`, pero la nueva pestaña indicaba erróneamente «No hay una carpeta del Himnario vinculada». Causa: `ensureJALibraryDirectories()` creaba las carpetas físicas, pero la lista persistente `mediaFolders` nunca registraba esas rutas.
+- Se añadió `jaDefaultLibraries.ts` con rutas correspondientes a `Himnario Adventista`, `Cantos Juveniles`, `Fondos Personalizados` y `Especiales`. Al disponer del directorio de datos, `Drawer.svelte` registra estas bibliotecas predeterminadas en `mediaFolders` sin copiar archivos, sin crear duplicados y sin borrar bibliotecas externas.
+- Si la carpeta predeterminada ya aparece vinculada con otra etiqueta, se reutiliza ese registro y se le asigna el rol apropiado. La pestaña Himnario prioriza la carpeta predeterminada, conserva las bibliotecas externas como recursos adicionales y abre Multimedia para administrarlas.
+- Prueba: `scripts/ja/default-libraries.test.mjs`; **pendiente** CI Windows y comprobar en el equipo del usuario: 613 MP4, búsquedas, miniaturas y el resto de carpetas incluso si están vacías. No modificar `main` antes de validar.
+- Importante: esto cubre las cuatro bibliotecas multimedia JA; la Biblia se gestiona por su propio módulo de versiones y no debe tratarse como una carpeta de MP4. Audio y presentaciones poseen flujos propios: evaluar sus conexiones predeterminadas en su fase, sin cambiar el motor de FreeShow a ciegas.
+
 ### Orden de pestañas aprobado — 25-oct-2026
 - El usuario autorizó aplicar de inmediato la organización funcional: **Proyectos → Himnario → Biblia → Multimedia → Audio → Superposiciones → Plantillas → Calendario → Funciones**.
 - Se modificó únicamente el orden de `drawerTabs` en `src/frontend/values/tabs.ts`; se mantienen los mismos identificadores, componentes y permisos, sin cambios en el motor de salidas.
