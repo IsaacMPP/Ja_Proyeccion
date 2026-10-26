@@ -25,6 +25,19 @@ test("worship tabs stay together and related media tabs stay adjacent", () => {
 
 test("Multimedia does not repeat the dedicated Himnario in its JA navigation", () => {
     const navigation = fs.readFileSync("src/frontend/components/drawer/navigation/MediaTabs.svelte", "utf8")
-    assert.match(navigation, /categorizedFolders = foldersList\.filter\(\(a\) => isJALibraryRole\(a\.jaLibraryRole\) && a\.jaLibraryRole !== "hymnal"\)/)
+    assert.match(navigation, /foldersList = keysToID\(\$mediaFolders\)\.filter\(\(folder\) => folder\.jaLibraryRole !== "hymnal"\)/)
     assert.match(navigation, /regularFolders = foldersList\.filter\(\(a\) => !isJALibraryRole\(a\.jaLibraryRole\)\)/)
 })
+
+test("Multimedia all and global search do not request the Himnario folders", () => {
+    const media = fs.readFileSync("src/frontend/components/drawer/media/Media.svelte", "utf8")
+    assert.match(media, /multimediaFolderPaths = Object.values\(\$mediaFolders\)\.filter\(\(folder\) => folder\.jaLibraryRole !== "hymnal"\)/)
+    assert.match(media, /requestFiles\(multimediaFolderPaths\)/)
+    assert.match(media, /requestFiles\(multimediaFolderPaths, 0\)/)
+    assert.match(media, /jaSearchEverywhere \? multimediaFolderPaths : path/)
+    const hymnal = fs.readFileSync("src/frontend/components/drawer/navigation/HymnalTabs.svelte", "utf8")
+    assert.match(hymnal, /Vincular carpeta externa/)
+    assert.match(hymnal, /jaLibraryRole: "hymnal"/)
+    assert.match(navigationSource(), /JA_LIBRARY_ROLES\.filter\(\(library\) => library\.id !== "hymnal"\)/)
+})
+function navigationSource() { return fs.readFileSync("src/frontend/components/drawer/navigation/MediaTabs.svelte", "utf8") }
