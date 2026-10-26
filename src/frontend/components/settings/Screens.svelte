@@ -11,7 +11,7 @@
     import { addOutput, toggleOutputs } from "../helpers/output"
     import { getPhysicalOutputId, isExternalDisplay } from "./displayGuide"
     import { jaDetectedDisplays } from "./jaDetectedDisplays"
-    import { jaPrimaryOutputId, setJAPrimaryOutput, getJAPrimaryOutputId } from "./jaPrimaryOutput"
+    import { setJAPrimaryOutput, getJAPrimaryOutputId } from "./jaPrimaryOutput"
     import T from "../helpers/T.svelte"
     import InputRow from "../input/InputRow.svelte"
     import MaterialButton from "../inputs/MaterialButton.svelte"
