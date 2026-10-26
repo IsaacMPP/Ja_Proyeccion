@@ -16,3 +16,12 @@ test("all local videos support video-only via existing muted output flag", () =>
  assert.match(card,/forceMuted \? \{ muted: true \}/)
  assert.match(card,/setOutput\("background"/)
 })
+
+test("video modes replace audio-only playback and change mute on existing video", () => {
+ const card = fs.readFileSync("src/frontend/components/drawer/media/MediaCard.svelte","utf8")
+ assert.ok(card.includes("AudioPlayer.stop(path)"), "video must stop this file's audio-only player")
+ assert.ok(card.includes("VideoPlayer.getAudio(path, output.id)"), "existing video playback is checked by output")
+ assert.ok(card.includes("VideoPlayer.toggleMute(path, output.id)"), "mute is updated, not toggled off as background")
+ assert.ok(card.includes('AudioPlayer.start(path, { name }, { pauseIfPlaying: false })'), "solo audio should not pause a playing audio track")
+ assert.ok(card.includes("clearBackground(outputId)"), "audio-only must remove the matching projected video")
+})
