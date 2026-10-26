@@ -1,3 +1,9 @@
+### Ajuste de selección explícita de modos en el mismo video — 25-oct-2026
+- Usuario reporta que seleccionar otro modo sobre un video ya proyectado no produce el cambio.
+- En `MediaCard.svelte` se encontró que el `wait/iconClicked` usado para los clics de tarjeta también bloqueaba órdenes de modo y que un nuevo fondo podía heredar `muted` del estilo.
+- Se agregaron acciones explícitas para «Video con audio» y «Solo video» que no dependen de ese bloqueo temporal y que establecen `muted` conforme a la elección. Para un video ya proyectado se utiliza `VideoPlayer.toggleMute` sobre el mismo archivo y salida. «Solo audio» conserva la limpieza selectiva.
+- Todavía falta comprobar CI y reproducir todos los cambios de modo en Windows; no afirmar validación funcional solamente por pruebas estructurales. No se implementó cambio sincronizado en caliente.
+
 ### Corrección unificada de modos de reproducción — 25-oct-2026
 - El usuario autorizó corregir de forma conjunta cinco transiciones (video con audio, solo video, solo audio) sin exigir continuidad temporal.
 - `MediaCard.svelte`: al solicitar video normal o video silenciado se detiene únicamente el audio independiente del **mismo archivo** mediante `AudioPlayer.stop(path)`. Si ese video ya está proyectándose, se modifica su estado de silencio con `VideoPlayer.getAudio/toggleMute(path,output.id)` en vez de interpretar el clic como orden de retirar el fondo. Si aún no está en pantalla, se usa el flujo de proyección nativo.
