@@ -9,7 +9,7 @@
     import { save } from "../../../utils/save"
     import type { ShowType } from "../../../../types/Show"
     import { addProjectItem } from "../../../converters/project"
-    import { activeShow, customMessageCredits, media, mediaFolders, mediaOptions, mediaTags, outLocked, outputs, photoApiCredits, styles } from "../../../stores"
+    import { activeShow, customMessageCredits, media, mediaOptions, mediaTags, outLocked, outputs, photoApiCredits, styles } from "../../../stores"
     import { translateText } from "../../../utils/language"
     import { getKey } from "../../../values/keys"
     import Icon from "../../helpers/Icon.svelte"
@@ -34,11 +34,11 @@
     export let contentProvider: ContentProviderId | false = false
     export let contentFileData: ContentFile | null = null
 
-    $: isHymnalVideo = type === "video" && !!active && $mediaFolders[active]?.jaLibraryRole === "hymnal"
+    $: supportsAudioOnly = type === "video" && !contentProvider && !!path
     let startingAudio = false
     async function playHymnAudio(event: MouseEvent) {
         event.stopPropagation()
-        if (startingAudio || !isHymnalVideo) return
+        if (startingAudio || !supportsAudioOnly) return
         startingAudio = true
         try {
             const played = await AudioPlayer.start(path, { name })
@@ -307,8 +307,8 @@
     >
         <!-- icons -->
         <div class="icons">
-            {#if isHymnalVideo}
-                <div class="button"><Button style="padding: 3px;" title="Solo audio: reproducir sin cambiar las pantallas" on:click={playHymnAudio} disabled={startingAudio}><Icon id="audio" size={0.9} white /></Button></div>
+            {#if supportsAudioOnly}
+                <div class="button"><Button style="padding: 3px;" title="Solo audio: escuchar el video sin cambiar las pantallas" on:click={playHymnAudio} disabled={startingAudio}><Icon id="audio" size={0.9} white /></Button></div>
             {/if}
             {#if !contentProvider && type === "video" && path}
                 <div class="ja-cover-controls">
