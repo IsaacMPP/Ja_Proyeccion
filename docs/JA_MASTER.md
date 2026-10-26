@@ -1,3 +1,9 @@
+### Corrección unificada de modos de reproducción — 25-oct-2026
+- El usuario autorizó corregir de forma conjunta cinco transiciones (video con audio, solo video, solo audio) sin exigir continuidad temporal.
+- `MediaCard.svelte`: al solicitar video normal o video silenciado se detiene únicamente el audio independiente del **mismo archivo** mediante `AudioPlayer.stop(path)`. Si ese video ya está proyectándose, se modifica su estado de silencio con `VideoPlayer.getAudio/toggleMute(path,output.id)` en vez de interpretar el clic como orden de retirar el fondo. Si aún no está en pantalla, se usa el flujo de proyección nativo.
+- «Solo audio» mantiene la acción de iniciar audio y retirar exclusivamente fondos del **mismo video**, sin tocar otros videos, Biblia ni monitores no relacionados; el audio ya activo no se pausa al volver a pulsar.
+- Prueba estructural agregada a `scripts/ja/global-media-controls.test.mjs`. **Pendiente** CI y validación real 5 transiciones; no garantiza continuidad temporal. La conversión inversa puede reiniciar el video; opción acordada. No fusionar sin validar.
+ 
 ### Corrección de «Solo audio» con video aún proyectado — 25-oct-2026
 - Reporte de prueba en Windows: al reproducir video (con audio o silenciado) y elegir «Solo audio», permanecía el video anterior en pantalla. Causa: `AudioPlayer.start()` no interactuaba con las salidas de `VideoPlayer`.
 - En `MediaCard.svelte`, después de confirmar que `AudioPlayer.start()` se ejecutó, se retira únicamente el fondo de salidas cuyo `out.background.path/id` coincide con el archivo elegido, mediante `clearBackground(outputId)`. Si el audio falla, se preserva la proyección. Otras pantallas y contenidos diferentes no se cambian.
