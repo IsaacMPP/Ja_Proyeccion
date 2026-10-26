@@ -11,6 +11,7 @@
     import { contextMenuGroups, contextMenuItems, contextMenuLayouts } from "./contextMenus"
     import { flattenMenuItems, handleKeydown as handleSearchKeydown, searchMenuItems, type FlatMenuItem } from "./contextMenuSearch"
     import { quickLoadItems } from "./loadItems"
+    import { refreshJADetectedDisplays } from "../settings/jaDetectedDisplays"
     import { saveTextSelectionRange } from "./menuClick"
     import SpellCheckMenu from "./SpellCheckMenu.svelte"
 
@@ -59,6 +60,7 @@
         }
 
         activeMenu = [...(getContextMenu(id) || contextMenuLayouts.default)]
+        if (activeMenu.includes("ja_send_to_output")) void refreshJADetectedDisplays()
         // show "Copy ID" button if API is enabled
         if ($serverData?.companion?.enabled && id) {
             const baseId = id.slice(1).split("_readonly")[0].split("_default")[0]
