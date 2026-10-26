@@ -19,3 +19,10 @@ export async function refreshJADetectedDisplays(): Promise<JADisplay[]> {
         return []
     }
 }
+
+let initialLookup: Promise<JADisplay[]> | null = null
+/** Shared first-load query; hundreds of media cards must not each call Windows. */
+export function ensureJADetectedDisplays(): Promise<JADisplay[]> {
+    if (!initialLookup) initialLookup = refreshJADetectedDisplays()
+    return initialLookup
+}
