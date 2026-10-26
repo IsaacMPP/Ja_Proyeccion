@@ -39,24 +39,31 @@
     let startingAudio = false
     async function playHymnAudio(event: MouseEvent) {
         event.stopPropagation()
-        if (startingAudio || !supportsAudioOnly) return
+        if (startingAudio || !supportsAudioOnly || $outLocked) return
         startingAudio = true
+        // Preserve only backgrounds showing this video, so a failed audio start can
+        // restore them without disturbing unrelated content on other outputs.
+        const matchingOutputs = Object.entries($outputs)
+            .filter(([, output]) => (output.out?.background?.path || output.out?.background?.id) === path)
+            .map(([outputId, output]) => ({ outputId, background: output.out!.background }))
         try {
+            matchingOutputs.forEach(({ outputId }) => clearBackground(outputId))
             const played = await AudioPlayer.start(path, { name }, { pauseIfPlaying: false })
-            if (!played) {
-                newToast("No se pudo reproducir el audio de este MP4")
+            // FreeShow may return true for a locked/loading request without starting it.
+            if (!played || !AudioPlayer.audioExists(path)) {
+                matchingOutputs.forEach(({ outputId, background }) => {
+                    const current = $outputs[outputId]?.out?.background
+                    if (!current) setOutput("background", background, false, outputId)
+                })
+                newToast("No se pudo iniciar el audio de este MP4")
                 return
             }
-            // Solo audio es una acción nueva, no una transición sincronizada:
-            // liberar únicamente las salidas que muestran este mismo video.
-            // No tocar fondos diferentes, versículos ni otras pantallas.
-            Object.entries($outputs).forEach(([outputId, output]) => {
-                if ((output.out?.background?.path || output.out?.background?.id) === path) {
-                    clearBackground(outputId)
-                }
-            })
+            if (AudioPlayer.isPaused(path)) AudioPlayer.play(path)
         } catch (error) {
-            console.error("JA: error al reproducir audio del himno", error)
+            matchingOutputs.forEach(({ outputId, background }) => {
+                if (!$outputs[outputId]?.out?.background) setOutput("background", background, false, outputId)
+            })
+            console.error("JA: error al reproducir audio del video", error)
             newToast("El archivo no contiene audio compatible o no se puede abrir")
         } finally {
             startingAudio = false
