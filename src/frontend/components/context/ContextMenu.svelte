@@ -261,9 +261,10 @@
 <style>
     .contextMenu {
         position: fixed;
-        min-width: 250px;
-        box-shadow: 1px 1px 3px 2px rgb(0 0 0 / 0.2);
-        padding: 8px 0;
+        min-width: 272px;
+        max-width: min(340px, 94vw);
+        box-shadow: 0 12px 30px rgb(0 0 0 / 0.25);
+        padding: 8px 5px;
         z-index: 5001;
 
         border-radius: 6px;
