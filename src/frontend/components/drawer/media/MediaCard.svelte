@@ -1,7 +1,8 @@
 <script lang="ts">
     import { derived } from "svelte/store"
+    import { onMount } from "svelte"
     import { AudioPlayer } from "../../../audio/audioPlayer"
-    import { jaDetectedDisplays } from "../../settings/jaDetectedDisplays"
+    import { jaDetectedDisplays, ensureJADetectedDisplays } from "../../settings/jaDetectedDisplays"
     import { getJAPrimaryOutputId } from "../../settings/jaPrimaryOutput"
     import { VideoPlayer } from "../../media/video/videoPlayer"
     import type { ContentFile, ContentProviderId } from "../../../../electron/contentProviders/base/types"
@@ -23,6 +24,8 @@
     import SelectElem from "../../system/SelectElem.svelte"
     import Card from "../Card.svelte"
     import MediaLoader from "./MediaLoader.svelte"
+
+    onMount(() => { void ensureJADetectedDisplays() })
 
     export let name: string
     export let collectionName = ""
