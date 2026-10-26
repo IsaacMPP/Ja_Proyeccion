@@ -153,7 +153,7 @@ export function menuClick(id: string, enabled = true, menu: ContextMenuItem | nu
         const target = get(outputs)[outputId]
         if (!target?.enabled || !target.active || target.stageOutput || !target.screen) return
         const display = get(jaDetectedDisplays).find((screen) => String(screen.id) === String(target.screen))
-        if (!display || display.isPrimary) return
+        if (!display || display.isPrimary || !isOutputOnDisplay(target, display)) return
         const item = sel.data[0]
         const path = item?.path || item?.id
         if (typeof path !== "string" || !path || sel.id !== "media") return
