@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { mediaFolders, activeDrawerTab } from "../../../stores"
+    import { mediaFolders, dataPath, activeDrawerTab } from "../../../stores"
     import Media from "./Media.svelte"
+    import { getPrimaryJALibraryId } from "./jaDefaultLibraries"
 
     export let searchValue = ""
-    $: hymnalFolder = Object.entries($mediaFolders).find(([, folder]) => folder.jaLibraryRole === "hymnal")?.[0] || ""
+    $: hymnalFolder = getPrimaryJALibraryId($mediaFolders, $dataPath, "hymnal")
 </script>
 
 {#if hymnalFolder}
@@ -11,7 +12,7 @@
 {:else}
     <div class="emptyHymnal">
         <h3>Himnario Adventista</h3>
-        <p>Vincula la carpeta de tus videos MP4 una sola vez desde Multimedia → Vincular biblioteca JA.</p>
+        <p>No se encontró la biblioteca predeterminada. Comprueba la carpeta de datos o vincula una carpeta externa desde Multimedia.</p>
         <button type="button" on:click={() => activeDrawerTab.set("media")}>Abrir Multimedia</button>
     </div>
 {/if}
