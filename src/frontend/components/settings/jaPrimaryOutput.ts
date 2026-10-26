@@ -1,5 +1,5 @@
 import { get, writable } from "svelte/store"
-import type { JADisplay, JAOutput } from "./displayGuide"
+import { isOutputOnDisplay, type JADisplay, type JAOutput } from "./displayGuide"
 
 const storageKey = "ja.primary-projector-output-id"
 function readSavedPrimary(): string {
@@ -23,8 +23,7 @@ export function setJAPrimaryOutput(id: string): void {
 
 export function getJAPrimaryOutputId(outputs: Record<string, JAOutput>, displays: JADisplay[]): string {
     const candidates = Object.entries(outputs).filter(([, output]) =>
-        output.enabled && output.active && !output.stageOutput && !!output.screen &&
-        displays.some((display) => !display.isPrimary && String(display.id) === String(output.screen))
+        displays.some((display) => !display.isPrimary && isOutputOnDisplay(output, display))
     )
     const configured = get(jaPrimaryOutputId)
     if (configured) return candidates.some(([id]) => id === configured) ? configured : ""
