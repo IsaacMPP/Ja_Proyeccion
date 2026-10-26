@@ -213,6 +213,12 @@
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
 
+### Ampliación del modo solo audio a todos los videos — 25-oct-2026
+- Aclaración del usuario: la función «Solo audio» no es exclusiva de Himnario; debe servir para **todos los videos locales** (Multimedia, Fondos, Especiales, etc.) mientras se mantienen otras proyecciones.
+- `MediaCard.svelte` ahora ofrece el botón de audio independiente a todo medio local de tipo `video`, utilizando el `AudioPlayer` de FreeShow; no llama `setOutput` ni cambia pantalla alguna. `hymnal-audio-only.test.mjs` actualizado para prevenir restringir de nuevo la función.
+- Los controles adicionales de la barra lateral del Himnario siguen siendo contextuales; el motor de audio es global. Pendiente revisar experiencia de controles globales y probar mp4 con audio, sin audio, distintas pantallas, y evitar duplicación de pistas.
+- Pendiente compilación Windows y prueba real. No fusionar sin validación.
+
 ### Audio independiente de MP4 en Himnario — 25-oct-2026
 - El usuario autorizó continuar Fase 4.2. Auditoría: el motor de FreeShow `AudioPlayer` ya puede abrir medios mediante `new Audio(encodeFilePath(path))`, gestionar pausa/reanudación/detención y reproducir sin modificar `setOutput` ni las salidas multipantalla.
 - Primera entrega: tarjetas MP4 de bibliotecas `hymnal` incorporan botón **Solo audio** que usa `AudioPlayer.start`; en la navegación del Himnario aparecen estado y controles **Pausar/Reanudar/Detener** cuando hay audio activo desde una ruta de sus bibliotecas. Se reutiliza el motor de audio y sus ajustes; el video con audio conserva su comportamiento anterior.
