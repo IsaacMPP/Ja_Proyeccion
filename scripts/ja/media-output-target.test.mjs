@@ -20,6 +20,6 @@ test("target action uses the selected output only, with native FreeShow dispatch
  assert.ok(actions.includes('id.startsWith("ja_media_output:")'))
  assert.ok(actions.includes("!target?.enabled || !target.active || target.stageOutput"))
  assert.ok(actions.includes('sel.id !== "media"'))
- assert.ok(actions.includes("if (!display || display.isPrimary) return"))
+ assert.ok(actions.includes("if (!display || display.isPrimary || !isOutputOnDisplay(target, display)) return"))
  assert.ok(actions.includes('setOutput("background", { path, ...mediaStyle, type, loop, muted }, false, outputId)'))
 })
