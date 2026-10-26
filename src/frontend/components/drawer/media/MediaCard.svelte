@@ -1,5 +1,6 @@
 <script lang="ts">
     import { derived } from "svelte/store"
+    import { AudioPlayer } from "../../../audio/audioPlayer"
     import type { ContentFile, ContentProviderId } from "../../../../electron/contentProviders/base/types"
     import type { MediaStyle } from "../../../../types/Main"
     import { Main } from "../../../../types/IPC/Main"
@@ -8,7 +9,7 @@
     import { save } from "../../../utils/save"
     import type { ShowType } from "../../../../types/Show"
     import { addProjectItem } from "../../../converters/project"
-    import { activeShow, customMessageCredits, media, mediaOptions, mediaTags, outLocked, outputs, photoApiCredits, styles } from "../../../stores"
+    import { activeShow, customMessageCredits, media, mediaFolders, mediaOptions, mediaTags, outLocked, outputs, photoApiCredits, styles } from "../../../stores"
     import { translateText } from "../../../utils/language"
     import { getKey } from "../../../values/keys"
     import Icon from "../../helpers/Icon.svelte"
@@ -32,6 +33,23 @@
     export let loadFullImage = false
     export let contentProvider: ContentProviderId | false = false
     export let contentFileData: ContentFile | null = null
+
+    $: isHymnalVideo = type === "video" && !!active && $mediaFolders[active]?.jaLibraryRole === "hymnal"
+    let startingAudio = false
+    async function playHymnAudio(event: MouseEvent) {
+        event.stopPropagation()
+        if (startingAudio || !isHymnalVideo) return
+        startingAudio = true
+        try {
+            const played = await AudioPlayer.start(path, { name })
+            if (!played) newToast("No se pudo reproducir el audio de este MP4")
+        } catch (error) {
+            console.error("JA: error al reproducir audio del himno", error)
+            newToast("El archivo no contiene audio compatible o no se puede abrir")
+        } finally {
+            startingAudio = false
+        }
+    }
 
     $: customCoverPath = !contentProvider && type === "video" ? $media[path]?.jaCoverPath || "" : ""
     $: previewCoverPath = customCoverPath || thumbnailPath
@@ -289,6 +307,9 @@
     >
         <!-- icons -->
         <div class="icons">
+            {#if isHymnalVideo}
+                <div class="button"><Button style="padding: 3px;" title="Solo audio: reproducir sin cambiar las pantallas" on:click={playHymnAudio} disabled={startingAudio}><Icon id="audio" size={0.9} white /></Button></div>
+            {/if}
             {#if !contentProvider && type === "video" && path}
                 <div class="ja-cover-controls">
                     <div class="button">
