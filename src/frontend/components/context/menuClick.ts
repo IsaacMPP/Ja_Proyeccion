@@ -118,6 +118,7 @@ import { _show } from "../helpers/shows"
 import { getMenuTagId, openTagManager, toggleSelectionTags, toggleTagFilter } from "../helpers/tags"
 import { clearSlide } from "../output/clear"
 import { jaDetectedDisplays } from "../settings/jaDetectedDisplays"
+import { getJAPrimaryOutputId } from "../settings/jaPrimaryOutput"
 import { defaultThemes } from "../settings/tabs/defaultThemes"
 import { activeProject } from "./../../stores"
 import type { ContextMenuItem } from "./contextMenus"
@@ -131,6 +132,15 @@ interface ObjData {
 }
 
 export function menuClick(id: string, enabled = true, menu: ContextMenuItem | null = null, contextElem: HTMLElement | null = null, actionItem: HTMLElement | null = null, sel: Selected | null = null) {
+    if (id === "ja_play_main") {
+        const primary = getJAPrimaryOutputId(get(outputs), get(jaDetectedDisplays))
+        if (!primary) {
+            newToast("Configura primero el proyector principal")
+            return
+        }
+        menuClick(`ja_media_output:${primary}`, enabled, menu, contextElem, actionItem, sel)
+        return
+    }
     if (id === "ja_configure_screens") {
         settingsTab.set("display_settings")
         activePage.set("settings")
@@ -151,7 +161,8 @@ export function menuClick(id: string, enabled = true, menu: ContextMenuItem | nu
         const videoType = getMediaLayerType(path, mediaStyle)
         const type = getMediaType(getExtension(path))
         const loop = videoType !== "foreground"
-        const muted = videoType !== "foreground"
+        const isPrimary = outputId === getJAPrimaryOutputId(get(outputs), get(jaDetectedDisplays))
+        const muted = !isPrimary
         setOutput("background", { path, ...mediaStyle, type, loop, muted }, false, outputId)
         return
     }
