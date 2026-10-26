@@ -213,6 +213,12 @@
 - Restaurado el CSS original completo sin revertir la virtualización: commit `76b53855`. Compilación `40242347542` iniciada, todavía requiere verificación final de CI.
 - La prueba estática y la compilación no prueban ausencia de congelamientos ni portadas completas en PC: pendiente confirmar con los 613 videos del usuario. No fusionar antes de la validación.
 
+### Audio independiente de MP4 en Himnario — 25-oct-2026
+- El usuario autorizó continuar Fase 4.2. Auditoría: el motor de FreeShow `AudioPlayer` ya puede abrir medios mediante `new Audio(encodeFilePath(path))`, gestionar pausa/reanudación/detención y reproducir sin modificar `setOutput` ni las salidas multipantalla.
+- Primera entrega: tarjetas MP4 de bibliotecas `hymnal` incorporan botón **Solo audio** que usa `AudioPlayer.start`; en la navegación del Himnario aparecen estado y controles **Pausar/Reanudar/Detener** cuando hay audio activo desde una ruta de sus bibliotecas. Se reutiliza el motor de audio y sus ajustes; el video con audio conserva su comportamiento anterior.
+- No se ha implementado aún modo de proyección **video silenciado** como selector explícito; requiere revisar reglas de `muted` de las diferentes salidas. No hay listas nuevas ni reemplazo del motor de audio.
+- Advertencia: MP4 sin pista de audio compatible puede fallar, y el dispositivo de salida/ruteo debe comprobarse en Windows; **pendiente** CI y pruebas reales de sonido simultáneo con versículos, cambio de pantallas, pausa, reinicio de reproducción y archivos sin audio. No declarar completada la fase solo por CI verde.
+
 ### Separación definitiva de catálogos del Himnario y Multimedia — 25-oct-2026
 - Petición del usuario: Multimedia → Todo y la búsqueda general no deben recorrer ni listar los ~613 MP4 del Himnario, que ya dispone de sección propia. La misma entrada «Vincular Himnario» debe gestionarse en Himnario, no duplicarse en Multimedia.
 - `Media.svelte` ahora construye `multimediaFolderPaths` excluyendo el rol `hymnal` y utiliza ese conjunto al abrir Todo, buscar globalmente y restablecer la búsqueda. `MediaTabs.svelte` excluye los mismos registros de su navegación y contadores, y retira «Vincular Himnario» de los botones de bibliotecas JA.
