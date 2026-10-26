@@ -23,7 +23,7 @@
     $: activeSubTab = $drawerTabsData.media?.activeSubTab || ""
 
     $: foldersList = keysToID($mediaFolders)
-    $: categorizedFolders = foldersList.filter((a) => isJALibraryRole(a.jaLibraryRole))
+    $: categorizedFolders = foldersList.filter((a) => isJALibraryRole(a.jaLibraryRole) && a.jaLibraryRole !== "hymnal")
     $: regularFolders = foldersList.filter((a) => !isJALibraryRole(a.jaLibraryRole))
     $: favoritesListLength = Object.values($media).filter((a) => !a.audio && a.favourite).length
 
