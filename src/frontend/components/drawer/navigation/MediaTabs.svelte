@@ -22,8 +22,8 @@
 
     $: activeSubTab = $drawerTabsData.media?.activeSubTab || ""
 
-    $: foldersList = keysToID($mediaFolders)
-    $: categorizedFolders = foldersList.filter((a) => isJALibraryRole(a.jaLibraryRole) && a.jaLibraryRole !== "hymnal")
+    $: foldersList = keysToID($mediaFolders).filter((folder) => folder.jaLibraryRole !== "hymnal")
+    $: categorizedFolders = foldersList.filter((a) => isJALibraryRole(a.jaLibraryRole))
     $: regularFolders = foldersList.filter((a) => !isJALibraryRole(a.jaLibraryRole))
     $: favoritesListLength = Object.values($media).filter((a) => !a.audio && a.favourite).length
 
@@ -131,7 +131,7 @@
     </div>
     <div slot="section_3" style="padding: 8px;">
         <div class="ja-library-title">Vincular biblioteca JA</div>
-        {#each JA_LIBRARY_ROLES as library}
+        {#each JA_LIBRARY_ROLES.filter((library) => library.id !== "hymnal") as library}
             <MaterialButton style="width: 100%;margin-top: 5px;" variant="outlined" disabled={readOnly} on:click={() => addFolder(library.id)} small>
                 <Icon id="folder" size={0.9} />
                 {library.name}
