@@ -24,6 +24,7 @@ test("video modes replace audio-only playback and change mute on existing video"
  assert.ok(card.includes("VideoPlayer.toggleMute(path, output.id)"), "mute is updated, not toggled off as background")
  assert.ok(card.includes('AudioPlayer.start(path, { name }, { pauseIfPlaying: false })'), "solo audio should not pause a playing audio track")
  assert.ok(card.includes("clearBackground(outputId)"), "audio-only must remove the matching projected video")
+ assert.ok(card.includes("AudioPlayer.audioExists(path)"), "audio-only must verify actual playback instead of relying on start return")
 })
 
 test("explicit video mode buttons switch the same file without click debounce", () => {
