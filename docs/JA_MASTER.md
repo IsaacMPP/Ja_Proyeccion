@@ -1,3 +1,9 @@
+### Fallo repetido Solo audio al regresar desde modos de video — 25-oct-2026
+- Windows: «Solo audio» funciona si se elige primero en otro archivo, pero falla al alternar en el mismo MP4 tras Video con audio/Solo video.
+- Se inspeccionó `AudioPlayer.start()`: puede devolver `true` cuando `currentlyLoading`, `outLocked` o `clearing` bloquean la operación, sin confirmar reproducción; el flujo previo iniciaba la pista antes de quitar la proyección que podía mantener reglas de atenuación de audio.
+- Corrección candidata: `MediaCard.svelte` quita **solo** el video coincidente antes de iniciar el audio; exige `AudioPlayer.audioExists(path)` tras start, reanuda si quedó pausado y restaura el fondo original únicamente cuando el inicio falla y esa salida sigue vacía. No crea segundo motor, no hace transición sincronizada ni altera fondos ajenos.
+- Pruebas estructurales actualizadas. **Pendiente CI y validación real en Windows del cambio repetido sobre un mismo MP4; no dar por resuelto sin esos resultados.**
+
 ### Ajuste de selección explícita de modos en el mismo video — 25-oct-2026
 - Usuario reporta que seleccionar otro modo sobre un video ya proyectado no produce el cambio.
 - En `MediaCard.svelte` se encontró que el `wait/iconClicked` usado para los clics de tarjeta también bloqueaba órdenes de modo y que un nuevo fondo podía heredar `muted` del estilo.
