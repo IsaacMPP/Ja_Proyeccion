@@ -333,7 +333,7 @@
                     <div class="ja-guide-card" class:ja-assigned={external && assigned}>
                         <div class="ja-guide-number">{index + 1}</div>
                         <div class="ja-guide-info">
-                            <strong>Pantalla {index + 1}</strong>
+                            <strong>{getDisplayLabel(display, index)}</strong>
                             <span>{display.isPrimary ? "Principal · controles" : external ? "Externa · proyector o TV" : "Pantalla detectada"}</span>
                             <small>{display.bounds.width} × {display.bounds.height} px {external && assigned ? "· Asignada" : ""}{isMainProjector ? " · Proyector principal (audio)" : ""}</small>
                         </div>
