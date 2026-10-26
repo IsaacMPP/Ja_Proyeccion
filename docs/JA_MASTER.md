@@ -1,3 +1,8 @@
+### Auditoría integral y nueva priorización — 25-oct-2026
+- Auditoría estática completada: `docs/AUDITORIA_INTEGRAL_JA_FREESHOW_2026-10-25.md`. Revisar ese documento antes de iniciar nuevas funciones. Se mantiene `JA_MASTER.md` como fuente de continuidad.
+- Prioridades nuevas: **P0 CI y estabilidad** → **P1 pantallas, salidas, selección de destino en menú** → **P2 matriz de configuraciones reales** → **P3 coherencia de experiencia** → **P4 organizador de culto**. No duplicar funciones nativas de FreeShow; no comenzar centro universal aún.
+- Se corrigió en `760cf60e` una prueba estructural obsoleta de controles globales de audio tras retirada de controles repetidos en Himnario. HEAD de auditoría pendiente de CI.
+
 ### Consolidación de controles y modo «Solo video» — 25-oct-2026
 - Tras la decisión del usuario de no arriesgar transiciones instantáneas audio↔video, se revisó `src/frontend/components/output/tools/Audio.svelte`: FreeShow ya tiene reproductor global (pausa, posición, selector de pistas). Se añadió solamente el botón «Detener» mediante `AudioPlayer.stop(key)` y se retiraron controles redundantes de `HymnalTabs.svelte`. Conserva vinculación externa del Himnario.
 - `MediaCard.svelte`: todos los videos locales tienen botón «Solo video: proyectar sin sonido» que reutiliza la proyección normal mediante `setOutput("background",...)` y fuerza `muted: true` por encima del estilo de salida; el video con audio se conserva. El botón «Solo audio» continúa disponible globalmente. No se implementó cambio en caliente.
