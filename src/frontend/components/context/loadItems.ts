@@ -27,7 +27,7 @@ const loadActions = {
             const output = assigned.find((entry) => isOutputOnDisplay(entry, display))
             if (display.isPrimary) return { id: "ja_control_display", label: `${getDisplayLabel(display, index)} · Control`, translate: false, disabled: true }
             if (!output) return { id: "ja_unassigned_display", label: `${getDisplayLabel(display, index)} · Sin asignar`, translate: false, disabled: true }
-            return { id: `ja_media_output:${output.id}`, label: `${output.name || `Pantalla ${index + 1}`} · Pantalla ${index + 1}`, translate: false }
+            return { id: `ja_media_output:${output.id}`, label: `${getDisplayLabel(display, index)} · ${display.bounds.width} × ${display.bounds.height}${output.name ? ` · ${output.name}` : ""}`, translate: false }
         })
         return [...entries, "SEPARATOR", { id: "ja_configure_screens", label: "Configurar pantallas…", translate: false }]
     },
