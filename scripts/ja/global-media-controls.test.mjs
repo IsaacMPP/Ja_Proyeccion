@@ -12,8 +12,8 @@ test("global FreeShow audio transport includes stop and hymnal avoids duplicate 
 test("all local videos support video-only via existing muted output flag", () => {
  const card = fs.readFileSync("src/frontend/components/drawer/media/MediaCard.svelte","utf8")
  assert.match(card,/Solo video: proyectar sin sonido/)
- assert.match(card,/click\(event, true\)/)
- assert.match(card,/forceMuted \? \{ muted: true \}/)
+ assert.match(card,/click\(event, true, true\)/)
+ assert.ok(card.includes("explicitMode ? { muted: forceMuted }"), "explicit mode must override background style")
  assert.match(card,/setOutput\("background"/)
 })
 
@@ -24,4 +24,14 @@ test("video modes replace audio-only playback and change mute on existing video"
  assert.ok(card.includes("VideoPlayer.toggleMute(path, output.id)"), "mute is updated, not toggled off as background")
  assert.ok(card.includes('AudioPlayer.start(path, { name }, { pauseIfPlaying: false })'), "solo audio should not pause a playing audio track")
  assert.ok(card.includes("clearBackground(outputId)"), "audio-only must remove the matching projected video")
+})
+
+test("explicit video mode buttons switch the same file without click debounce", () => {
+ const card=fs.readFileSync("src/frontend/components/drawer/media/MediaCard.svelte","utf8")
+ assert.ok(card.includes("function projectVideoWithAudio(event: MouseEvent)"))
+ assert.ok(card.includes("click(event, false, true)"))
+ assert.ok(card.includes("click(event, true, true)"))
+ assert.ok(card.includes("(!explicitMode && (wait || iconClicked))"))
+ assert.ok(card.includes("if (isActive) {"))
+ assert.ok(card.includes("VideoPlayer.toggleMute(path, output.id)"))
 })
