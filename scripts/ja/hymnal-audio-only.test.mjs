@@ -16,6 +16,8 @@ test("all local videos reuse FreeShow audio engine without changing projection o
     assert.ok(audioAction.includes("matchingOutputs"), "do not alter unrelated outputs")
     assert.ok(audioAction.includes("!AudioPlayer.audioExists(path)"), "verify actual audio player state")
     assert.ok(audioAction.includes("clearBackground(outputId)"), "remove matching video before starting audio")
+    assert.ok(audioAction.includes("while (VideoPlayer.audioExists(path)"), "wait for video fade-out to release playback before starting sound")
+    assert.ok(audioAction.indexOf("while (VideoPlayer.audioExists(path)") < audioAction.indexOf("await AudioPlayer.start("), "audio starts only after video exits")
     assert.ok(audioAction.includes('if (!current) setOutput("background", background, false, outputId)'), "restore only if audio failed and output remains empty")
     assert.ok(audioAction.includes("=== path"), "preserve unrelated projected content")
 })
